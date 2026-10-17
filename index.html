@@ -3138,7 +3138,7 @@ function endWeek(){
   if(!S.story){goalCheck().forEach(g=>Q.push(()=>{const G=myGoals(),n=G.filter(x=>S.goals[x.id]).length,all=n>=G.length;
     if(S.founder){const can=n>=2;openModal('창간 목표 달성!',`<p class="lede"><b>${g.n}</b> — ${g.d}</p><p>창간 목표 ${n}/${G.length} 달성.${can?(all?' 세 가지를 모두 이뤘다 — 완전 클리어!':' 두 가지를 이뤄 창간 엔딩을 볼 수 있다. 하나 더 이루면 완전 클리어.'):' 하나 더 이루면 창간 엔딩을 볼 수 있다.'}</p>`,[{label:'계속 키운다'},...(can?[{label:all?'완전 클리어 엔딩 보기':'창간 엔딩 보기',fn:()=>{ending(all?`창간 완전 클리어 · 「${OUT().n}」 목표 3관왕`:`창간 성공 · 「${OUT().n}」 목표 ${n}/3`);return false;}}]:[])]);return;}
     openModal('목표 달성!',`<p class="lede"><b>${g.n}</b> — ${g.d}</p><p>이번 판의 목표를 하나 이뤘다. 여기서 엔딩을 볼 수도, 계속 갈 수도 있다.</p>${all?'<p class="fx">이번 판의 목표 3가지를 모두 이뤘다 — 완전 클리어!</p>':''}`,[{label:'계속한다'},{label:'여기서 엔딩 보기',fn:()=>{ending(all?'완전 클리어 · 목표 3관왕':`목표 달성 · ${g.n}`);return false;}}]);}));}
-  handoffTick(Q);storyTick(Q);founderTick(Q);medTick(Q);if(S.turn%4===0)try{exitCheck(Q);}catch(e){}try{ageCheck(Q);}catch(e){console.error(e);}try{errTick(Q);errDisc(Q);arcTick(Q);}catch(e){console.error(e);}try{lgeTick(Q);}catch(e){console.error(e);}
+  handoffTick(Q);storyTick(Q);founderTick(Q);medTick(Q);if(S.turn%4===0)try{exitCheck(Q);}catch(e){}try{ageCheck(Q);}catch(e){console.error(e);}if(S.turn%4===0)try{errTick(Q);errDisc(Q);arcTick(Q);traineeTick(Q);}catch(e){console.error(e);}try{lgeTick(Q);}catch(e){console.error(e);}
   if(S.founder&&founderGoal()&&!S.goals?.major){S.goals=S.goals||{};S.goals.major=dateShort();Q.push(()=>openModal('메이저 언론 달성!',`<p class="lede">「${esc(OUT().n)}」가 ★5 메이저 매체, 포털 CP, 기자 ${S.co.staff}명을 갖췄다.</p>`,[{label:'계속 키운다'},{label:'엔딩 보기',fn:()=>{ending('창간 성공 · 메이저 언론');return false;}}]));}
   const fail=failCheck(monthEnd);if(fail)Q.push(fail);
   if(S._bw!=null){S._mq.push(...Q);Q.length=0;return;}
@@ -3290,7 +3290,8 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['5.1','수습기자 · 광고 주기 · 보기 쉬운 화면',[
-  '대규모|수습기자: 사회부 계열 부서에는 1월·7월 공채 수습이 배치된다. 사수를 맡아 직접 가르치면(컨디션↓·정보보고 거리↑) 든든한 후배나 제자가 되고, 기본만 챙기거나 혹독하게 굴릴 수도 있다(못 버티고 떠날 수 있다)',
+  '대규모|수습기자: 사회부 계열 부서에는 1월·7월 공채 시즌에 수습이 배치될 수 있다(확정이 아니라 시즌마다 절반쯤). 최종 평가에서 열에 넷은 떨어진다. 사수를 맡아 직접 가르치면(컨디션↓·정보보고 거리↑) 든든한 후배나 제자가 되고, 기본만 챙기거나 혹독하게 굴릴 수도 있다(못 버티고 떠날 수 있다)',
+  '주요|수습도 떨어질 수 있다: 실력이 낮거나 평판에 흠이 있으면 수습 기간이 연장되거나 탈락·중도 포기·타사 이탈이 나온다(어려움일수록 잦다). 내가 가르친 수습이 탈락 위기면 사수로서 보증을 서거나 한 달 연장을 요청할 수 있다',
   '주요|수습이 끝나면 여러 부서로 흩어진다: 회사 수요·본인 희망·사수와의 관계로 배치가 정해지고, 우리 부서로 데려오고 싶다고 요청할 수도 있다(부장일수록 잘 통한다). 다른 부서로 간 후배는 가끔 그 부서 아이템을 귀띔해 준다. 채용한 수습도 사람이 모자란 부서로 배치될 수 있다',
   '대규모|채용에서 수습기자를 뽑을 수 있다: 인건비가 싸고(수습 기간 약 40% 할인) 3년간 잘 떠나지 않으며 빨리 크지만, 실력이 낮고 수습 기간엔 전력 외이며 선배들 시간이 들고 실수가 잦다. 경쟁 매체도 해마다 수습을 뽑는다',
   '주요|경쟁사 AI: 우리와 틀어진 광고주를 낚아채고, 우리 \"몰래 수정\"이 들통나면 사설로 저격한다. 매체마다 임금 수준이 달라 처우가 좋은 곳이 기자를 더 잘 빼 가고, 낚시 기사를 남발한 곳은 무더기 정정에 나선다',
@@ -5515,22 +5516,27 @@ function rkDealHTML(){return `<div class="deal"><div class="dp"><b>수습을 뽑
 function rkActive(){return (S.team||[]).filter(m=>m.rk!=null);}
 // 매달: 수습 졸업, 인건비 할인, 데스크 부담
 function rkMonth(lines){const L=rkActive();if(!L.length)return;const wk=rookieWeeks();
-  L.forEach(m=>{if(S.turn-m.rk>=wk){delete m.rk;m.own=S.turn;m.yrs=1;m.t0=S.turn;m._fy=null;const o=OUT();const cnt=d=>(S.team||[]).filter(x=>x.d===d).length;const pool=o.depts.filter(d=>!isRegD(d));const need=(S.rank>=6||S.founder)?pool.slice().sort((a,b)=>cnt(a)-cnt(b))[0]:pick(pool);const moved=need&&need!==m.d&&chance(.5);if(moved)m.d=need;
+  L.forEach(m=>{if(S.turn-m.rk>=wk){const pf=clamp(.22-(m.skill-20)/90+(m.flaw?.08:0),.04,.3)*(DF()===DIFF.hard?1.3:DF()===DIFF.easy?.7:1);if(!m.rkExt&&chance(pf*.6)){m.rkExt=1;m.rk=S.turn-wk+4;lines.push({c:'',t:`${m.name} 수습은 평가가 모자라 수습이 한 달 연장됐다`});return;}if(chance(pf)){S.team=S.team.filter(x=>x!==m);if(S.co)S.co.staff=Math.max(1,S.co.staff-1);const why=pick(['수습 평가에서 떨어졌다','"기자는 나랑 안 맞는다"며 수습을 포기했다','다른 회사 공채에 붙어 떠났다','잦은 실수로 수습 탈락 판정을 받았다']);lines.push({c:'r',t:`${m.name} 수습이 ${why}`});log(`${m.name} 수습 탈락`);return;}delete m.rk;m.own=S.turn;m.yrs=1;m.t0=S.turn;m._fy=null;const o=OUT();const cnt=d=>(S.team||[]).filter(x=>x.d===d).length;const pool=o.depts.filter(d=>!isRegD(d));const need=(S.rank>=6||S.founder)?pool.slice().sort((a,b)=>cnt(a)-cnt(b))[0]:pick(pool);const moved=need&&need!==m.d&&chance(.5);if(moved)m.d=need;
       if(moved&&!S.founder&&S.rank>=2&&S.rank<=5&&m.d!==S.dept){S.team=S.team.filter(x=>x!==m);(S.alumni=S.alumni||[]).push({name:m.name,d:m.d,rel:10,t:S.turn});}
       lines.push({c:'g',t:`${m.name} 수습이 정식 기자로 발령됐다 — ${DEPTS[m.d]?DEPTS[m.d].n:''} 배치 (실력 ${Math.round(m.skill)})`});log(`${m.name} 수습 → ${DEPTS[m.d]?DEPTS[m.d].n:''}`);}});
   const n=rkActive().length;if(n&&S.co){S.co.extra=+((S.co.extra||0)-.09*.4*n).toFixed(3);}
   if(n&&!S.founder&&S.rank>=2&&S.rank<=3)S.hp=clamp(S.hp-1.5*Math.min(3,n),0,100);}
 // 사회부 계열: 회사 공채 수습이 우리 부서로 온다 (평기자~부장)
 function traineeEvent(){const nm=rname();const st=pick(['집요함','눈치','글솜씨','체력','배짱']);
-  openModal('수습기자가 왔다',`<p class="lede">이번 공채 수습 ${esc(nm)}이(가) 우리 부서로 배치됐다. 강점은 「${st}」. ${S.rank>=2?'부서장으로서':'선배로서'} 어떻게 할까?</p><p class="hint">수습은 ${rookieWeeks()/4}개월 동안 경찰서를 돌며 정보보고를 올린다. 잘 키우면 든든한 후배가 되고, 방치하면 떠난다.</p>`,[
-   {label:'사수를 맡아 직접 가르친다',rec:true,sub:'매달 컨디션↓ · 정보보고 거리↑ · 끝나면 든든한 후배',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'teach',rel:30};toast(`${nm} 수습의 사수가 됐다`);}},
-   {label:'기본만 챙겨 준다',sub:'부담 없음 · 관계는 무난',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'basic',rel:10};toast('기본만 챙기기로 했다');}},
-   {label:'혹독하게 굴린다',risk:true,sub:'평가 조금↑ · 독하게 크거나, 버티지 못하고 떠난다',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'hard',rel:-5};toast(apply({eval:.5}));}}]);}
+  openModal('수습기자가 왔다',`<p class="lede">이번 공채 수습 ${esc(nm)}이(가) 우리 부서로 배치됐다. 강점은 「${st}」. ${S.rank>=2?'부서장으로서':'선배로서'} 어떻게 할까?</p><p class="hint">수습은 ${rookieWeeks()/4}개월 동안 경찰서를 돌며 정보보고를 올린다. 최종 평가에서 열에 넷은 떨어진다 — 직접 가르치면 덜 떨어지고, 혹독하게 굴리면 더 떨어진다.</p>`,[
+   {label:'사수를 맡아 직접 가르친다',rec:true,sub:'매달 컨디션↓ · 정보보고 거리↑ · 탈락 확률 약 32% · 끝나면 든든한 후배',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'teach',rel:30};toast(`${nm} 수습의 사수가 됐다`);}},
+   {label:'기본만 챙겨 준다',sub:'부담 없음 · 관계는 무난 · 탈락 확률 약 40%',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'basic',rel:10};toast('기본만 챙기기로 했다');}},
+   {label:'혹독하게 굴린다',risk:true,sub:'평가 조금↑ · 탈락 확률 약 50% · 독하게 크거나, 버티지 못하고 떠난다',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'hard',rel:-5};toast(apply({eval:.5}));}}]);}
 function traineeMonth(lines){const T=S.trainee;if(!T)return;const age=S.turn-T.t;
   if(T.mode==='teach'){S.memo=(S.memo||0)+1;S.hp=clamp(S.hp-4,0,100);T.rel+=3;if(chance(.25))lines.push({c:'',t:`${T.name} 수습이 새벽 3시에 라인 보고를 올렸다. "선배, 이거 기사 될까요?"`});}
   if(T.mode==='hard'&&chance(.12)){lines.push({c:'r',t:`${T.name} 수습이 "도저히 못 하겠다"며 사표를 냈다`});apply({eval:-1});S.trainee=null;return;}
   if(T.mode!=='basic'&&chance(.08)){lines.push({c:'r',t:`${T.name} 수습이 확인 안 된 첩보를 그대로 보고했다. 캡에게 같이 깨졌다`});apply({eval:-.4});}
-  if(age>=rookieWeeks()){S.trainee=null;Q.push(()=>traineePlace(T));}}
+  if(age>=rookieWeeks()){S.trainee=null;const pf=clamp(.4+({teach:-.08,basic:0,hard:.1}[T.mode]||0)+(DF()===DIFF.hard?.05:DF()===DIFF.easy?-.05:0),.2,.6);if(chance(pf))Q.push(()=>traineeFail(T));else Q.push(()=>traineePlace(T));}}
+// 수습 평가에서 떨어질 때: 사수라면 보증을 서 볼 수 있다
+function traineeFail(T){openModal('수습 탈락 위기',`<p class="lede">${esc(T.name)} 수습이 최종 평가에서 기준에 못 미쳤다. 인사위원회가 탈락 쪽으로 기울고 있다.</p>`,[
+   ...(T.mode==='teach'?[{label:'사수로서 보증을 선다',sub:'성공하면 정식 배치 · 실패하면 내 평가↓',fn:()=>{if(chance(.6+T.rel/250)){toast('보증이 받아들여졌다');traineePlace(T);return false;}toast(`보증에도 탈락했다 · ${apply({eval:-1})}`);log(`${T.name} 수습 탈락`);}}]:[]),
+   {label:'한 달 더 기회를 달라고 한다',sub:'연장 · 다시 평가',fn:()=>{T.t=S.turn-rookieWeeks()+4;T.rel+=2;S.trainee=T;toast('수습이 한 달 연장됐다');}},
+   {label:'결과를 받아들인다',sub:'수습이 떠난다',fn:()=>{log(`${T.name} 수습 탈락`);toast(`${T.name} 수습이 회사를 떠났다`);}}]);}
 // 수습이 끝나면 배치: 회사 수요·본인 희망·사수와의 관계로 정해진다
 function traineePlace(T){const o=OUT();const others=o.depts.filter(d=>d!==S.dept&&!isRegD(d));const want=pick(others.length?others:o.depts);
   const pStay=clamp(.25+T.rel/150+(S.rank>=3?.2:S.rank>=2?.1:0)+(T.mode==='teach'?.15:0),.1,.85);
@@ -5543,7 +5549,8 @@ function traineePlace(T){const o=OUT();const others=o.depts.filter(d=>d!==S.dept
    {label:'인사팀에 맡긴다',sub:'회사 수요대로',fn:()=>{const d=chance(.3)?S.dept:pick(others.length?others:o.depts);if(d===S.dept){stay();toast(`${T.name}이(가) 우리 부서로 왔다`);}else{away(d,false);toast(`${T.name}, ${DEPTS[d].n} 배치`);}}}]);}
 // 다른 부서로 간 후배들: 가끔 그 부서 아이템이나 소식을 귀띔한다
 function alumniMonth(lines){const A=S.alumni||[];if(!A.length)return;A.forEach(a=>{if(a.rel>=20&&chance(.05)&&S.items.length<6){const it=makeItem(a.d,{mult:.9});it.from=a.name;S.items.push(it);lines.push({c:'g',t:`${DEPTS[a.d]?DEPTS[a.d].n:'다른 부서'}로 간 후배 ${a.name}이(가) 「${it.title}」을 귀띔했다`});}});if(A.length>8)A.shift();}
-F_EVENTS.push({w:4,c:()=>!S.founder&&!S.story&&S.rank>=1&&S.rank<=3&&!S.trainee&&cat1(S.dept)==='soc'&&[1,7].includes(month())&&(S.trT||-999)<S.turn-YW/2,run:()=>{S.trT=S.turn;traineeEvent();}});
+// 1월·7월 공채 시즌에 '나올 수도' 있다 (확정 아님, 약 50%)
+function traineeTick(Qx){if(S.founder||S.story||S.rank<1||S.rank>3||S.trainee||cat1(S.dept)!=='soc'||![1,7].includes(month())||(S.trT||-999)>=S.turn-YW/3)return;S.trT=S.turn;if(chance(.5))Qx.push(()=>traineeEvent());}
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
