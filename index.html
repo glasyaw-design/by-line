@@ -2962,7 +2962,7 @@ function compDecide(c,ctx){const sc={};const lead=ctx.leader===c;const behindMe=
     if(k==='pricecut')v+=(behindMe?1.2:0)+(c.cash>4?.5:-1)+((S.adRate||1)-1)*5;
     if(k==='lgebid')v=(ctx.lge&&c.aggro>20&&c.cash>.5)?.8+c.aggro/50:-9;
     if(k==='digital')v+=(c.dig<3?.6:-.6)+(c.cash>5?.6:-1);
-    if(k==='poach')v+=(ctx.myQ>c.q+5?1:0)+(c.aggro/40)+(rising?1:0)+(DF()===DIFF.hard&&(S.team||[]).length>6?.5:0)+((S.founder||S.rank>=6)&&(S.wMood??60)<40?1.2:0)+(((S.payLv||1)<.95)?.6:0);
+    if(k==='poach')v+=(ctx.myQ>c.q+5?1:0)+(c.aggro/40)+(rising?1:0)+(DF()===DIFF.hard&&(S.team||[]).length>6?.5:0)+((S.founder||S.rank>=6)&&(S.wMood??60)<40?1.2:0)+(((S.payLv||1)<.95)?.6:0)+((S.team||[]).length>teamSize()+1?.5:0)+((S.team||[]).filter(m=>m.own!=null&&S.turn-m.own<YW*2).length>=2?.3:0);
     if(k==='follow')v+=ctx.myScoop?2.2:-1;
     if(k==='editorial')v+=(c.aggro>45?1.5:-.5)+(ctx.myScoop?.6:0)+(ctx.myBig?1:0)+(DF()===DIFF.hard&&S.trust<45?.8:0);
     if(k==='cut')v=c.cash<0?4:-9;
@@ -2988,7 +2988,7 @@ function compMonth(lines){if(!S.comp)initComp();S.comp=S.comp.map(compFix);const
     if(k==='cut'){c.q-=4;c.pw*=.94;news.push([c,`${n}, 희망퇴직 단행`,0]);}
     c.q=clamp(c.q+R(-2,2),30,90);c.pw=Math.max(5,c.pw*(1+(c.q-55)/700)+R(-1,1));if(c.buzz>0){c.buzz--;}
     // 수입: 점유율만큼 돈이 들어온다
-    if(month()===1&&S.turn%4===0&&c.rkY!==S.turn){c.rkY=S.turn;c.rk=R(1,3)+(c.strat==='talent'?2:0);c.q-=1;c.rkT=S.turn+16;}if(c.rkT&&S.turn>=c.rkT){c.q+=Math.min(4,c.rk||0)*.7;c.rkT=null;}
+    if(month()===1&&S.turn%4===0&&c.rkY!==S.turn){c.rkY=S.turn;c.rk=R(1,3)+(c.strat==='talent'?2:0);c.q-=1;c.rkT=S.turn+16;}if(c.rkT&&S.turn>=c.rkT){const stay=Math.round((c.rk||0)*.6);c.q+=Math.min(3,stay)*.6;if((c.rk||0)-stay>0&&chance(.3))news.push([c,`${n} 수습 ${(c.rk||0)-stay}명 중도 퇴사`,0]);c.rkT=null;}
     c.pay=clamp((c.pay||1)+(c.strat==='talent'?.004:0)+(c.cash<0?-.01:c.cash>8?.004:0)+R(-1,1)/400,.8,1.4);
     if((c.pen||0)>=3&&chance(.25)){c.pen--;c.pw*=.98;news.push([c,`${n}, 낚시 기사 무더기 정정·삭제`,0]);}
     c.cash+=((c.share||ctx.avg)/100*o.p*2.6)*compDiffK().inc-(.2+o.p*.13)*(c.pay||1);c.cash=Math.min(c.cash,40);
@@ -3106,7 +3106,7 @@ function endWeek(){
     S.co.q=S.co.q*.75+(vals.length?avg(vals):50+R(-5,5))*.25;S.monthQ=[];
     fin=coMonth();compMonth(lines);try{mediaYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
     if(t%24===23)portalReview(lines);
-    if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);}catch(e){console.error(e);}corrMonth(lines);
+    if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);staffBalance(lines);}catch(e){console.error(e);}corrMonth(lines);
     if(S.rank>=6)S.trust=clamp(S.trust+(S.co.q-55)/25+(55-S.trust)*.03,0,100);
     if(S.rank===7)apply({eval:fin.profit>0?1.5:-2.5});
     if(S.rank>=4&&S.rank<7){if(perf!==null)apply({fame:(perf-55)/25});apply({eval:(S.co.q-52)/8+(fin.profit>0?.8:-.4)});}
@@ -3295,6 +3295,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|수습이 끝나면 여러 부서로 흩어진다: 회사 수요·본인 희망·사수와의 관계로 배치가 정해지고, 우리 부서로 데려오고 싶다고 요청할 수도 있다(부장일수록 잘 통한다). 다른 부서로 간 후배는 가끔 그 부서 아이템을 귀띔해 준다. 채용한 수습도 사람이 모자란 부서로 배치될 수 있다',
   '대규모|채용에서 수습기자를 뽑을 수 있다: 인건비가 싸고(수습 기간 약 40% 할인) 3년간 잘 떠나지 않으며 빨리 크지만, 실력이 낮고 수습 기간엔 전력 외이며 선배들 시간이 들고 실수가 잦다. 경쟁 매체도 해마다 수습을 뽑는다',
   '주요|경쟁사 AI: 우리와 틀어진 광고주를 낚아채고, 우리 \"몰래 수정\"이 들통나면 사설로 저격한다. 매체마다 임금 수준이 달라 처우가 좋은 곳이 기자를 더 잘 빼 가고, 낚시 기사를 남발한 곳은 무더기 정정에 나선다',
+  '주요|인력 수급 균형: 수습이 들어와 부서가 정원보다 붐비면 다른 부서 발령·이직·진로 변경이 늘고, 경쟁사도 북적이는 곳과 갓 키운 후배를 더 노린다. 회사 인원이 불어나면 고참 명예퇴직이 는다. 경쟁 매체 수습도 일부는 중도에 그만둔다',
   '수정|할 일 창의 취소·닫기·뒤로 버튼이 사라지던 문제',
   '대규모|비판 보도 뒤 줄다리기: 기사가 나가면 광고주·기관과 관계가 틀어지고, 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 1년간 광고를 늘리거나 ③ 광고 장기 중단·협찬 철회·자료 거부·법적 대응으로 보복한다. 받으면 돈, 거절하면 신뢰 — 무마를 받았다가 들키면 오보급 논란',
   '주요|수습 기간: 작은 매체(★1~2) 3개월 · 중견(★3~4) 4개월 · 메이저(★5) 6개월. 수습 평가 기준도 매체마다 다르다 — 큰 곳일수록 평가 문턱이 높고, 정보보고 횟수와 함께 신문·지역지는 사쓰마와리, 통신사는 속도, 방송사는 방송감, 온라인은 출고 기사, ★4 이상은 캡과의 관계, ★5는 캡 미션까지 본다. 못 채우면 한 달씩 두 번까지 연장',
@@ -5551,6 +5552,17 @@ function traineePlace(T){const o=OUT();const others=o.depts.filter(d=>d!==S.dept
 function alumniMonth(lines){const A=S.alumni||[];if(!A.length)return;A.forEach(a=>{if(a.rel>=20&&chance(.05)&&S.items.length<6){const it=makeItem(a.d,{mult:.9});it.from=a.name;S.items.push(it);lines.push({c:'g',t:`${DEPTS[a.d]?DEPTS[a.d].n:'다른 부서'}로 간 후배 ${a.name}이(가) 「${it.title}」을 귀띔했다`});}});if(A.length>8)A.shift();}
 // 1월·7월 공채 시즌에 '나올 수도' 있다 (확정 아님, 약 50%)
 function traineeTick(Qx){if(S.founder||S.story||S.rank<1||S.rank>3||S.trainee||cat1(S.dept)!=='soc'||![1,7].includes(month())||(S.trT||-999)>=S.turn-YW/3)return;S.trT=S.turn;if(chance(.5))Qx.push(()=>traineeEvent());}
+// ===== 인력 수급 균형: 수습이 늘면 그만큼 빠져나간다 =====
+// 부서 정원보다 사람이 많으면 다른 부서 발령·이직·퇴사가 늘고, 경쟁사도 북적이는 곳을 노린다
+function staffBalance(lines){if(S.founder||S.story)return;const T=S.team||[];
+  if(S.rank>=2&&S.rank<=5&&T.length){const cap=teamSize()+2;const over=T.length-cap;if(over>0&&chance(clamp(.22*over,0,.8))){
+    const L=T.filter(m=>m.rk==null&&m.name!==S.protege).sort((a,b)=>((a.rel??20)+(npcStage(a)==='vet'?30:0))-((b.rel??20)+(npcStage(b)==='vet'?30:0)));const m=L[0];if(m){S.team=S.team.filter(x=>x!==m);
+      const r=Math.random();if(r<.55){const d=pick(OUT().depts.filter(x=>x!==S.dept&&!isRegD(x)))||S.dept;lines.push({c:'',t:`부서가 붐빈다. ${m.name} 기자(${myrs(m)}년 차)가 ${DEPTS[d].n}로 발령됐다`});}
+      else if(r<.85){if(S.co)S.co.staff=Math.max(1,S.co.staff-1);const c=S.comp&&S.comp.length?pick(S.comp):null;lines.push({c:'r',t:`자리가 없다며 ${m.name} 기자가 ${c?cName(c):'다른 매체'}로 이직했다`});if(c)c.q+=.5;}
+      else{if(S.co)S.co.staff=Math.max(1,S.co.staff-1);lines.push({c:'r',t:`${m.name} 기자가 ${pick(['기업 홍보실','로스쿨','공공기관','유튜브 채널'])}(으)로 진로를 바꿨다`});}}}}
+  if(S.rank<=1&&(S.mates||[]).length>9){const m=S.mates.filter(x=>x.name!==S.name).sort((a,b)=>(a.rel??20)-(b.rel??20))[0];if(m){S.mates=S.mates.filter(x=>x!==m);lines.push({c:'',t:`${m.name} 선배가 다른 부서로 옮겼다`});}}
+  // 회사 전체: 수습을 많이 뽑으면 그만큼 고참 이탈·명예퇴직이 늘어 인원이 한쪽으로 쏠리지 않는다
+  if(S.co&&S.rank>=6){const o=OUT();const base=o.staff||S.co.staff;if(S.co.staff>base*1.25&&chance(.25)){const n=Math.max(1,Math.round((S.co.staff-base*1.25)*.1));S.co.staff-=n;lines.push({c:'',t:`인원이 불어나자 고참 ${n}명이 명예퇴직·이직으로 나갔다`});}}}
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
