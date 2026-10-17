@@ -1562,10 +1562,13 @@ function parseFacts(str,f){
 function heatFor(excl){return Math.max(2,Math.round((excl?R(5,10):R(3,6))*DF().heat));}
 // 직급에 맞는 아이템 규모: 수습은 동네 사건, 기자는 기관 비리, 부장 이상은 대형 의혹까지
 function itemCap(){const r=S.rank;if(r===0)return 38;if(r===1)return Math.min(62,48+Math.floor(S.inRank/24)*3+(OUT()&&OUT().p>=4?2:0));if(r===2)return 68;if(r===3)return 78;return 999;}
+// 수습이 다룰 만한 소재: 경찰서·소방·병원·동네 사건사고 급 (권력형 비리·대형 기획은 제외)
+const ROOKIE_RE=/사고|화재|절도|도난|실종|폭행|사기|보이스피싱|민원|고장|정전|침수|분실|소음|주차|싸움|낙상|추락|누수|뺑소니|음주|무단|방치|쓰레기|길고양이|빈집|노점|택시|버스|공사장|축제|미아|차량털이|침입|피해|층간/;
+function rookieFit(t){return t[2]<=36&&!String(t[3]).includes('i')&&(t[0]==='soc'||t[0]==='loc'||t[0]==='spo')&&ROOKIE_RE.test(t[1]);}
 function makeItem(d0,opts={}){
   const d=pick(catOf(d0));if(DEPTS[d0]&&DEPTS[d0].inv){if(opts.excl===undefined)opts.excl=chance(.55);opts.mult=(opts.mult||1)*1.12;}
   const cap=opts.anyScale?999:S.rank===0?(chance(.04)?50:38):chance(.04)?999:itemCap(),flo=S.rank>=3&&!opts.anyScale?26:0;const fit=t=>t[2]<=cap&&t[2]>=flo;
-  let pool=TPL.filter(t=>t[0]===d);const pf=pool.filter(fit);if(pf.length>=4)pool=pf;let sp=(SEAS_TPL[month()]||[]).filter(t=>t[0]===d);if(sp.some(fit))sp=sp.filter(fit);else if(cap<999)sp=[];
+  let pool=TPL.filter(t=>t[0]===d);const pf=pool.filter(fit);if(pf.length>=4)pool=pf;if(S.rank===0&&S.story!=='rookie'&&!opts.anyScale&&!opts.story){const rk=TPL.filter(t=>rookieFit(t)&&(t[0]===d||t[0]==='soc'||t[0]==='loc'));if(rk.length>=4)pool=rk;}let sp=(SEAS_TPL[month()]||[]).filter(t=>t[0]===d);if(sp.some(fit))sp=sp.filter(fit);else if(cap<999)sp=[];
   if(sp.length&&chance(.35))pool=sp;
   const recent=new Set(S.items.map(i=>i.base).concat(S.clips.slice(0,12).map(c=>c.base)));
   const fresh=pool.filter(t=>!recent.has(t[1]));const t=pick(fresh.length?fresh:(pool.length?pool:TPL));
@@ -1874,10 +1877,14 @@ RUN.sasu=function(){
     {n:'대학병원 응급실',s:'사고 환자가 실려 온다',k:1},{n:'소방서 상황실',s:'화재·구조 출동 기록',k:.9},{n:'역전 지구대',s:'취객과 시비, 가끔 큰 건',k:.8},{n:'구치소 접견실 앞',s:'변호사들이 드나든다',k:1.1}];
   const run={left:3,lines:[],found:0,visited:new Set()};
   const visit=l=>{run.left--;run.visited.add(l.n);S.hp=clamp(S.hp-(S.gear&&S.gear.car?3:5),0,100);gain('inv',.35);gain('sta',.15);
-    const busy=S.items.length>=5?.3:S.items.length>=3?.15:0;const r=Math.random()+S.st.inv/700+S.st.net/1000-busy;
+    const busy=S.items.length>=5?.3:S.items.length>=3?.15:0;let r=Math.random()+S.st.inv/700+S.st.net/1000-busy;if(S.rank===0&&S.story!=='rookie')r=Math.min(r,.99);
     // 수습 사쓰마와리: 아이템은 드물고, 대부분 짧은 정보(메모)다. 메모는 정보보고 때 평가로 바뀌고, 물먹을 일도 없다
     if(r<.38){gain('net',.3);run.lines.push({c:'',t:`${l.n}: ${pick(['"기자 양반, 오늘은 없어."','당직 형사가 눈길도 주지 않는다.','"수습이야? 커피나 한 잔 하고 가."','조용한 밤. 사건 일지는 텅 비었다.'])}`});}
     else if(r<.74&&S.rank===0){S.memo=(S.memo||0)+1;gain('kno',.15);run.found+=.4;run.lines.push({c:'s',t:`${l.n}: ${pick(['밤사이 접수된 절도 신고 3건 메모','교통사고 경위 한 줄 확인','실종 신고 접수, 아침에 귀가','주취 폭행 현행범 1명 입건','응급실 이송 환자 2명 상태 확인','소방 출동 기록: 주택 화재 1건, 인명 피해 없음','지구대장 "이번 주 보이스피싱 신고가 늘었다"'])} (정보보고 거리)`});}
+    else if(S.rank===0&&S.story!=='rookie'&&r<.995){const q=Math.random();if(q<.55){const sc=addSource(d,R(10,20));sc.role=sp?pick(ROLES.spo):(l.n.includes('경찰서')?'강력팀 형사':pick(ROLES.soc));run.lines.push({c:'s',t:`${l.n}: ${sc.name} ${sc.role}과 안면을 텄다.`});}
+      else if(q<.85){const rv=S.rival&&S.rival.name?S.rival.name:'타사 수습';run.lines.push({c:'r',t:`${l.n}: ${pick(['밤사이 난 사고를','지구대 폭행 사건을','응급실 이송 건을'])} ${rv}가 먼저 챙겨 갔다. 물먹었다.`});apply({eval:-.3});S.memo=(S.memo||0)+.5;}
+      else if(q<.97){S.memo=(S.memo||0)+1.5;run.found+=.6;run.lines.push({c:'s',t:`${l.n}: ${pick(['형사들이 수군거리는 큰 사건 냄새 — 선배에게 넘길 정보다','관할 간부가 흘린 「다음 주 대대적 단속」 정보','같은 수법 절도가 이어진다는 형사 귀띔'])} (정보보고 거리 · 굵직함)`});}
+      else{const it=makeItem(d,{mult:.6*l.k,excl:false});S.items.push(it);run.found++;run.lines.push({c:'g',t:`${l.n}: 단신감 하나 → 「${it.title}」`});}}
     else if(r<.93||S.items.length>=6){const sc=addSource(d,R(10,20));sc.role=sp?pick(ROLES.spo):(l.n.includes('경찰서')?'강력팀 형사':pick(ROLES.soc));run.lines.push({c:'s',t:`${l.n}: ${sc.name} ${sc.role}과 안면을 텄다.`});}
     else if(r<(S.rank===0?.985:.995)){const it=makeItem(d,{mult:.7*l.k,excl:chance(S.rank===0?.08:.2)});S.items.push(it);run.found++;run.lines.push({c:'g',t:`${l.n}: 단서 → 「${it.title}」`});}
     else{const it=makeItem(d,{mult:1.3,excl:true,pre:1});S.items.push(it);run.found+=2;run.lines.push({c:'g',t:`${l.n}: 큰 건이다! → 「${it.title}」 (단독 가능)`});}
@@ -1904,7 +1911,8 @@ RUN.hari=function(){
   const spots=[{n:'검찰청 포토라인 앞',s:'소환 인물의 한마디',p:.4},{n:'피의자 자택 앞',s:'귀가 장면을 노린다',p:.3},{n:'법원 영장실질심사장',s:'영장 발부 여부',p:.45}];
   openModal('하리꼬미 · 어디서 뻗칠까',`<p>찬바람 속에 몇 시간을 버텨야 한다. 체력이 많이 든다.</p>`,spots.map(s=>({label:s.n,sub:s.s,fn:()=>{
     spend(2,S.gear&&S.gear.car?11:18);gain('sta',.5);gain('inv',.3);
-    if(chance(s.p+S.st.inv/420+S.st.sta/520)){const it=makeItem(S.dept,{excl:true,pre:1,mult:1.1});S.items.push(it);log(`뻗치기 성공: ${s.n}`);
+    if(S.rank===0&&S.story!=='rookie'&&chance(s.p+S.st.inv/420+S.st.sta/520)&&!chance(.08)){S.memo=(S.memo||0)+1.5;log(`뻗치기: ${s.n} — 한마디를 땄다`);openModal('뻗치기 — 한마디',`<p class="lede">6시간 만에 나타난 당사자가 한마디를 남겼다. 선배 기사에 한 줄로 들어간다.</p><p class="hint">수습은 직접 기사를 쓰기보다 선배에게 넘길 정보를 모은다. 정보보고 때 평가로 바뀐다.</p>${fxLine(apply({eval:1.2}))}`);}
+    else if(chance(s.p+S.st.inv/420+S.st.sta/520)){const it=makeItem(S.dept,{excl:S.rank>0,pre:1,mult:S.rank===0?.7:1.1});S.items.push(it);log(`뻗치기 성공: ${s.n}`);
       openModal('뻗치기 성공',`<p class="lede">6시간 만에 나타난 당사자가 한마디를 남겼다. 아무도 못 들은 말이다.</p><p>아이템 「${esc(it.title)}」 확보 (확인된 사실 1개, 단독 가능)</p>${fxLine(apply({eval:2}))}`);}
     else{log(`뻗치기 허탕: ${s.n}`);openModal('허탕',`<p class="lede">${pick(['새벽 4시. 당사자는 뒷문으로 빠져나갔다는 소식이 들린다.','타사 기자 셋과 나란히 언 발을 굴렀다. 아무도 나오지 않았다.','"오늘 안 나온대." 경비원의 한마디에 철수했다.'])}</p>${fxLine(apply({eval:.5}))}`);}
     return false;}})).concat([{label:'오늘은 접는다',cls:'ghost'}]));
@@ -3277,6 +3285,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|동료 기자들도 나이를 먹는다: 주니어는 빨리 크지만 쉽게 떠나고, 5~12년 차는 경쟁사가 노리며, 고참은 후배를 키운다. 60세면 정년퇴직하고 후임이 오며, 연차가 차면 자동으로 승진한다(인사권자가 아닐 때). 사진·편집 등 지원 부서 인사는 자동',
   '주요|제보와 아이템 중 아주 가끔 허위 제보(약 2%)나 파 보니 알맹이가 없는 아이템(약 5%)이 섞인다',
   '대규모|비판 보도 뒤 줄다리기: 기사가 나가면 광고주·기관과 관계가 틀어지고, 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 1년간 광고를 늘리거나 ③ 광고 장기 중단·협찬 철회·자료 거부·법적 대응으로 보복한다. 받으면 돈, 거절하면 신뢰 — 무마를 받았다가 들키면 오보급 논란',
+  '수정|수습 사쓰마와리·뻗치기에서 기사 아이템이 너무 자주, 수습이 다루기 힘든 큰 소재로 나오던 문제: 이제 대부분 정보보고 거리·취재원·물먹은 소식이고, 아이템은 드물게 동네 사건사고급 단신만 나온다 (스토리 "물먹은 수습"은 예외)',
   '주요|관계망·사내 관계 화면 개편: 맨 위에 관계 분포 막대와 광고 중단·자료 거부·이번 달 광고 요약, 분류 버튼(정부·기관/광고주/정당·인물/주의/광고 집행 임박), 한 줄짜리 목록과 관계 막대 — 누르면 자세히 펼쳐진다. 간소화 모드는 "나" 탭에 관계 한눈에 보기 카드',
   '대규모|광고 집행 주기: 기관·기업 광고가 매달 · 2개월마다 · 분기마다 · 반년마다 · 1년에 한 번 등 곳마다 다른 주기로 몰아서 들어온다(정부 기관은 주로 반기·연 단위). 1년 총액은 그대로라 재정 평균은 같고, 달마다 들쭉날쭉하다. 관계망에 주기·1회 금액·다음 집행 시기가 나오고, 회사 탭에 이번 달 들어온 광고 내역이 보인다',
   '주요|메뉴를 2열 버튼 8개로 줄이고, 모드 전환·결과 창·팁·소리는 "설정"으로, 결산·새 커리어는 "커리어 관리"로 모았다',
