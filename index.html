@@ -3289,6 +3289,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|제보와 아이템 중 아주 가끔 허위 제보(약 2%)나 파 보니 알맹이가 없는 아이템(약 5%)이 섞인다',
   '대규모|비판 보도 뒤 줄다리기: 기사가 나가면 광고주·기관과 관계가 틀어지고, 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 1년간 광고를 늘리거나 ③ 광고 장기 중단·협찬 철회·자료 거부·법적 대응으로 보복한다. 받으면 돈, 거절하면 신뢰 — 무마를 받았다가 들키면 오보급 논란',
   '주요|수습 기간: 작은 매체(★1~2) 3개월 · 중견(★3~4) 4개월 · 메이저(★5) 6개월. 수습 평가 기준도 매체마다 다르다 — 큰 곳일수록 평가 문턱이 높고, 정보보고 횟수와 함께 신문·지역지는 사쓰마와리, 통신사는 속도, 방송사는 방송감, 온라인은 출고 기사, ★4 이상은 캡과의 관계, ★5는 캡 미션까지 본다. 못 채우면 한 달씩 두 번까지 연장',
+  '주요|수습 건너뛰기: 진행 막대 아래 버튼(또는 메뉴 → 커리어 관리)으로 남은 수습을 자동으로 보내고 바로 발령받는다. 대신 능력치는 직접 할 때의 60%쯤만 오르고, 취재원은 2명(신뢰 낮음), 캡과의 관계도 덜 쌓인다',
   '수정|수습 사쓰마와리·뻗치기에서 기사 아이템이 너무 자주, 수습이 다루기 힘든 큰 소재로 나오던 문제: 이제 대부분 정보보고 거리·취재원·물먹은 소식이고, 아이템은 드물게 동네 사건사고급 단신만 나온다 (스토리 "물먹은 수습"은 예외)',
   '주요|관계망·사내 관계 화면 개편: 맨 위에 관계 분포 막대와 광고 중단·자료 거부·이번 달 광고 요약, 분류 버튼(정부·기관/광고주/정당·인물/주의/광고 집행 임박), 한 줄짜리 목록과 관계 막대 — 누르면 자세히 펼쳐진다. 간소화 모드는 "나" 탭에 관계 한눈에 보기 카드',
   '대규모|광고 집행 주기: 기관·기업 광고가 매달 · 2개월마다 · 분기마다 · 반년마다 · 1년에 한 번 등 곳마다 다른 주기로 몰아서 들어온다(정부 기관은 주로 반기·연 단위). 1년 총액은 그대로라 재정 평균은 같고, 달마다 들쭉날쭉하다. 관계망에 주기·1회 금액·다음 집행 시기가 나오고, 회사 탭에 이번 달 들어온 광고 내역이 보인다',
@@ -3362,6 +3363,7 @@ function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
     {label:'← 메뉴',cls:'ghost',fn:()=>{gameMenu();return false;}}]);}
 function careerMenu(){
   openModal('커리어 관리',`<p>${esc(S.name)} 기자의 ${years()}년 차 커리어.</p>`,[
+    ...(rookieSkipOK()?[{label:'수습 건너뛰기',sub:'남은 수습을 자동으로 보낸다',fn:()=>{skipRookie();return false;}}]:[]),
     {label:'결산 보고 마무리',sub:'퇴사 처리 후 결산 화면으로',fn:()=>{ending('자진 퇴사');return false;}},
     {label:'새 커리어 시작',sub:'지금 커리어는 지워진다',fn:()=>{openModal('정말 새로 시작할까?',`<p class="lede">${esc(S.name)} 기자의 ${years()}년 차 커리어가 사라진다. 되돌릴 수 없다.</p>`,[
       {label:'새 커리어 시작',fn:()=>{try{localStorage.removeItem(SAVE_KEY);}catch(e){}startCreate();}},
@@ -3909,7 +3911,7 @@ function dashHTML(needTxt){const o=OUT(),D=DF(),nr=RANKS[S.rank];const nx=nextRa
   const goal=S.story?(()=>{const st=storyDef();return st?`<div class="nudge" style="background:rgba(119,166,255,.08);border-color:rgba(119,166,255,.3);color:#cfe0ff"><b style="color:var(--siren)">스토리</b>${esc(st.txt())}</div>`:'';})():'';
   return `<section class="dash" aria-label="상황판">
    <div class="dcard"><div class="who"><div class="ava" style="--c1:${c1};--c2:${c2}">${esc((S.name||'?')[0])}</div><div style="min-width:0"><h2>${esc(S.name)} ${rankName()}</h2><p>${esc(o.n)} · ${TYPES[o.type].n} · ${deptName()}</p><p>${dateStr()} · ${years()}년 차 · ${ageLine()} · ${DF().n}</p></div></div>
-    <div class="prog"><div class="pl"><span>${pl}</span><span class="num">${Math.round(prog*100)}%</span></div>${bar(prog*100,'var(--sodium)')}<div class="reqs">${reqs}</div></div></div>
+    <div class="prog"><div class="pl"><span>${pl}</span><span class="num">${Math.round(prog*100)}%</span></div>${bar(prog*100,'var(--sodium)')}<div class="reqs">${reqs}</div>${rookieSkipOK()?`<button class="btn sm" data-skiprk style="margin-top:8px">⏩ 수습 건너뛰기</button>`:''}</div></div>
    <div class="dcard"><div class="rings">${ring(S.eval,'var(--siren)',S.founder?(S.investor?'투자자 신뢰':'구성원 신뢰'):S.rank===7?'이사회':'사내 평가')}${ring(S.fame,'var(--sodium)','업계 평판')}${ring(S.trust,'var(--good)','신뢰도')}${ring(S.hp,S.hp<30?'var(--red)':'var(--pink)','컨디션')}</div>${tip}</div>
    <div class="dcard"><div class="mini"><div><span>행동력</span><b>${S.ap}</b></div><div><span>통장</span><b>${S.money.toLocaleString('ko-KR')}만</b></div><div><span>내 월급 (실수령)</span><b style="color:var(--good)">${payOf(OUT()).toLocaleString('ko-KR')}만</b></div><div><span>한 달 생활비</span><b>${living().toLocaleString('ko-KR')}만</b></div><div><span>${S.rank>=5?'회사 자금':'단독 · 기사'}</span><b>${S.rank>=5?f1(S.co.cash)+'억':`${S.scoops} · ${S.totalArticles||0}`}</b></div><div><span>취재 중 아이템</span><b>${S.items.length}건</b></div></div>${goal}</div>
   </section>`;}
@@ -3979,6 +3981,7 @@ function bind(){
   document.querySelectorAll('[data-spec]').forEach(b=>b.onclick=()=>{S.spec=+b.dataset.spec;render();});
   document.querySelectorAll('[data-simple]').forEach(b=>b.onclick=()=>{S.simple=b.dataset.simple==='1';render();});
   document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{S.diff=b.dataset.diff;render();});
+  document.querySelectorAll('[data-skiprk]').forEach(b=>b.onclick=()=>skipRookie());
   document.querySelectorAll('[data-nf]').forEach(b=>b.onclick=()=>{S.netF=b.dataset.nf;render();});document.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>{S.colF=b.dataset.cf;render();});
   document.querySelectorAll('[data-smode]').forEach(b=>b.onclick=()=>{S.smode=b.dataset.smode;render();});
   document.querySelectorAll('[data-age]').forEach(b=>b.onclick=()=>{S.age0=+b.dataset.age;render();});
@@ -5463,6 +5466,20 @@ function rookieReqs(o){o=o||OUT();if(S.story)return [];const mo=rookieWeeks(o)/4
   if(o.p>=4&&!S.simple){const cp=colBy('cap');L.push({t:`캡과의 관계 ${cp?Math.round(cp.rel):0}/30`,ok:!!cp&&cp.rel>=30});}
   if(o.p>=5&&!S.simple)L.push({t:`캡 미션 완수 ${S.rkMiss||0}/2달`,ok:(S.rkMiss||0)>=2});
   return S.simple?L.slice(0,2):L;}
+// ===== 수습 건너뛰기 =====
+// 남은 수습 기간을 자동으로 보낸다. 직접 할 때보다 능력치·취재원·캡 관계·돈이 조금 덜 쌓인다.
+function rookieSkipOK(){return S.phase==='game'&&S.rank===0&&!S.story&&!S.founder;}
+function skipRookie(){if(!rookieSkipOK())return;const left=Math.max(0,rookieWeeks()-S.inRank);
+  openModal('수습 건너뛰기',`<p class="lede">남은 수습 ${moTxt(left)}을 자동으로 보내고 바로 정식 기자로 발령받는다.</p><div class="deal"><div class="dp"><b>좋은 점</b><ul><li>바로 본게임 시작</li><li>수습 평가는 기준선으로 통과</li></ul></div><div class="dc"><b>아쉬운 점</b><ul><li>능력치가 직접 할 때보다 덜 오른다</li><li>취재원 2명만 얻는다 (신뢰 낮음)</li><li>캡·동기와의 관계가 덜 쌓인다</li><li>정보보고 수당·평가 보너스 없음</li></ul></div></div>`,[
+   {label:'건너뛴다',fn:()=>{const st0={...S.st};const m0=S.money;let g=0;while(S.rank===0&&S.inRank<rookieWeeks()-1&&g++<40&&S.phase==='game'){S.ap=0;endWeekQuiet();}
+     // 직접 했을 때의 절반쯤만 남긴다
+     for(const k in S.st){const d=S.st[k]-st0[k];if(d>0)S.st[k]=st0[k]+d*.6;}
+     ['inv','net','sta','kno'].forEach(k=>gain(k,.6));
+     for(let i=0;i<2;i++){const sc=addSource(S.dept,R(8,15));}
+     const cp=colBy('cap');if(cp)cp.rel=Math.min(cp.rel,20);
+     S.eval=Math.max(S.eval,rookieEv())-1;S.memo=0;S.rkSkip=1;S.items=[];
+     S.inRank=rookieWeeks();log('수습 기간을 건너뛰었다');Q.length=0;$('#modal').hidden=true;mTok++;graduate();return false;}},
+   {label:'직접 한다',cls:'ghost'}]);}
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
