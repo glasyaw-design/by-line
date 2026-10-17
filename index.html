@@ -594,6 +594,60 @@ body:not(:has(.dash)) #scene{max-height:24vh}
 .lgl li i{font-style:normal;font-size:11px;font-weight:700;color:var(--k);text-align:center;border:1px solid color-mix(in srgb,var(--k) 45%,transparent);background:color-mix(in srgb,var(--k) 12%,transparent);border-radius:6px;padding:1px 0}
 .lgl li span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
 .lgl li b{font-weight:700}.lgl li em{font-style:normal;color:var(--mute);font-size:12.5px;display:block}
+
+/* ===== 5.4 가독성: 읽히는 글꼴 · 크기 · 줄간격 · 대비 ===== */
+:root{--fg:#f3f0e9;--mute:#b0b7cc;--mute2:#8f97ae;--f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:var(--f-body);font-size:15.5px;line-height:1.7;letter-spacing:-.01em;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+b,strong{font-weight:600}
+.num,.mini b,.kv b,.rings b{font-variant-numeric:tabular-nums}
+/* 팝업 */
+#mt{font-size:18px;line-height:1.35}
+#mb{font-size:15.5px;line-height:1.75}
+#mb p{margin:0 0 12px}
+.lede{font-size:16px;line-height:1.7;color:var(--fg);font-weight:500}
+.hint{font-size:13.5px;line-height:1.65;color:var(--mute)}
+.fx{font-size:14px;line-height:1.6}
+.feed li{font-size:14.5px;line-height:1.6;padding:8px 12px;margin-bottom:6px}
+.ch{padding:12px 15px}
+.ch .cl{font-size:15.5px;line-height:1.45;font-weight:600}
+.ch .chips,.ch .chip{font-size:12.5px}
+.kv span{font-size:12.5px;color:var(--mute)}
+.kv b{font-size:16px}
+/* 할 일 · 상황판 · 탭 */
+.act .an{font-size:15.5px;font-weight:600;line-height:1.4}
+.act .ad{font-size:13px;color:var(--mute);line-height:1.5}
+.meta{font-size:13px;color:var(--mute);gap:4px 12px}
+.sec{font-size:13.5px;letter-spacing:.02em}
+.card .t{font-size:15px;line-height:1.45}
+.mini span{font-size:12.5px}
+.who h2{line-height:1.25}
+.who p{font-size:13.5px;color:var(--mute)}
+.statrow{font-size:14px}
+.tb{font-size:14.5px;line-height:1.7}
+.misr{font-size:14.5px}
+.mish span,.misp{font-size:13px}
+.lgl li{font-size:14.5px;line-height:1.6;padding:7px 0}
+.lgl li em{font-size:13px}
+.th b{font-size:14.5px}.th span{font-size:13px}
+.rcard{font-size:14.5px;line-height:1.6}
+.rcard .rb .hint{font-size:13px}
+#toast{font-size:14.5px;line-height:1.5}
+.nrow summary,.nn{font-size:14.5px}
+.nn small,.cs,.ch .cs{font-size:13px}
+.tag,.achip small{font-size:12px}
+.loglist{font-size:14px}
+@media (max-width:600px){body{font-size:15px}#mb{font-size:15px}.lede{font-size:15.5px}.ch .cl{font-size:15px}.act .an{font-size:15px}}
+
+/* 할 일 카드: 제목이 세로로 끊기지 않게 */
+.act .an{flex-wrap:nowrap;min-width:0}
+.act .an>span:not(.pips),.act .an{white-space:normal}
+.act.rec .an::before{flex:none;white-space:nowrap;line-height:1.6;padding:0 6px;font-size:10.5px}
+.act .pips,.act .an .free,.act .an small{flex:none;white-space:nowrap}
+@media (max-width:600px){.acts{grid-template-columns:minmax(0,1fr)}.act{padding:10px 12px}.act .ad{display:block;font-size:12.5px}}
+
+.chips{gap:5px}.chips .cp{font-size:13px;line-height:1.5;padding:2px 8px}
+.ch .cs{display:block;font-size:13px;color:var(--mute);line-height:1.5}
 </style>
 
 <div class="wrap">
@@ -3523,6 +3577,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|시작 간소화: "바로 시작하기"(시험 없이 추천 매체 3곳 중 입사), 언론고시 상식 5문제·면접 3문항, 불합격 땐 수시 채용 제안, 나이·난이도·전공·스펙은 "자세히 설정"으로. 첫 안내는 3쪽짜리로',
   '주요|성취감: 내 기사가 1면·첫 꼭지에 실리면 내일 자 지면(방송은 메인뉴스 화면)으로 보여 준다. 수첩 탭 "진행 중인 이야기"(쫓기는 단독·후속·분쟁·광고주·라이벌 전적). 수습은 굵직한 정보보고가 선배 기사로 이어지면 공동 바이라인',
   '주요|행동력 재조정: 거의 모두 12로 같던 행동력을 "기본 6 + 항목마다 ±1"로 바꿨다. 직급·매체·부서에 따라 8~10(간소화 7~9, 창간 10~11). 보너스가 실제 차이를 만들고, 한 달이 덜 늘어진다. 미션 보너스는 행동력 옆에 따로 표시',
+  '주요|가독성 개선: 본문 글꼴을 손글씨체에서 읽기 쉬운 고딕(IBM Plex Sans KR)으로 바꾸고, 글자 크기·줄간격·흐린 글씨 대비를 올렸다. 한글이 단어 중간에서 끊기지 않고, 모바일 할 일 카드는 한 줄씩 넓게',
   '주요|기록 탭 개편: 달별로 묶고, 성과·사건·기사·취재·인사·돈·사람으로 분류해 골라 볼 수 있다. 결과 카드도 여기서 다시 본다. 긴 글도 줄이 맞는다',
   '주요|그래픽: 팝업의 SVG 그림을 신문 섹션 라벨(사건·단독·광고 등)로 바꾸고, 타이틀 화면을 정리했다(빈 카드 정리·3단계 안내)'],'2026.10.17',['이달의 미션','팝업 35% 감소·결과 카드','사쓰마와리·기사 빠르게','바로 시작하기','1면 지면 연출']],
  ['5.3','매체 성장과 추락',[
