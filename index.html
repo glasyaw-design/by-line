@@ -442,6 +442,8 @@ button.statrow.stk .sfx{grid-column:1/-1;font-size:11.5px;color:var(--mute);marg
 .devlist{display:flex;flex-wrap:wrap;gap:5px}.dvev{font:inherit;font-size:12px;padding:4px 9px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer}.dvev.ok{border-color:var(--good)}
 
 .pnl{list-style:none;margin:8px 0 0;padding:0}.pnl li{margin:0 0 7px;line-height:1.55;font-size:13.5px}.tg.pc{background:var(--panel3);color:var(--sodium);min-width:52px;text-align:center}.card.pnew{border-color:rgba(255,184,77,.45)}
+
+.mopt{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.mob{font:inherit;font-size:12.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line2);background:var(--panel2);color:var(--fg);cursor:pointer}.mob.on{background:var(--sodium);color:#2a1a05;border-color:var(--sodium)}.mob:disabled{opacity:.35}.card.mtc.done{border-color:rgba(255,184,77,.35)}
 </style>
 
 <div class="wrap">
@@ -475,7 +477,7 @@ const pct=p=>Math.round(p*100)+'%';
 const DIFF={
  easy:{n:'쉬움',d:'승진이 빠르고 사실 확인이 잘 된다. 경쟁사도 느긋하고 오보 위험이 낮다.',ten:.7,ver:1.22,risk:.6,heat:1.35,drift:.6,need:-6,pay:1.15,harsh:.7,start:500,pen:.75,crisis:.65,legal:.6},
  normal:{n:'보통',d:'현실에 가까운 속도. 취재는 쉽지 않고 승진은 느리다.',ten:1,ver:1,risk:1,heat:1,drift:1,need:0,pay:1,harsh:1,start:300,pen:1,crisis:1,legal:1},
- hard:{n:'어려움',d:'경쟁사는 빠르고 데스크는 냉정하다. 오보 하나가 커리어를 흔든다.',ten:1.3,ver:.8,risk:1.45,heat:.75,drift:1.5,need:4,pay:.85,harsh:1.35,start:260,pen:1.3,crisis:1.45,legal:1.3}
+ hard:{n:'어려움',d:'경쟁사는 빠르고 데스크는 냉정하다. 오보 하나가 커리어를 흔든다.',ten:1.3,ver:.8,risk:1.45,heat:.75,drift:1.5,need:4,pay:.85,harsh:1.35,start:260,pen:1.2,crisis:1.45,legal:1.3}
 };
 const SIMPLE_CACHE={};
 const DF=()=>{const k=(S&&S.diff)||'normal';const d=DIFF[k];if(!(S&&S.simple))return d;return SIMPLE_CACHE[k]||(SIMPLE_CACHE[k]={...d,n:d.n+' · 간소화',ten:d.ten*.55,ver:d.ver*1.18,risk:d.risk*.6,heat:d.heat*1.25,need:d.need-8,harsh:d.harsh*.7,drift:d.drift*.6});};
@@ -1370,21 +1372,31 @@ function hasCorrDept(o){o=o||OUT();return o.depts.some(d=>['nat','loc','sigun'].
 function corrRegions(){const o=OUT();return REGIONS[o.id]?SUBCITY.slice(0,6).map(c=>`${REGIONS[o.id][1].replace(/광역시|특별자치도|도$/,'')} ${c}`):NAT_REG;}
 // 지역 주재기자 명부 — 지역마다 1~3명. 창간 모드는 발행인이 직접 주재지를 연다
 function corrs(){const o=OUT();if(S.founder){S.posts=S.posts||{};const L=[];S.corrList=S.corrList||{};Object.keys(S.posts).forEach(r=>{S.corrList[r]=(S.corrList[r]||[]).slice(0,S.posts[r]);while(S.corrList[r].length<S.posts[r]){const m=genMember(o.depts.find(d=>['nat','loc','sigun'].includes(d))||o.depts[0],35,65);m.reg=r;m.role='주재기자';m.rel=R(0,20);S.corrList[r].push(m);}L.push(...S.corrList[r]);});return L;}
-  if(!hasCorrDept(o))return [];if(!S.corr||S.corrOut!==S.outlet){const d=o.depts.find(x=>['nat','loc','sigun'].includes(x));S.corr=[];const P0=corrPlan(o);
+  if(!hasCorrDept(o))return [];if(!S.corr||S.corrOut!==S.outlet||S.corrV!==2){S.corrV=2;const d=o.depts.find(x=>['nat','loc','sigun'].includes(x));S.corr=[];const P0=corrPlan(o);
     P0.regs.forEach(r=>{const n=R(P0.lo,P0.hi);for(let i=0;i<n;i++){const m=genMember(d,35,70);m.reg=r;m.r=i===0?(P0.lead===1&&chance(.5)?0:P0.lead):i===1&&n>=4?1:0;m.role=m.r>=2?P0.leadN:m.r===1?'주재 차장':'주재기자';m.yrs=yrsFor(m.r);m.rel=R(0,20);S.corr.push(m);}});
     fixDept(S.corr,d);S.corrOut=S.outlet;}S.corr=S.corr.filter(m=>m.reg);S.corr.forEach(fitSk);return S.corr;}
 // 매체마다 다른 지역 취재망: 통신사·지상파는 지역 본부·총국이 크고, 지역 일간지는 시·군 주재가 편집국의 큰 몫, 중앙 일간지는 광역마다 1~3명
-function corrPlan(o){const T=o.type,p=o.p;const W17=['인천','경기남부','경기북부','강원','대전·세종','충남','충북','광주','전남','전북','대구','경북','부산','울산','경남','제주'];
-  if(T==='wire')return{regs:p>=4?W17:NAT_REG,lo:p>=4?3:2,hi:p>=4?6:3,lead:2,leadN:'지역취재본부장'};
-  if(T==='tv')return{regs:p>=4?['부산','대구','광주','대전','청주','전주','춘천','창원','제주']:NAT_REG.slice(0,5),lo:p>=4?6:2,hi:p>=4?10:3,lead:2,leadN:'총국 보도부장'};
-  if(T==='jp'||T==='ch')return{regs:NAT_REG.slice(0,5),lo:1,hi:2,lead:1,leadN:'주재 차장'};
-  if(T==='local'){const h=REGIONS[o.id];return{regs:SUBCITY.slice(0,p>=3?8:6).map(c=>`${h?h[1].replace(/광역시|특별자치도|도$/,''):''} ${c}`.trim()),lo:2,hi:p>=3?4:3,lead:1,leadN:'주재 차장'};}
-  if(T==='econ')return{regs:NAT_REG.slice(0,6),lo:1,hi:2,lead:1,leadN:'주재 차장'};
-  return{regs:NAT_REG,lo:1,hi:p>=4?3:2,lead:1,leadN:'주재 차장'};}
+function corrPlan(o){const T=o.type,p=o.p;const W17=['인천','경기남부','경기북부','강원','대전·세종','충남','충북','광주','전남','전북','대구','경북','부산','울산','경남','제주'];const none={regs:[],lo:0,hi:0,lead:0,leadN:'',alt:1};
+  if(T==='wire')return p>=4?{regs:W17,lo:3,hi:6,lead:2,leadN:'지역취재본부장'}:p===3?{regs:NAT_REG,lo:1,hi:2,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,3),lo:1,hi:1,lead:0,leadN:''};
+  if(T==='tv')return p>=4?{regs:['부산','대구','광주','대전','청주','전주','춘천','창원','제주'],lo:6,hi:10,lead:2,leadN:'총국 보도부장'}:p===3?{regs:NAT_REG.slice(0,4),lo:2,hi:3,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,2),lo:1,hi:1,lead:0,leadN:''};
+  if(T==='jp'||T==='ch')return p>=4?{regs:NAT_REG.slice(0,5),lo:1,hi:2,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,3),lo:1,hi:1,lead:0,leadN:''};
+  if(T==='local'){const h=REGIONS[o.id];return{regs:SUBCITY.slice(0,p>=3?8:4).map(c=>`${h?h[1].replace(/광역시|특별자치도|도$/,''):''} ${c}`.trim()),lo:p>=3?2:1,hi:p>=3?4:2,lead:1,leadN:'주재 차장'};}
+  if(T==='daily')return p>=4?{regs:NAT_REG,lo:1,hi:3,lead:1,leadN:'주재 차장'}:p===3?{regs:NAT_REG.slice(0,4),lo:1,hi:1,lead:0,leadN:''}:none;
+  if(T==='econ')return p>=4?{regs:NAT_REG.slice(0,4),lo:1,hi:1,lead:0,leadN:''}:none;
+  return none;}
+// 주재기자가 없는 매체: 지역 통신원·제휴 매체·직접 출장으로 지역 기사를 메운다
+function corrAlt(o){o=o||OUT();return corrPlan(o).alt?{online:'지역 통신원(프리랜서)과 제휴 지역지 기사',weekly:'지역 통신원과 직접 출장',trade:'업계 지역 통신원',sports:'구단 연고지 통신원',eng:'통신사 영문 기사와 통신원',daily:'통신사 지역 기사와 통신원',econ:'통신사 지역 기사와 통신원'}[o.type]||'지역 통신원과 통신사 기사':'';}
+function altCoord(it,next){const o=OUT();it.coord='alt';
+  openModal('주재기자가 없는 지역 기사',`<p class="lede">「${esc(it.title)}」은 지역 이야기인데, ${esc(o.n)}에는 그 지역 주재기자가 없다.</p><p class="hint">작은 매체·온라인·잡지·전문지는 주재기자 대신 ${corrAlt(o)}로 지역을 메운다.</p>`,[
+   {label:'지역 통신원에게 맡긴다',sub:'통장 -20만 · 현지 사실 하나를 확인해 줄 수 있다',fn:()=>{S.money-=20;const f=it.facts.find(x=>!fOK(x)&&x.k!=='n')||it.facts.find(x=>!fOK(x));if(f&&chance(.6)){f.conf++;f.via.push('지역 통신원');toast('통신원이 현장 사진과 증언을 보내왔다');}else toast('통신원이 연락이 잘 안 된다');next();return false;}},
+   {label:'통신사·제휴 지역지 기사를 인용한다',sub:'숫자·공식 자료는 확인될 수 있다 · 파급력 조금↓',fn:()=>{const f=it.facts.find(x=>!fOK(x)&&(x.k==='n'||x.k==='d'));if(f&&chance(.5)){f.conf++;f.via.push('통신사 기사');}it.imp=Math.round(it.imp*.93);toast('통신사 기사를 받아 보강했다');next();return false;}},
+   {label:'직접 출장 간다',sub:'컨디션 -12 · 통장 -15만 · 확인 확률이 가장 높다',fn:()=>{S.hp=clamp(S.hp-12,0,100);S.money-=15;const f=it.facts.find(x=>!fOK(x));if(f&&chance(.75)){f.conf++;f.via.push('출장 현장 확인');}toast('KTX를 타고 현장에 다녀왔다');next();return false;}},
+   {label:'그냥 쓴다',sub:'',fn:()=>{next();return false;}},
+   {label:'취소',cls:'ghost'}]);}
 function corrOf(reg){return corrs().filter(m=>m.reg===reg);}
 // 본사 기자가 다른 지역 이야기를 취재할 때: 주재기자에게 먼저 전화
 function coordThen(it,next){if(S.simple){it.coord='ok';return next();}const isReg=REGION_DEPTS.includes(S.dept);if(it.coord||it.d!=='loc'||S.rank>=4||S.founder&&!Object.keys(S.posts||{}).length){return next();}
-  const C=corrs();if(!C.length)return next();if(!it.reg)it.reg=pick([...new Set(C.map(m=>m.reg).filter(Boolean))]);if(!it.reg)return next();if(isReg&&S.region&&S.region.includes(it.reg.split(' ').pop()))return next();
+  const C=corrs();if(!C.length)return corrPlan(OUT()).alt&&!S.founder?altCoord(it,next):next();if(!it.reg)it.reg=pick([...new Set(C.map(m=>m.reg).filter(Boolean))]);if(!it.reg)return next();if(isReg&&S.region&&S.region.includes(it.reg.split(' ').pop()))return next();
   const m=corrOf(it.reg)[0];if(!m)return next();
   openModal('주재기자에게 전화',`<p class="lede">「${esc(it.title)}」은 <b>${esc(it.reg)}</b> 이야기다. 그 지역은 ${esc(m.name)} ${m.role}(${myrs(m)}년 차)의 관할이다.</p><p>본사 기자가 남의 지역 기사를 쓸 땐 주재기자에게 먼저 전화해 "써도 되겠냐"고 묻는 게 예의다. 현지 사정과 취재원은 주재기자가 제일 잘 안다.</p>`,[
    {label:'같이 쓰자고 한다 (공동 바이라인)',sub:'주재기자가 현지 사실 하나를 확인해 준다 · 관계↑ · 평판은 나눠 갖는다',fn:()=>{it.coord='co';it.coBy=m.name;const f=it.facts.find(x=>!fOK(x)&&x.k!=='n')||it.facts.find(x=>!fOK(x));if(f){f.conf++;f.via.push('주재기자');}m.rel=clamp((m.rel||0)+10,-50,100);it.imp=Math.round(it.imp*.95);toast(`${m.name}: "좋지. 현장은 내가 붙을게."`);next();return false;}},
@@ -1546,6 +1558,7 @@ function itemDept(){return S.rank===0?S.dept:S.dept;}
 // ================= 모달·토스트 =================
 let mTok=0;const Q=[];
 function openModal(title,body,choices){
+  if(S&&S.phase==='game'&&S._curAct&&!S._sur&&choices&&choices.length&&!choices.some(c=>c.cls==='ghost'))choices=choices.concat([{label:'취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
   mTok++;const tok=mTok;$('#mt').textContent=title;$('#mb').innerHTML=body||'';const mc=$('#mc');mc.innerHTML='';
   (choices&&choices.length?choices:[{label:'확인'}]).forEach(c=>{const b=document.createElement('button');b.className='ch'+(c.cls?' '+c.cls:'');b.disabled=!!c.disabled;
     b.innerHTML=`<span class="cl">${c.label}</span>${c.sub?`<span class="cs">${c.sub}</span>`:''}`;
@@ -1553,7 +1566,7 @@ function openModal(title,body,choices){
   try{sfx(sfxFor(title,body),.02);}catch(e){}
   $('#modal').hidden=false;$('#modal .mbx').scrollTop=0;const fb=mc.querySelector('button:not([disabled])');if(fb)fb.focus({preventScroll:true});
 }
-function closeModal(){$('#modal').hidden=true;mTok++;if(Q.length){const n=Q.shift();n();return;}render();saveGame();}
+function closeModal(){$('#modal').hidden=true;mTok++;if(S)S._curAct=null;if(Q.length){const n=Q.shift();n();return;}render();saveGame();}
 let toastT=null;
 function toast(t){try{sfx(/부족|없다|모자란다|못 한다|불가|골라 주세요|적어|정해/.test(t)?'deny':'blip');}catch(e){}const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{el.hidden=true;},2800);}
 const fxLine=t=>t?`<p class="fx">${t}</p>`:'';
@@ -1586,6 +1599,7 @@ const ACT={
  job:{n:'이직 알아보기',ap:1,d:'다른 매체의 경력기자 채용을 알아본다',sc:'meet',cd:24},
  rest:{n:'휴식',ap:1,d:'컨디션을 회복한다',sc:'newsroom'},
  colleague:{n:'동료 챙기기',ap:1,d:'사내 동료와 시간을 보내며 관계를 다진다',sc:'meet'},
+ revenue:{n:'수익 다변화',ap:1,d:'뉴스레터·영상·포럼·멤버십 등 광고 말고 다른 수익원을 만든다',sc:'office'},
  deptlife:{n:'부서 사람들과',ap:1,d:'같은 부서 사람과 밥 먹고, 배우고, 가르치고, 같이 취재한다',sc:'newsroom'},
  meeting:{n:'편집회의 주재',ap:1,d:'부장들의 발제를 보고 1면·안쪽 면·보강·킬을 정한다',sc:'newsroom',cd:1},
  tour:{n:'편집국 순시',ap:1,d:'기자들 자리를 돌며 고충을 듣고 갈등을 푼다',sc:'newsroom',cd:2},
@@ -1621,7 +1635,7 @@ const RANK_ACTS=[
  ['breaking','meeting','front','desk','tour','taskforce','column','network','adsell','source','colleague','life','recruit','job','rest'],
  ['breaking','meeting','front','tour','taskforce','column','campaign','portal','network','adsell','source','colleague','life','recruit','found','job','rest'],
  ['breaking','meeting','front','direction','personnel','portal','tour','taskforce','column','network','adsell','source','colleague','life','recruit','found','rest'],
- ['personnel','gad','facility','portal','tour','network','campaign','adsales','digital','hire','cut','event','recruit','meeting','front','colleague','life','rest']
+ ['personnel','gad','facility','portal','revenue','tour','network','campaign','adsales','digital','hire','cut','event','recruit','meeting','front','colleague','life','rest']
 ];
 const SPECIAL={
  pol:['의원실 순회','의원실을 돌며 자료와 국감 정보를 얻는다'],diplo:['외교·안보 백브리핑','당국자 비공개 설명을 따라간다'],int:['외신 모니터링','밤새 외신을 훑어 국내에 없는 기사를 찾는다 (어학)'],
@@ -1657,7 +1671,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='4.9';
+const VERSION='4.11';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 7주차부터)'},
@@ -1900,16 +1914,16 @@ RUN.source=function(pg=0){
 RUN.discover=function(){
   const d=S.dept;
   openModal('아이템 발굴 · 어디서 찾을까',`<p>${DEPTS[d].n} 담당: ${DEPTS[d].lede}</p>`,[
-    {label:'보도자료·공시 뒤지기',sub:'안전하고 확인도 쉽지만 타사도 다 안다',fn:()=>{spend(1,3);gain('kno',.4);if(!chance(.7*glut())){toast('보도자료 수십 건, 기사가 될 만한 건 없었다');return;}const it=makeItem(d,{excl:false,pre:2,mult:.6});S.items.push(it);toast(`보도자료에서 「${it.title}」`);}},
-    {label:'온라인 커뮤니티·SNS 훑기',sub:'단독 가능성은 높지만 허위 제보가 섞여 있다',fn:()=>{spend(1,3);gain('inv',.2);if(!chance((.45+S.st.inv/500)*glut())){toast('글은 많은데 쓸 만한 건 없었다');return;}const it=makeItem(d,{excl:chance(.45),hoax:chance(.25)});S.items.push(it);toast(`커뮤니티 글에서 「${it.title}」`);}},
-    {label:'현장 발로 뛰기',sub:'체력이 들지만 질 좋은 아이템',fn:()=>{spend(1,12);gain('inv',.5);gain('sta',.2);if(!chance((.42+S.st.inv/300)*glut())){toast('발품만 팔았다. 내일 다시 나가 보자');return;}const it=makeItem(d,{excl:chance(.45),pre:1,mult:1.1});S.items.push(it);toast(`현장에서 「${it.title}」`);}},
-    {label:'공공 데이터 파고들기',sub:'상식이 높을수록 성공. 데이터 사실 하나를 먼저 확인',fn:()=>{spend(1,4);if(chance((.28+S.st.kno/200)*glut())){const it=makeItem(d,{excl:true,mult:1});const n=it.facts.find(f=>f.k==='n');if(n){n.conf=n.need;n.via.push('데이터');}S.items.push(it);gain('kno',.6);toast(`데이터 이상치 발견 → 「${it.title}」`);}else{gain('kno',.3);toast('엑셀만 세 시간. 아무것도 안 나왔다.');}}},
+    {label:'보도자료·공시 뒤지기',sub:'안전하고 확인도 쉽지만 타사도 다 안다',fn:()=>{spend(1,3);gain('kno',.4);if(!chance(.7*glut())){toast('보도자료 수십 건, 기사가 될 만한 건 없었다');return;}const it=makeItem(d,{excl:false,pre:2,mult:.6});S.items.push(it);itemFound(it,'보도자료를 뒤지다 걸렸다');}},
+    {label:'온라인 커뮤니티·SNS 훑기',sub:'단독 가능성은 높지만 허위 제보가 섞여 있다',fn:()=>{spend(1,3);gain('inv',.2);if(!chance((.45+S.st.inv/500)*glut())){toast('글은 많은데 쓸 만한 건 없었다');return;}const it=makeItem(d,{excl:chance(.45),hoax:chance(.25)});S.items.push(it);itemFound(it,'커뮤니티 글 하나가 눈에 걸렸다');}},
+    {label:'현장 발로 뛰기',sub:'체력이 들지만 질 좋은 아이템',fn:()=>{spend(1,12);gain('inv',.5);gain('sta',.2);if(!chance((.42+S.st.inv/300)*glut())){toast('발품만 팔았다. 내일 다시 나가 보자');return;}const it=makeItem(d,{excl:chance(.45),pre:1,mult:1.1});S.items.push(it);itemFound(it,'현장을 돌다 냄새를 맡았다');}},
+    {label:'공공 데이터 파고들기',sub:'상식이 높을수록 성공. 데이터 사실 하나를 먼저 확인',fn:()=>{spend(1,4);if(chance((.28+S.st.kno/200)*glut())){const it=makeItem(d,{excl:true,mult:1});const n=it.facts.find(f=>f.k==='n');if(n){n.conf=n.need;n.via.push('데이터');}S.items.push(it);gain('kno',.6);itemFound(it,'공공 데이터에서 이상치를 찾았다');}else{gain('kno',.3);toast('엑셀만 세 시간. 아무것도 안 나왔다.');}}},
     {label:'취소',cls:'ghost'}]);
 };
 
 // --- 취재 세션 ---
 RUN.invest=function(){
-  openModal('어떤 아이템을 취재할까',`<p>취재 한 번에 시간 ${3+(S.st.sta>=60?1:0)}칸. 핵심 사실은 서로 다른 두 출처로 교차 확인해야 한다.</p>`,S.items.map(it=>({label:it.title,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?` · 단독 · 타사 추격까지 ${wkTxt(it.heat)}`:''}${it.slot?` · ${SLOT[it.slot.g].n} 마감 ${wkTxt(it.slot.due-S.turn)}`:''}`,fn:()=>{coordThen(it,()=>session(it));return false;}})).concat([{label:'취소',cls:'ghost'}]));
+  openModal('어떤 아이템을 취재할까',`<p>취재 한 번에 시간 ${3+(S.st.sta>=60?1:0)}칸. 핵심 사실은 서로 다른 두 출처로 교차 확인해야 한다.</p>`,S.items.map(it=>({label:`[${gradeOf(it)}] ${it.title}`,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?` · 단독 · 타사 추격까지 ${wkTxt(it.heat)}`:''}${it.slot?` · ${SLOT[it.slot.g].n} 마감 ${wkTxt(it.slot.due-S.turn)}`:''}`,fn:()=>{coordThen(it,()=>session(it));return false;}})).concat([{label:'취소',cls:'ghost'}]));
 };
 function target(it,m){const un=it.facts.filter(f=>!fOK(f));if(!un.length)return null;const M=METH[m];const mt=un.filter(f=>M.k.includes(f.k));const pool=mt.length?mt:un;return pool.find(f=>f.key)||pool[0];}
 function mChance(it,m,f){
@@ -1940,9 +1954,10 @@ function session(it){
     if(m==='interview'){interview(it,T,draw);return;}
     const f=target(it,m);if(!f){T.lines.push({c:'',t:'더 확인할 사실이 없다.'});return draw();}
     const p=mChance(it,m,f);gain({call:'net',docs:'ver',scene:'inv',ask:'cha',data:'dat'}[m],.35);gain('ver',.12);
-    if(chance(p)){f.conf++;f.via.push(M.n);T.lines.push({c:'g',t:`${SUCC[m]} ${f.t}${f.key&&f.conf<f.need?' — 단일 출처. 다른 경로로 한 번 더 확인해야 한다':''}`});}
-    else T.lines.push({c:'r',t:`${f.t} — ${pick(FAILS[m])}`});
-    draw();
+    moment(m,it,b=>{const pp=clamp(p+b,.03,.97);
+    if(chance(pp)){f.conf++;f.via.push(M.n);T.lines.push({c:'g',t:`${SUCC[m]} ${f.t}${f.key&&f.conf<f.need?' — 단일 출처. 다른 경로로 한 번 더 확인해야 한다':''}`});twist(it,T);}
+    else T.lines.push({c:'r',t:`${f.t} — ${pick(FAILS[m])}${it.hoax&&S.st.ver>=55&&chance(.4)?' (제보 자체가 수상하다는 느낌이 든다)':''}`});
+    draw();});
   };
   const draw=()=>{
     if(T.left<=0)return finish();
@@ -2004,7 +2019,7 @@ function writeAngle(W){if(S.simple)return writeSimple(W);
   const it=W.it,o=OUT();
   const opts=it.ideo?[{l:'성장·안보·재정 건전성 관점으로 짚는다',tag:'cons'},{l:'분배·노동·약자 보호 관점으로 짚는다',tag:'prog'},{l:'양쪽 입장을 균형 있게 싣는다',tag:'neu'}]
     :[{l:'스트레이트 — 사실 위주로 간결하게',tag:'st',s:'무난하다'},{l:'해설 — 배경과 맥락까지',tag:'ex',s:'상식이 높을수록 좋다'},{l:'르포 — 현장 묘사 중심',tag:'re',s:'현장 사실이 확인돼 있으면 빛난다'},{l:'탐사 — 구조와 책임을 파고든다',tag:'iv',s:'확인 사실이 3개 이상일 때 강하다'}];
-  openModal('1단계 · 야마 잡기',`<p class="lede">「${esc(it.title)}」</p><p>${o.n}의 논조: <b>${LEAN[o.lean]}</b>${it.ideo?' — 논조가 갈리는 아이템이다. 데스크가 지켜본다.':''}</p>`,opts.map(x=>({label:x.l,sub:x.s,fn:()=>{W.angle=x.tag;writeLead(W);return false;}})));
+  openModal('1단계 · 야마 잡기',`<p class="lede">「${esc(it.title)}」</p><p>${o.n}의 논조: <b>${LEAN[o.lean]}</b>${it.ideo?' — 논조가 갈리는 아이템이다. 데스크가 지켜본다.':''}</p>`,opts.map(x=>({label:x.l,sub:x.s,fn:()=>{W.angle=x.tag;writeLead(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{RUN.write();return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
 function writeLead(W){
   const it=W.it;const ok=k=>it.facts.find(f=>f.k===k&&fOK(f));const key=it.facts.find(f=>f.key);
@@ -2014,19 +2029,19 @@ function writeLead(W){
     {k:'person',l:'사람 이야기로 연다',f:ok('w'),s:ok('w')?`"${ok('w').t}."`:'확인된 증언이 없다'},
     {k:'key',l:'핵심 의혹으로 곧장 연다',f:fOK(key),s:fOK(key)?`"${key.t}."`:'핵심이 덜 확인됐다. 위험하다'}
   ];
-  openModal('2단계 · 리드 문장',`<p>첫 문장이 기사의 운명을 정한다. 확인된 사실로 열어야 힘이 실린다.</p>`,L.map(x=>({label:x.l,sub:x.s,fn:()=>{W.lead=x.k;W.leadOK=!!x.f;W.leadText=x.f?x.f.t:key.t;writeFacts(W);return false;}})));
+  openModal('2단계 · 리드 문장',`<p>첫 문장이 기사의 운명을 정한다. 확인된 사실로 열어야 힘이 실린다.</p>`,L.map(x=>({label:x.l,sub:x.s,fn:()=>{W.lead=x.k;W.leadOK=!!x.f;W.leadText=x.f?x.f.t:key.t;writeFacts(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{writeAngle(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
 function writeFacts(W){
   const it=W.it;
   const body=`<p>어떤 사실을 넣을까? 미확인 사실은 파급력을 키우지만 오보 위험이 생긴다. 핵심 사실이 단일 출처면 위험이 남는다.</p>${it.facts.map((f,i)=>`<label class="chk"><input type="checkbox" data-f="${i}" ${fOK(f)?'checked':''}><span>${esc(f.t)}${f.key?' <span class="tag so">핵심</span>':''}<small>${fOK(f)?'확인됨 · '+f.via.join(', '):f.conf?'단일 출처 — 교차 확인 안 됨':'미확인 — 넣으면 위험'}</small></span></label>`).join('')}
   <label class="chk"><input type="checkbox" id="wRb" ${it.rebut?'checked':''} ${it.rebut?'':'disabled'}><span>${esc(it.subj)} 측 반론<small>${it.rebut==='got'?'입장을 받았다':it.rebut==='no'?'"노코멘트" — 요청 사실을 적는다':'반론을 받지 않았다. 데스크가 문제 삼고 오보 위험이 커진다'}</small></span></label>
   ${it.expert?'<label class="chk"><input type="checkbox" id="wEx" checked><span>전문가 코멘트<small>기사에 무게가 실린다</small></span></label>':''}`;
-  openModal('3단계 · 팩트와 반론',body,[{label:'다음: 제목 달기',fn:()=>{W.sel=[...document.querySelectorAll('#mb input[data-f]')].filter(x=>x.checked).map(x=>+x.dataset.f);if(!W.sel.length){toast('최소 한 개의 사실은 넣어야 한다');return false;}W.rb=!!($('#wRb')&&$('#wRb').checked);W.ex=!!($('#wEx')&&$('#wEx').checked);writeHead(W);return false;}}]);
+  openModal('3단계 · 팩트와 반론',body,[{label:'다음: 제목 달기',fn:()=>{W.sel=[...document.querySelectorAll('#mb input[data-f]')].filter(x=>x.checked).map(x=>+x.dataset.f);if(!W.sel.length){toast('최소 한 개의 사실은 넣어야 한다');return false;}W.rb=!!($('#wRb')&&$('#wRb').checked);W.ex=!!($('#wEx')&&$('#wEx').checked);writeHead(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeLead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
 }
 function writeHead(W){
   const it=W.it;const pre=it.excl?'[단독] ':'';const on=OUT().type==='online';
   const hs=headOpts(it,on);
-  openModal('4단계 · 제목 달기',`<p>독자가 가장 먼저 보는 한 줄이다. 제목 감각(능력치)이 높을수록 어떤 제목이든 효과가 커진다.</p>`,hs.map(x=>({label:x.h,sub:x.s,disabled:!!x.dis,fn:()=>{W.head=x.k;W.headline=x.h;writeMedium(W);return false;}})));
+  openModal('4단계 · 제목 달기',`<p>독자가 가장 먼저 보는 한 줄이다. 제목 감각(능력치)이 높을수록 어떤 제목이든 효과가 커진다.</p>`,hs.map(x=>({label:x.h,sub:x.s,disabled:!!x.dis,fn:()=>{W.head=x.k;W.headline=x.h;writeMedium(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{S.simple?RUN.write():writeFacts(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
 function writeMedium(W){
   const t=OUT().type;
@@ -2034,19 +2049,19 @@ function writeMedium(W){
     openModal('5단계 · 리포트 영상',`<p>방송 리포트는 그림이 절반이다.</p>`,[
       {label:'현장 스탠드업 촬영',sub:'체력 -10, 방송감이 높을수록 완성도↑',fn:()=>{W.mq=3+S.st.brd/10;gain('brd',.4);S.hp=clamp(S.hp-10,0,100);writeFinish(W);return false;}},
       {label:'녹취 화면 띄우기',sub:it2(W.it.tape,'녹취가 있으면 완성도 +12'),disabled:!W.it.tape,fn:()=>{W.mq=12;writeFinish(W);return false;}},
-      {label:'자료화면으로 대체',sub:'빠르지만 완성도 -4',fn:()=>{W.mq=-4;writeFinish(W);return false;}}]);
+      {label:'자료화면으로 대체',sub:'빠르지만 완성도 -4',fn:()=>{W.mq=-4;writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
   }else if(t==='wire'){
     openModal('5단계 · 송고 방식',`<p>통신사는 1분이 승부다. 언론사 수백 곳이 이 기사를 받아쓴다.</p>`,[
       {label:'속보 먼저 송고 후 보강',sub:'파급력 +15%, 완성도 -5',fn:()=>{W.speed=1;W.mq=-5;writeFinish(W);return false;}},
-      {label:'완성본 한 번에 송고',sub:'안정적',fn:()=>{writeFinish(W);return false;}}]);
+      {label:'완성본 한 번에 송고',sub:'안정적',fn:()=>{writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
   }else if(t==='weekly'){
     openModal('5단계 · 커버스토리 분량',`<p>주간지는 깊이로 승부한다. 확인된 팩트 3개 미만이면 데스크가 반려한다.</p>`,[
       {label:'8쪽 심층 기사로',sub:'필력이 높을수록 완성도↑',fn:()=>{W.mq=S.st.wri/10;writeFinish(W);return false;}},
-      {label:'2쪽 단신으로 줄인다',sub:'파급력 -20%',fn:()=>{W.short=1;writeFinish(W);return false;}}]);
+      {label:'2쪽 단신으로 줄인다',sub:'파급력 -20%',fn:()=>{W.short=1;writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
   }else if(t==='online'){
     openModal('5단계 · 송출 시간',`<p>인터넷 매체는 포털 노출이 생명이다.</p>`,[
       {label:'출근 시간 7시에 송출',sub:'조회수↑',fn:()=>{W.vm=1.3;writeFinish(W);return false;}},
-      {label:'준비되는 대로 바로',sub:'평범',fn:()=>{writeFinish(W);return false;}}]);
+      {label:'준비되는 대로 바로',sub:'평범',fn:()=>{writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
   }else writeFinish(W);
 }
 const it2=(c,s)=>c?s:'녹취가 없다';
@@ -2162,6 +2177,11 @@ RUN.deptreq=function(){
 // ===== 채용 게시판: 지원자를 직접 보고 고른다 =====
 const TRAITS=[['집요함','inv',6],['꼼꼼함','ver',6],['글솜씨','wri',6],['마당발','net',6],['속도','spd',5],['친화력','cha',5],['데이터','dat',5],['배짱','men',4]];
 const FLAWS_C=['전 직장 갈등설','오보 이력 1건','잦은 이직','마감을 자주 넘긴다는 평','SNS 설화 전력'];
+// 채용: 지역부가 있는 매체는 지역 주재를 희망하는 지원자가 꽤 있다
+function hireRegs(){const o=OUT();if(S.founder)return Object.keys(S.posts||{}).length?Object.keys(S.posts):(hasCorrDept(o)?NAT_REG.slice(0,4):[]);if(!hasCorrDept(o))return [];const P=corrPlan(o);return P.regs&&P.regs.length?P.regs:[];}
+function hireCorr(m,reg){const d=OUT().depts.find(x=>['nat','loc','sigun'].includes(x))||m.d;m.d=d;m.reg=reg;m.role='주재기자';m.rel=R(5,20);
+  if(S.founder){S.posts=S.posts||{};S.corrList=S.corrList||{};S.posts[reg]=(S.posts[reg]||0)+1;(S.corrList[reg]=S.corrList[reg]||[]).push(m);log(`${m.name}, ${reg} 주재기자로 입사`);return true;}
+  corrs();if(Array.isArray(S.corr)){S.corr.push(fitSk(m));log(`${m.name}, ${reg} 주재기자로 입사`);return true;}return false;}
 function hireEye(){return S.founder?fs('lead'):(S.st.cha+S.st.net+S.st.kno)/3;}
 function hireCands(kind){const o=OUT();const n=kind==='new'?8:6;const L=[];
   for(let i=0;i<n;i++){const from=kind==='new'?null:pick(OUTLETS.filter(x=>x.id!==S.outlet&&!x.custom));const tr=pick(TRAITS);
@@ -2170,13 +2190,13 @@ function hireCands(kind){const o=OUT();const n=kind==='new'?8:6;const L=[];
     const yrs=yrs0;const d=pick(o.depts);
     const ask=kind==='new'?0.05:+((.15+skill/220)*(from?(.7+from.p*.15):1)*(kind==='star'?1.6:1)).toFixed(2);
     const will=kind==='new'?.92:clamp(.55+(o.p-(from?from.p:3))*.14+S.fame/400+(kind==='star'?-.15:0),.1,.92);
-    L.push({id:uid(),name:rname(),age:kind==='new'?R(25,31):24+yrs+R(0,4),yrs,from,major:pick(MAJORS).n,spec:pick(SPECS).n,trait:tr[0],tk:tr[1],d,skill,st,ask,will,flaw:chance(kind==='new'?.12:.2)?pick(FLAWS_C):null,cut:R(0,4)});}
+    const regs=hireRegs();const reg=regs.length&&chance(kind==='new'?.3:.35)?pick(regs):null;L.push({id:uid(),name:rname(),age:kind==='new'?R(25,31):24+yrs+R(0,4),yrs,from,major:pick(MAJORS).n,spec:pick(SPECS).n,trait:tr[0],tk:tr[1],d,skill,st,ask,will,flaw:chance(kind==='new'?.12:.2)?pick(FLAWS_C):null,cut:R(0,4),reg});}
   return L;}
 function hireBoard(kind,keep){const o=OUT();const B=keep&&S.hb&&S.hb.kind===kind?S.hb:(S.hb={kind,c:hireCands(kind),round:0});
   const acc=clamp(.35+hireEye()/150+B.round*.18,.35,.95);const w=Math.round(26*(1-acc));
   const slots=kind==='new'?(S.rank===7||S.founder?5:2):kind==='star'?1:3;const title={new:'신입 기자 공채',career:'경력 기자 영입',star:'스타 기자 스카우트'}[kind];
   const est=(v,seed)=>{const off=((seed*37)%(w+1))-w/2;const m=clamp(Math.round(v+off*.6),5,99);return `${clamp(m-Math.round(w/2),1,99)}~${clamp(m+Math.round(w/2),1,99)}`;};
-  const card=(c,i)=>`<label class="chk"><input type="checkbox" data-hc="${i}"><span><b>${esc(c.name)}</b> · ${c.age}세${c.from?` · ${esc(c.from.n)} ${c.yrs}년 차`:` · ${esc(c.major)}`} · 희망 ${DEPTS[c.d]?DEPTS[c.d].n:''}
+  const card=(c,i)=>`<label class="chk"><input type="checkbox" data-hc="${i}"><span><b>${esc(c.name)}</b> · ${c.age}세${c.from?` · ${esc(c.from.n)} ${c.yrs}년 차`:` · ${esc(c.major)}`} · 희망 ${c.reg?`<b style="color:var(--good)">지역 주재 · ${esc(c.reg)}</b>`:DEPTS[c.d]?DEPTS[c.d].n:''}
    <small>추정 실력 ${est(c.skill,i+3)} · 강점 「${c.trait}」 · 취재 ${est(c.st.inv,i+5)} · 문장 ${est(c.st.wri,i+7)} · 검증 ${est(c.st.ver,i+9)}${c.from?` · 계약금 ${f1(c.ask)}억 · 이적 의사 ${c.will>=.7?'높음':c.will>=.45?'반반':'낮음'}`:` · 대표 스펙 ${esc(c.spec)}`}${c.flaw&&acc>=.6?` · <span style="color:var(--red)">평판 조회: ${c.flaw}</span>`:''}</small></span></label>`;
   openModal(title,`<p>${kind==='new'?'필기·면접을 통과한 최종 후보들이다.':'헤드헌터와 기자들 사이 평판으로 추린 후보들이다.'} 최대 <b>${slots}명</b>까지 고를 수 있다. 회사 자금 ${f1(S.co.cash)}억 · 한 명 뽑을 때마다 매달 인건비 약 ${f1((S.founder?.075:.09)*(S.payLv||1))}억이 더 나간다.</p>
    <p class="hint">실력은 겉으로 본 추정치다. 사람 보는 눈(${S.founder?'리더십':'친화력·인맥·상식'} ${Math.round(hireEye())})이 좋을수록, 면접을 더 볼수록 범위가 좁아지고 숨은 흠도 보인다. 지금 정확도 ${Math.round(acc*100)}%.</p>${B.c.map(card).join('')}`,[
@@ -2184,7 +2204,7 @@ function hireBoard(kind,keep){const o=OUT();const B=keep&&S.hb&&S.hb.kind===kind
      const cost=sel.reduce((a,c)=>a+c.ask,0);if(S.co.cash<cost){toast('회사 자금이 모자란다');return false;}if(S.ap<1){toast('행동력이 없다');return false;}
      spend(1,3);setCd(S.founder?'fhire':kind==='new'?'hire':'recruit');if(S.founder)fgain('lead',.6);
      const got=[],no=[];const boss=S.rank===3?.8:1;
-     sel.forEach(c=>{if(chance(c.will*boss)){S.co.cash-=c.ask;S.co.staff++;const m={id:uid(),name:c.name,skill:c.skill,d:o.depts.includes(c.d)?c.d:o.depts[0],r:0,yrs:c.yrs,st:c.st,t0:S.turn,flaw:c.flaw};if(kind!=='new'&&c.yrs>=10&&chance(.4))m.r=1;S.team.push(m);got.push(c);if(c.flaw)S.pendFlaw=(S.pendFlaw||0)+1;}else no.push(c);});
+     sel.forEach(c=>{if(chance(c.will*boss)){S.co.cash-=c.ask;S.co.staff++;const m={id:uid(),name:c.name,skill:c.skill,d:o.depts.includes(c.d)?c.d:o.depts[0],r:0,yrs:c.yrs,st:c.st,t0:S.turn,flaw:c.flaw};if(kind!=='new'&&c.yrs>=10&&chance(.4))m.r=1;if(c.reg&&hireCorr(m,c.reg)){}else S.team.push(m);got.push(c);if(c.flaw)S.pendFlaw=(S.pendFlaw||0)+1;}else no.push(c);});
      if(kind==='star'&&got.length){S.co.q+=3;apply({fame:2});}if(kind!=='new'&&got.length)apply({eval:1});S.hb=null;S.ros=null;
      got.forEach(c=>{log(`${kind==='new'?'신입':'경력'} 채용: ${c.name}${c.from?` (${c.from.n})`:''}`);if(c.from)tick(`${c.from.n} ${c.name} 기자, ${o.n}로 이적`);});
      openModal('채용 결과',`<p class="lede">${got.length?`${got.map(c=>esc(c.name)).join(', ')} 입사 확정.`:'아무도 오지 않았다.'}</p>${no.length?`<p>${no.map(c=>esc(c.name)).join(', ')}은(는) "지금 회사에 남겠다"며 거절했다.${S.rank===3?' (국장 결재에서 막힌 건도 있다)':''}</p>`:''}${got.some(c=>c.flaw)?'<p class="hint">평판 조회에 걸렸던 사람이 있다. 시간이 지나면 드러날 수도 있다.</p>':''}`);return false;}},
@@ -2280,31 +2300,36 @@ function pickColEvent(){const el=COL_EVENTS.filter(e=>{try{return e.c()&&fOk(e);
 
 // --- 간부: 편집회의·순시·특별취재팀·속보 ---
 RUN.meeting=function(){
-  const heads=S.team.length?S.team:[genMember(S.dept)];const area=S.area;
+  const heads=S.team.length?S.team:[genMember(S.dept)];const area=S.area;const tv=isTV();
   const pool=OUT().depts.filter(d=>S.rank>=6||!area||AREAS[cat1(d)]===area);
-  const P=[0,1,2].map(()=>{const m=pick(heads);const d=pick(pool.length?pool:OUT().depts);const it=makeItem(d,{excl:chance(.4)});return{m,d,it,vr:R(30,100)/100,choice:null};});
-  const step=k=>{
-    if(k>=P.length)return resolve();
-    const p=P[k];const taken=P.some(x=>x.choice==='front');
-    openModal(`편집회의 · 발제 ${k+1}/3`,`<p class="lede">${p.m.name} ${DEPTS[p.d].n} 데스크: "「${esc(p.it.title)}」${p.it.excl?' — 단독입니다.':''}"</p><p>확인 정도 <b>${pct(p.vr)}</b> · 파급력 ${p.it.imp}${p.it.adv?' · 광고주 관련':''}${p.it.ideo?' · 논조 갈림':''}</p>`,[
-      {label:'1면에 올린다',sub:taken?'1면은 이미 찼다':'크게 터지거나 크게 다친다',disabled:taken,fn:()=>{p.choice='front';step(k+1);return false;}},
-      {label:'안쪽 면에 싣는다',sub:'무난하다',fn:()=>{p.choice='in';step(k+1);return false;}},
-      {label:'"더 파 와" 보강 지시',sub:'다음 주 더 단단해져 돌아온다. 단독은 뺏길 수도',fn:()=>{p.choice='more';step(k+1);return false;}},
-      {label:'킬',sub:'기사를 접는다',fn:()=>{p.choice='kill';step(k+1);return false;}}]);
-  };
+  const N=S.rank>=5||S.founder?6:5;
+  const P=Array.from({length:N},()=>{const m=pick(heads);const d=pick(pool.length?pool:OUT().depts);const it=makeItem(d,{excl:chance(.4)});return{m,d,it,vr:R(30,100)/100,choice:null};});
+  const OPT=[['front',tv?'첫 꼭지':'1면 톱','크게 터지거나 크게 다친다 · 1건만'],['sub',tv?'메인뉴스':'1면 하단','눈에 띄되 위험은 절반 · 2건까지'],['in','안쪽 면','무난하다'],['more','보강 지시','더 단단해져 돌아온다 · 단독은 뺏길 수도'],['kill','킬','기사를 접는다']];
+  const LIM={front:1,sub:2};const vw=v=>v>=.8?'탄탄':v>=.6?'대체로 확인':v>=.45?'절반쯤':'아직 약함';
+  const board=()=>{const cnt=k=>P.filter(p=>p.choice===k).length;
+    openModal(`${tv?'보도국':'편집'} 회의 주재 · 발제 ${N}건`,`<p>데스크들이 오늘 ${tv?'뉴스':'지면'}에 올릴 기사 ${N}건을 가져왔다. 먼저 전부 훑어보고, 기사마다 어떻게 할지 정한 뒤 회의를 마친다.</p>
+     <p class="hint">${OPT.map(o=>`<b>${o[1]}</b> ${o[2]}`).join(' · ')}</p>
+     ${P.map((p,i)=>`<div class="card mtc${p.choice?' done':''}"><div class="t">${i+1}. 「${esc(p.it.title)}」 ${p.it.excl?'<span class="tg h">단독</span>':''}${p.it.adv?'<span class="tg">광고주 관련</span>':''}${p.it.ideo?'<span class="tg">논조 갈림</span>':''}</div>
+       <div class="meta"><span>${esc(p.m.name)} · ${DEPTS[p.d].n} 데스크</span><span>확인 ${pct(p.vr)} (${vw(p.vr)})</span><span>파급력 ${p.it.imp}</span></div>
+       <div class="mopt">${OPT.map(([k,n])=>{const full=LIM[k]&&cnt(k)>=LIM[k]&&p.choice!==k;return `<button type="button" class="mob${p.choice===k?' on':''}" data-mi="${i}" data-mk="${k}" ${full?'disabled':''}>${n}</button>`;}).join('')}</div></div>`).join('')}
+     <p class="hint" id="mleft">${P.filter(p=>!p.choice).length?`아직 정하지 않은 기사 ${P.filter(p=>!p.choice).length}건 — 회의를 마치면 안쪽 면으로 간다.`:'모두 정했다.'}</p>`,
+     [{label:'이대로 회의를 마친다',sub:'행동력을 쓴다',fn:()=>{P.forEach(p=>{if(!p.choice)p.choice='in';});resolve();return false;}},
+      {label:'추천대로 정리',sub:'확인·파급력 기준으로 자동 배정 (바꿀 수 있다)',fn:()=>{const o=P.slice().sort((a,b)=>b.it.imp*b.vr-a.it.imp*a.vr);P.forEach(p=>p.choice=null);o.forEach((p,i)=>{p.choice=p.vr<.45?(p.it.imp>=50?'more':'kill'):i===0&&p.vr>=.7?'front':i<=2&&p.vr>=.6?'sub':'in';});board();return false;}},
+      {label:'회의를 미룬다',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
+    document.querySelectorAll('#mb [data-mi]').forEach(b=>b.onclick=()=>{const p=P[+b.dataset.mi];p.choice=p.choice===b.dataset.mk?null:b.dataset.mk;const st=$('#modal .mbx').scrollTop;board();$('#modal .mbx').scrollTop=st;});};
   const resolve=()=>{
     spend(1,4);setCd('meeting');const lines=[];const fx={eval:0,fame:0,trust:0};
     P.forEach(p=>{const val=p.it.imp*p.vr*(p.it.excl?1.3:1);
-      if(p.choice==='front'){fx.fame+=val/90;fx.eval+=p.vr>=.7?.8:-.8;S.co.q+=p.vr*1.5;
-        if(p.vr<.6&&chance((1-p.vr)*.32*DF().risk)){S.pending.push({type:'err',title:p.it.title,due:S.turn+R(1,3),desk:1});lines.push({c:'r',t:`1면 「${p.it.title}」 — 확인이 덜 됐다. 찜찜하다.`});}
-        else lines.push({c:'g',t:`1면 「${p.it.title}」 — ${p.vr>=.7?'탄탄하다. 타사들이 받아썼다.':'반응은 있었다.'}`});tick(`[${OUT().n}] ${p.it.excl?'[단독] ':''}${p.it.title}`,1);}
-      else if(p.choice==='in'){fx.eval+=.3;S.co.q+=p.vr*.6;lines.push({c:'',t:`안쪽 면 「${p.it.title}」`});}
-      else if(p.choice==='more'){(S.reinforce=S.reinforce||[]).push({title:p.it.title,imp:p.it.imp,excl:p.it.excl,vr:Math.min(1,p.vr+.3),m:p.m.name,due:S.turn+1});p.m.skill=clamp(p.m.skill+.5,0,95);lines.push({c:'s',t:`「${p.it.title}」 보강 지시. ${p.m.name} 팀이 한 주 더 판다.`});}
+      if(p.choice==='front'||p.choice==='sub'){const h=p.choice==='front'?1:.5;fx.fame+=val/90*h;fx.eval+=(p.vr>=.7?.8:-.8)*h;S.co.q+=p.vr*1.5*h;
+        if(p.vr<.6&&chance((1-p.vr)*.32*DF().risk*h)){S.pending.push({type:'err',title:p.it.title,due:S.turn+R(1,3),desk:1});lines.push({c:'r',t:`${p.choice==='front'?(tv?'첫 꼭지':'1면 톱'):(tv?'메인뉴스':'1면 하단')} 「${p.it.title}」 — 확인이 덜 됐다. 찜찜하다.`});}
+        else lines.push({c:'g',t:`${p.choice==='front'?(tv?'첫 꼭지':'1면 톱'):(tv?'메인뉴스':'1면 하단')} 「${p.it.title}」 — ${p.vr>=.7?'탄탄하다. 타사들이 받아썼다.':'반응은 있었다.'}`});if(p.choice==='front')tick(`[${OUT().n}] ${p.it.excl?'[단독] ':''}${p.it.title}`,1);}
+      else if(p.choice==='in'){fx.eval+=.2;S.co.q+=p.vr*.5;lines.push({c:'',t:`안쪽 면 「${p.it.title}」`});}
+      else if(p.choice==='more'){(S.reinforce=S.reinforce||[]).push({title:p.it.title,imp:p.it.imp,excl:p.it.excl,vr:Math.min(1,p.vr+.3),m:p.m.name,due:S.turn+1});p.m.skill=clamp(p.m.skill+.5,0,95);lines.push({c:'s',t:`「${p.it.title}」 보강 지시. ${p.m.name} 팀이 한 달 더 판다.`});}
       else{if(val>=40){fx.eval-=.6;p.m.skill=clamp(p.m.skill-.5,0,95);lines.push({c:'r',t:`「${p.it.title}」 킬. ${p.m.name}의 표정이 굳었다.`});if(p.it.excl&&chance(.4))tick(`[${pick(OUTLETS.filter(o=>o.id!==S.outlet)).n}] [단독] ${p.it.title}`);}else{fx.trust+=.3;lines.push({c:'',t:`「${p.it.title}」 킬. 깔끔한 판단이었다.`});}}
     });
-    openModal('편집회의 결과',`<ul class="feed">${lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>${fxLine(apply(fx))}`);
+    openModal('회의 결과',`<ul class="feed">${lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>${fxLine(apply(fx))}`);
   };
-  step(0);
+  board();
 };
 RUN.tour=function(){
   spend(1,4);setCd('tour');
@@ -2359,7 +2384,7 @@ const REGIONS={nambu:['남부','남부광역시','남해건설','남부은행'],
 const TYPE_ENT={tv:[['kcc','방송통신위원회','gov',.008],['pr_kcc','방송통신위원장','person',0]],jp:[['kcc','방송통신위원회','gov',.008]],ch:[['kcc','방송통신위원회','gov',.008]],online:[['portal','누리포털','corp',.18]],econ:[['krx','한국거래소','gov',.02],['sec','누리증권','corp',.06],['ir','상장사협의회','corp',.04]],sports:[['team0','가람 타이거즈','corp',.04],['team1','누리 이글스','corp',.03],['team2','한솔 FC','corp',.02]],wire:[['govsub','정부 구독 계약(문체부)','gov',.1]]};
 const ID_ENT={jeonja:[['semi','반도체산업협회','corp',.15]],uiyak:[['pharma','제약바이오협회','corp',.15],['hospa','병원협회','corp',.08]],beopjeong:[['bar','변호사협회','corp',.15]],edujournal:[['kfta','교원단체총연합','corp',.06],['acad','대형 학원 그룹','corp',.12]],techreport:[['portal','누리포털','corp',.12]]};
 // 광고 금액 표시: 1억 미만은 만 원 단위로
-function adAmt(v){return v>=1?`${f1(v)}억`:`${Math.max(10,Math.round(v*10000/10)*10).toLocaleString('ko-KR')}만 원`;}
+function adAmt(v){return v>=1?`${f1(v)}억`:`${Math.max(50,Math.round(v*10000/10)*10).toLocaleString('ko-KR')}만 원`;}
 function adLine(E){if(E.w)return `광고 월 ${adAmt(OUT().ad*E.w)} (우리 광고 매출의 ${(E.w*100).toFixed(E.w<.01?1:0)}%)`;return {person:'개인 — 광고 없음',party:'선거 때만 광고',gov:'광고 집행 없음 (수사·사법·감독 기관)',corp:'광고 거래 없음'}[E.kind]||'광고 없음';}
 function buildEnts(o){
   const cats=new Set(['pol']);o.depts.forEach(d=>catOf(d).forEach(c=>cats.add(c)));
@@ -2370,10 +2395,12 @@ function buildEnts(o){
   (TYPE_ENT[o.type]||[]).forEach(e=>add(e,o.type==='econ'?'eco':o.type==='sports'?'spo':'pol'));
   (ID_ENT[o.id]||[]).forEach(e=>add(e,catOf(o.depts[0])[0]));
   if(REGIONS[o.id])out.forEach(e=>{if(e[2]==='corp'&&e[3]!=='loc')e[4]=+(e[4]*.4).toFixed(3);});
-  return normEnts(out);
+  return normEnts(out,o);
 }
 // 이름 있는 기관·광고주를 다 합쳐도 광고 매출의 35% 정도 (나머지는 중소 광고주·지역 상인·온라인 광고망)
-function normEnts(L){const t=L.reduce((a,e)=>a+(e[4]||0),0);if(t>.35){const k=.35/t;L.forEach(e=>{if(e[4])e[4]=Math.max(.001,+(e[4]*k).toFixed(4));});}return L;}
+function normEnts(L,o){const t=L.reduce((a,e)=>a+(e[4]||0),0);if(t>.35){const k=.35/t;L.forEach(e=>{if(e[4])e[4]=Math.max(.001,+(e[4]*k).toFixed(4));});}
+  // 광고는 한 곳당 최소 월 50만 원
+  const ad=(o&&o.ad)||(S&&S.outlet&&OUT()?OUT().ad:1);const mw=.005/Math.max(.05,ad);L.forEach(e=>{if(e[4]&&e[4]<mw)e[4]=+mw.toFixed(4);});return L;}
 let ENTS=[],ENT={};
 function setEnts(list){ENTS=list||[];ENT={};ENTS.forEach(([id,n,kind,c,w])=>ENT[id]={id,n,kind,c,w});}
 const ENT_INFO={
@@ -2905,10 +2932,10 @@ function coMonth(){
   const infl=Math.pow(1.02,Math.floor(S.turn/YW));
   const na=netAdAdj();const ad=Math.max(o.ad*.2,o.ad*(.6+.25*c.subs/o.subs+.15*c.tr/o.tr)*(1+c.adB)*shareMult()*infl*(S.erp?1.04:1)-na.loss+na.gain);
   if(hasF('app'))c.bT+=.004;if(hasF('paywall'))c.bS+=.004;if(hasF('reader'))c.bS+=.002;
-  const cp=S.portal&&S.portal.lv===3?c.tr*.004:0;const fac=facUpkeep();
-  const rev=(c.subs*o.rate*(hasF('paywall')?1.25:1)+c.tr*.01*portalMult())*infl+ad+cp,cost=(c.staff*(S.founder?.075:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
+  const cp=S.portal&&S.portal.lv===3?c.tr*.004*(S.cpBoost||1):0;const fac=facUpkeep();const bz=bizMonth();
+  const subsRev=c.subs*o.rate*(hasF('paywall')?1.25:1)*infl,trRev=c.tr*.01*portalMult()*infl;const rev=subsRev+trRev+ad+cp+bz.rev,cost=bz.cost+(c.staff*(S.founder?.075:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
   const costX=cost*(S.costCut&&S.costCut.due>S.turn?1-S.costCut.r:1)*(S.payRaise?Math.pow(1+S.payRaise,(S.turn-(S.payRaiseT||S.turn))/YW):1)*(S.founder?1-(fs('biz')-40)/800:1)+(S.founder?rev*({2:.08,3:.22,4:.32,5:.38}[o.p]||.3):0);
-  c.cash+=rev-costX;c.last={rev,cost:costX,profit:rev-costX,ad,cp,netLoss:na.loss,netGain:na.gain};c.hist.push(Math.round(c.cash*10)/10);if(c.hist.length>48)c.hist.shift();
+  c.cash+=rev-costX;c.last={rev,cost:costX,profit:rev-costX,ad,cp,netLoss:na.loss,netGain:na.gain,subsRev,trRev,bizRev:bz.rev,biz:bz.list};c.hist.push(Math.round(c.cash*10)/10);if(c.hist.length>48)c.hist.shift();
   return c.last;
 }
 const Q2=[];
@@ -3142,6 +3169,23 @@ const TUTF=()=>[
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['분류|내용', ...],'날짜'] — 새 버전은 맨 위에 추가
+ ['4.11','취재의 재미 · 수익 다변화 · 지역 취재망',[
+  '취재|아이템 등급(S·A·B·C): 파급력·단독·후속 여부로 매겨진다. A급 이상을 발굴하면 따로 알림이 뜬다',
+  '취재|현장의 순간: 취재 중 가끔 고를 일이 생긴다. 머뭇거리는 상대에게 오프더레코드를 약속할지, 경비원을 피해 뒷문으로 돌아갈지, 숫자가 안 맞을 때 원자료를 다시 요구할지 등 16가지',
+  '취재|반전: 사실을 확인하다 보면 가끔 판이 커지거나(파급력↑), 후속 아이템이 생기거나, 제보가 수상하다는 낌새가 오거나, 타사가 같은 사람을 만나고 갔다는 소식이 들린다',
+  '경영|수익 다변화(사장·창간 대표): 유료 뉴스레터, 영상 채널, 포럼, 기획 기사·협찬, 기사 판매, 아카이브 판매, 저널리즘 아카데미, 후원 멤버십. 사업마다 3단계까지 키운다',
+  '경영|회사 탭에 지난달 수익 구조(광고·구독·포털 트래픽·CP 전재료·수익 사업 비율). 광고 의존이 높으면 경고',
+  '경영|포털 알고리즘 개편, CP 전재료 협상, 구독 해지 러시, 연말 구독 캠페인, 협찬 기사 논란 등 이벤트 추가',
+  '관계망|기관·광고주 광고는 한 곳당 최소 월 50만 원',
+  '지역|매체 성격·규모에 따라 지역 주재기자가 달라진다. 큰 통신사·방송사는 지역 본부·총국, 중앙 일간지는 광역마다, 지역지는 시·군마다. 작은 일간지·경제지와 온라인·잡지·전문지·스포츠지·영자지는 주재기자가 없다',
+  '지역|주재기자가 없는 매체에서 지역 기사를 쓸 땐 지역 통신원·통신사 기사 인용·직접 출장 중에 고른다',
+  '채용|지역부가 있는 매체는 지원자의 30% 안팎이 지역 주재를 희망한다. 뽑으면 그 지역 주재기자가 된다'],'2026.10.17'],
+ ['4.10','되돌리기 · 편집회의 개편',[
+  '기사|기사 쓰기의 모든 단계에 "← 이전 단계"와 "쓰기 취소" 버튼. 마지막에 출고하기 전까지는 행동력이 들지 않는다',
+  '편의|여러 단계로 된 할 일(브리핑·데스킹·편집회의 등)은 행동력을 쓰기 전까지 언제든 "취소"할 수 있다',
+  '간부|편집회의 주재: 발제가 3건에서 5건(국장 이상 6건)으로 늘었다. 한 건씩 넘기는 대신 발제 전부를 한눈에 보고 기사마다 1면 톱 · 1면 하단 · 안쪽 면 · 보강 지시 · 킬을 고른다',
+  '간부|1면 톱은 1건, 1면 하단은 2건까지. "추천대로 정리"로 자동 배정한 뒤 고칠 수도 있고, 정하지 않은 기사는 안쪽 면으로 간다',
+  '밸런스|어려움 난이도의 신뢰·평판 페널티를 조금 완화했다'],'2026.10.17'],
  ['4.9','광고 금액 현실화',[
   '관계망|기관·광고주별 광고 금액을 낮췄다. 이름 있는 곳을 다 합쳐도 우리 광고 매출의 35% 정도이고, 나머지는 중소 광고주·지역 상인·온라인 광고망에서 나온다',
   '관계망|광고 금액 옆에 "우리 광고 매출의 몇 %"인지 함께 보여 준다',
@@ -3753,7 +3797,7 @@ const ACT_GROUPS=[
  ['취재 현장','#77a6ff',['breaking','sasu','hari','beat','discover','invest','special','source','tour']],
  ['기사와 지면','#ffb84d',['fethics','fcrisis','write','report','pitch','desk','meeting','front','column','direction','plan','taskforce']],
  ['사람과 관계','#ff8fb1',['deptlife','handoff','fhire','fbureau','colleague','drink','network','recruit','personnel','hire']],
- ['영업과 경영','#5ad49b',['gad','fvision','fsales','fpartner','fbrand','fraise','adsell','adsales','campaign','digital','event','portal','facility','paypol','newdept','cut']],
+ ['영업과 경영','#5ad49b',['revenue','gad','fvision','fsales','fpartner','fbrand','fraise','adsell','adsales','campaign','digital','event','portal','facility','paypol','newdept','cut']],
  ['나의 생활','#b98cff',['life','rest','deptreq','job','found']]
 ];
 function recommend(){const ok=id=>rankActs().includes(id)&&!why(id);
@@ -3796,17 +3840,17 @@ function tabBody(){
    <p class="hint">${S.history.map(id=>OUTLETS.find(x=>x.id===id).n).join(' → ')}</p>
    <div class="sec">업적 ${Object.keys(S.ach).length}/${Object.keys(ACH).length}</div><div class="achs">${Object.keys(ACH).map(k=>`<div class="${S.ach[k]?'on':''}">${ACH[k][0]}<small>${S.ach[k]?S.ach[k]:ACH[k][1]}</small></div>`).join('')}</div>`;}
   if(t==='items'){if(!S.items.length)return `<p class="empty">아이템이 없다. ${S.rank===0?'사쓰마와리를 돌아보자.':'발굴하거나 브리핑에 가거나 취재원을 만나자.'}</p>`;
-    return S.items.map(it=>`<div class="card"><div class="t">${esc(it.title)}</div><div class="meta"><span class="tag bl">${DEPTS[it.d].n}</span>${it.excl?`<span class="tag ex">단독 · 추격까지 ${wkTxt(it.heat)}</span>`:`<span class="tag">공통 · ${Math.max(0,it.heat+4)}주 뒤 묵힘</span>`}${it.slot?`<span class="tag so">${SLOT[it.slot.g].n} · 마감 ${wkTxt(it.slot.due-S.turn)}</span>`:''}<span>파급력 ${it.imp}</span><span>반론 ${it.rebut==='got'?'받음':it.rebut==='no'?'노코멘트':'없음'}</span><span>경계 ${Math.round(it.alert)}</span>${it.src?`<span>출처 ${esc(it.src)}</span>`:''}</div>${factList(it)}</div>`).join('');}
+    return S.items.map(it=>`<div class="card"><div class="t">${gradeTag(it)} ${esc(it.title)}${it.hoaxHint?' <span class="tg new">수상한 제보</span>':''}${it.chain?` <span class="tg h">후속 ${it.chain}</span>`:''}</div><div class="meta"><span class="tag bl">${DEPTS[it.d].n}</span>${it.excl?`<span class="tag ex">단독 · 추격까지 ${wkTxt(it.heat)}</span>`:`<span class="tag">공통 · ${Math.max(0,it.heat+4)}주 뒤 묵힘</span>`}${it.slot?`<span class="tag so">${SLOT[it.slot.g].n} · 마감 ${wkTxt(it.slot.due-S.turn)}</span>`:''}<span>파급력 ${it.imp}</span><span>반론 ${it.rebut==='got'?'받음':it.rebut==='no'?'노코멘트':'없음'}</span><span>경계 ${Math.round(it.alert)}</span>${it.src?`<span>출처 ${esc(it.src)}</span>`:''}</div>${factList(it)}</div>`).join('');}
   if(t==='src'){S.newSrc=0;if(!S.sources.length)return '<p class="empty">아직 취재원이 없다.</p>';return `<p class="hint" style="margin:0 0 8px">취재원 ${S.sources.length}명 · 인원 제한 없음. 오래 안 만나도 사라지지 않지만, 배신하거나 신원이 노출되면 떠날 수 있다.</p>`+S.sources.slice().sort((a,b)=>((b.fresh??-99)>=S.turn-4)-((a.fresh??-99)>=S.turn-4)||b.trust-a.trust).map(s=>`<div class="card"><div class="t">${(s.fresh??-99)>=S.turn-4?'<span class="tg new">NEW</span>':''}${esc(s.name)} <span style="font-weight:400;color:var(--mute)">· ${esc(s.role)}</span></div><div class="meta"><span class="tag bl">${DEPTS[s.d].n}</span><span>${PERS[s.pers].n}</span><span>신뢰 ${Math.round(s.trust)}${s.trust>=40?' · 문건 가능':''}</span></div>${bar(s.trust,'var(--good)')}</div>`).join('');}
   if(t==='clips'){if(!S.clips.length)return '<p class="empty">아직 출고한 기사가 없다.</p>';return S.clips.map(c=>clipHTML(c,1)+`<p class="meta" style="margin:-4px 0 12px">완성도 ${c.q} · 파급력 ${c.imp} · 조회 ${c.views.toLocaleString('ko-KR')}${c.portal?` · 포털 ${c.portal}위`:''}${c.awarded?' · 기자상':''}</p>`).join('');}
   if(t==='co'){const c=S.co,l=c.last;return `<div class="sec">${esc(o.n)} · ${TYPES[o.type].n} · ${LEAN[o.lean]} · ${o.own}</div><p class="hint" style="margin:0 0 8px">사장 <b>${esc(leaders().ceo)}</b> · ${isTV()?'보도국장':'편집국장'} <b>${esc(leaders().chief)}</b><br>직급 체계: ${rankChain().map(r=>rankName(r)).join(' → ')} · 부서 ${o.depts.length}개(${o.depts.map(d=>DEPTS[d].n).join('·')})</p>
    <div class="kv"><div><span>${TYPES[o.type].sub}</span><b>${f1(c.subs)}${TYPES[o.type].unit}</b></div><div><span>일 방문자</span><b>${f1(c.tr)}만</b></div><div><span>편집국 인원</span><b>${c.staff}명</b></div><div><span>보도 품질</span><b>${Math.round(c.q)}</b></div><div><span>회사 자금</span><b>${f1(c.cash)}억</b></div><div><span>월 손익</span><b style="color:${!l||l.profit>=0?'var(--good)':'var(--red)'}">${l?(l.profit>=0?'+':'')+f1(l.profit)+'억':'—'}</b></div></div>
    ${l?`<p class="hint">매출 ${f1(l.rev)}억 (광고 ${f1(l.ad)}억${l.netLoss?` · 광고 중단·축소 -${f1(l.netLoss)}억`:''}${l.netGain?` · 관계 덕 광고 확대 +${f1(l.netGain)}억`:''}) · 비용 ${f1(l.cost)}억</p>`:''}
-   ${S.rank>=2&&S.rank<=6?`<div class="sec">광고·협찬 영업</div><div class="kv"><div><span>이번 분기 실적</span><b>${f1(S.adQ||0)}억</b></div>${quota()?`<div><span>분기 목표</span><b>${f1(quota())}억</b></div>`:''}<div><span>누적 실적</span><b>${f1(S.adTotal||0)}억</b></div></div>`:''}<div class="sec">포털 제휴</div><div class="kv"><div><span>등급</span><b style="font-size:14px">${S.portal?PORTAL[S.portal.lv]:'-'}</b></div><div><span>벌점</span><b>${S.portal?S.portal.pen:0}</b></div><div><span>트래픽 배율</span><b>×${f1(portalMult())}</b></div>${l&&l.cp?`<div><span>CP 전재료</span><b>${f1(l.cp)}억</b></div>`:''}</div>${otrBox()}${S.comp?`<div class="sec">광고 시장 경쟁</div>${[{n:o.n,s:S.myShare||0,me:1}].concat(S.comp.map(x=>({n:OUTLETS.find(y=>y.id===x.id).n,s:x.share||0}))).sort((a,b)=>b.s-a.s).map(x=>`<div class="statrow" style="grid-template-columns:120px minmax(0,1fr) 44px"><span style="${x.me?'color:var(--sodium);font-weight:700':''}">${esc(x.n)}</span>${bar(x.s*2.2,x.me?'var(--sodium)':'var(--siren)')}<span class="num">${f1(x.s)}%</span></div>`).join('')}${compBox()}`:''}${Object.keys(S.facil||{}).length?`<div class="sec">시설</div><p class="hint">${Object.keys(S.facil).map(k=>FACIL[k][0]).join(' · ')}</p>`:''}${S.founder?`<div class="sec">창간 성장</div><p class="hint">매체 위상 ★${o.p} · 성장 점수 ${Math.round(S.fScore||0)} · 기자 ${c.staff}명 · 목표: ★5·CP·기자 80명</p>`:''}<div class="sec">회사 자금 추이</div>${spark(c.hist)}<p class="hint">${S.rank<5?'경영 결정은 국장부터 관여한다. 내 기사 품질이 회사 품질에 반영된다.':'구독·광고·투자 결정이 매달 결산에 반영된다.'}</p>`;}
+   ${S.rank>=2&&S.rank<=6?`<div class="sec">광고·협찬 영업</div><div class="kv"><div><span>이번 분기 실적</span><b>${f1(S.adQ||0)}억</b></div>${quota()?`<div><span>분기 목표</span><b>${f1(quota())}억</b></div>`:''}<div><span>누적 실적</span><b>${f1(S.adTotal||0)}억</b></div></div>`:''}<div class="sec">포털 제휴</div><div class="kv"><div><span>등급</span><b style="font-size:14px">${S.portal?PORTAL[S.portal.lv]:'-'}</b></div><div><span>벌점</span><b>${S.portal?S.portal.pen:0}</b></div><div><span>트래픽 배율</span><b>×${f1(portalMult())}</b></div>${l&&l.cp?`<div><span>CP 전재료</span><b>${f1(l.cp)}억</b></div>`:''}</div>${S.rank>=5||S.founder?revBox():''}${otrBox()}${S.comp?`<div class="sec">광고 시장 경쟁</div>${[{n:o.n,s:S.myShare||0,me:1}].concat(S.comp.map(x=>({n:OUTLETS.find(y=>y.id===x.id).n,s:x.share||0}))).sort((a,b)=>b.s-a.s).map(x=>`<div class="statrow" style="grid-template-columns:120px minmax(0,1fr) 44px"><span style="${x.me?'color:var(--sodium);font-weight:700':''}">${esc(x.n)}</span>${bar(x.s*2.2,x.me?'var(--sodium)':'var(--siren)')}<span class="num">${f1(x.s)}%</span></div>`).join('')}${compBox()}`:''}${Object.keys(S.facil||{}).length?`<div class="sec">시설</div><p class="hint">${Object.keys(S.facil).map(k=>FACIL[k][0]).join(' · ')}</p>`:''}${S.founder?`<div class="sec">창간 성장</div><p class="hint">매체 위상 ★${o.p} · 성장 점수 ${Math.round(S.fScore||0)} · 기자 ${c.staff}명 · 목표: ★5·CP·기자 80명</p>`:''}<div class="sec">회사 자금 추이</div>${spark(c.hist)}<p class="hint">${S.rank<5?'경영 결정은 국장부터 관여한다. 내 기사 품질이 회사 품질에 반영된다.':'구독·광고·투자 결정이 매달 결산에 반영된다.'}</p>`;}
   if(t==='net'){if(!S.net)return '<p class="empty">관계망이 없다.</p>';const na=netAdAdj();const grp=k=>ENTS.filter(e=>e[2]===k&&S.net[e[0]].known).map(e=>e[0]).sort((a,b)=>netRel(b)-netRel(a));const unk=k=>ENTS.filter(e=>e[2]===k&&!S.net[e[0]].known).length;const more=k=>unk(k)?`<p class="hint">아직 연줄이 없는 곳 ${unk(k)}곳 — '대외 관계'에서 뚫을 수 있다</p>`:'';
    const row=id=>{const e=S.net[id],E=ENT[id];return `<div class="card"><div class="t">${esc(entName(id))}</div><div class="meta"><span class="tag ${e.rel>=40?'ok':e.rel<=-25?'ex':'bl'}">${relLabel(e.rel)} ${Math.round(e.rel)}</span>${e.cut?`<span class="tag ex">광고 중단 ${e.cut}주</span>`:''}${e.block?`<span class="tag ex">자료 거부 ${e.block}주</span>`:''}<span>${adLine(E)}</span><span>${DEPTS[E.c]?DEPTS[E.c].n:''}</span></div>${bar((e.rel+100)/2,e.rel>=40?'var(--good)':e.rel<=-25?'var(--red)':'var(--siren)')}<p class="meta" style="margin-top:6px">${esc(entInfo(id)[0])} · <b>${esc(entInfo(id)[1])}</b></p></div>`;};
    return `<p class="hint" style="margin:0 0 10px">비판 보도는 대상과의 관계를 깎는다. 관계가 좋으면 먼저 전화가 오고 문건이 잘 나오며 광고가 늘어난다. 나쁘면 자료 거부·광고 중단·고소가 돌아온다.${na.list.length?` 이번 달 광고 영향: -${f1(na.loss)}억 / +${f1(na.gain)}억`:''}</p><div class="sec">정부·기관</div>${grp('gov').map(row).join('')||'<p class="empty">아직 없다</p>'}${more('gov')}<div class="sec">광고주</div>${grp('corp').map(row).join('')||'<p class="empty">아직 없다</p>'}${more('corp')}<div class="sec">정당·인물</div>${grp('party').concat(grp('person')).map(row).join('')||'<p class="empty">아직 없다</p>'}${more('party')}${more('person')}`;}
-  if(t==='cols'){if(!S.cols||!S.cols.length)return '<p class="empty">아직 동료가 없다.</p>';const CC=corrs();const corrBox=CC.length&&!['nat','loc','sigun'].includes(S.dept)?`<div class="sec">지역 주재기자 연락망 ${CC.length}명</div><p class="hint" style="margin:0 0 6px">다른 지역 기사를 쓸 땐 이들에게 먼저 전화한다. 관계가 좋으면 같이 써 주고 제보도 넘겨 준다.</p>${[...new Set(CC.map(m=>m.reg))].map(r=>`<p class="meta" style="margin:2px 0"><b style="color:var(--fg)">${esc(r)}</b> ${CC.filter(m=>m.reg===r).map(m=>`${esc(m.name)}(${myrs(m)}년 차·관계 ${Math.round(m.rel||0)})`).join(', ')}</p>`).join('')}`:'';return `<p class="hint" style="margin:0 0 10px">관계는 -50~100. 40 이상이면 도움을 받고, -20 이하면 발목을 잡힌다. '동료 챙기기'로 관계를 다질 수 있다.</p>`+S.cols.slice().sort((a,b)=>b.rel-a.rel).map(c=>`<div class="card"><div class="t">${esc(c.name)} <span style="font-weight:400;color:var(--mute)">· ${colRole(c)} · ${colYrs(c)}년 차</span></div><div class="meta"><span class="tag ${c.rel>=40?'ok':c.rel<=-10?'ex':'bl'}">${relLabel(c.rel)} ${Math.round(c.rel)}</span><span>${PERS[c.pers].n}</span><span>${CROLE[c.role].perk}</span></div>${bar((c.rel+50)/1.5,c.rel>=40?'var(--good)':c.rel<=-10?'var(--red)':'var(--siren)')}<p class="meta" style="margin-top:6px">능력치 추정 (친할수록 정확): ${colStats(c)}</p>${c.hist.length?`<p class="meta" style="margin-top:6px">${c.hist.slice(0,2).map(esc).join(' · ')}</p>`:''}</div>`).join('')+corrBox+(S.team.length?`<p class="hint">이 밖에 ${S.rank>=4?'편집국':'부서'}원 ${S.team.length}명 — '부서원' 탭</p>`:'');}
+  if(t==='cols'){if(!S.cols||!S.cols.length)return '<p class="empty">아직 동료가 없다.</p>';const CC=corrs();const corrBox=!CC.length&&!S.founder&&corrPlan(OUT()).alt?`<div class="sec">지역 취재</div><p class="hint" style="margin:0 0 6px">우리 회사엔 지역 주재기자가 없다. 지역 기사는 ${corrAlt()}로 메운다.</p>`:CC.length&&!['nat','loc','sigun'].includes(S.dept)?`<div class="sec">지역 주재기자 연락망 ${CC.length}명</div><p class="hint" style="margin:0 0 6px">다른 지역 기사를 쓸 땐 이들에게 먼저 전화한다. 관계가 좋으면 같이 써 주고 제보도 넘겨 준다.</p>${[...new Set(CC.map(m=>m.reg))].map(r=>`<p class="meta" style="margin:2px 0"><b style="color:var(--fg)">${esc(r)}</b> ${CC.filter(m=>m.reg===r).map(m=>`${esc(m.name)}(${myrs(m)}년 차·관계 ${Math.round(m.rel||0)})`).join(', ')}</p>`).join('')}`:'';return `<p class="hint" style="margin:0 0 10px">관계는 -50~100. 40 이상이면 도움을 받고, -20 이하면 발목을 잡힌다. '동료 챙기기'로 관계를 다질 수 있다.</p>`+S.cols.slice().sort((a,b)=>b.rel-a.rel).map(c=>`<div class="card"><div class="t">${esc(c.name)} <span style="font-weight:400;color:var(--mute)">· ${colRole(c)} · ${colYrs(c)}년 차</span></div><div class="meta"><span class="tag ${c.rel>=40?'ok':c.rel<=-10?'ex':'bl'}">${relLabel(c.rel)} ${Math.round(c.rel)}</span><span>${PERS[c.pers].n}</span><span>${CROLE[c.role].perk}</span></div>${bar((c.rel+50)/1.5,c.rel>=40?'var(--good)':c.rel<=-10?'var(--red)':'var(--siren)')}<p class="meta" style="margin-top:6px">능력치 추정 (친할수록 정확): ${colStats(c)}</p>${c.hist.length?`<p class="meta" style="margin-top:6px">${c.hist.slice(0,2).map(esc).join(' · ')}</p>`:''}</div>`).join('')+corrBox+(S.team.length?`<p class="hint">이 밖에 ${S.rank>=4?'편집국':'부서'}원 ${S.team.length}명 — '부서원' 탭</p>`:'');}
   if(t==='team')fixTeam();
   if(t==='team'&&S.rank>=6){const per=roster();const MRn=MR;return `<p class="hint" style="margin:0 0 10px">편집국 전체 ${S.co.staff}명을 부서별로 본다. 부서를 누르면 명단이 펼쳐진다. 실력은 겉으로 본 추정치.</p>`+Object.keys(per).filter(d=>dn(d)&&per[d].length).map(d=>{const L=per[d].slice().sort((a,b)=>(b.r||0)-(a.r||0)||b.skill-a.skill);const av=Math.round(L.reduce((a,m)=>a+m.skill,0)/L.length);const head=L.find(m=>(m.r||0)>=2)||L.find(m=>m.acting)||L[0];return `<details class="card"><summary style="cursor:pointer"><b>${dn(d)}</b> <span class="meta" style="display:inline-flex"><span>${L.length}명</span><span>평균 실력 ${av}</span><span>${head.acting?'부장 직무대리':['기자','차장','부장','부국장'][Math.min(3,head.r||0)]} ${esc(head.name)}</span>${L.some(m=>S.team.includes(m))?'<span class="tag so">직속</span>':''}</span></summary>${bar(av,'var(--siren)')}<ul class="loglist" style="margin-top:8px">${L.map(m=>`<li><span>${m.reg?'주재':rTitle(m)}</span>${esc(m.name)}${m.reg?` · ${esc(m.reg)}`:''} · ${myrs(m)}년 차 · 실력 ${estRange(m.skill,30,m.name.length*7,'sk')}</li>`).join('')}</ul></details>`;}).join('');}
   if(t==='team')return deptBox()+(S.team.length?S.team.slice().sort((a,b)=>(b.r||0)-(a.r||0)||b.skill-a.skill).map(m=>`<div class="card"><div class="t">${esc(m.name)} ${MR[m.r||0]} <span style="font-weight:400;color:var(--mute)">· ${myrs(m)}년 차</span></div><div class="meta"><span class="tag bl">${DEPTS[m.d]?DEPTS[m.d].n:''}</span><span>종합 실력 ${Math.round(m.skill)}</span>${m.st?`<span>추정 ${['inv','wri','ver','net'].map(k=>`${STN[k]} ${estRange(m.st[k],S.rank>=2?40:10,m.name.length*7,k)}`).join(' · ')}</span>`:''}</div>${bar(m.skill,'var(--siren)')}</div>`).join(''):'<p class="empty">부서원이 없다.</p>');
@@ -3984,7 +4028,7 @@ function fstInit(){const t=S.st;const c=v=>Math.round(clamp(v,10,85));S.fst={vis
 const fs=k=>(S.fst&&S.fst[k]!=null)?S.fst[k]:40;
 function fgain(k,v){if(!S.fst)fstInit();S.fst[k]=clamp(S.fst[k]+v,0,99);}
 const FST_GAIN={fbureau:'lead',meeting:'edit',front:'edit',write:'edit',invest:'edit',discover:'vis',source:'pr',network:'pr',portal:'pr',facility:'biz',cut:'biz',fvision:'vis',fsales:'sales',fpartner:'pr',fbrand:'dig',fraise:'fund',fhire:'lead',fcrisis:'crisis',fethics:'integ',life:'lead',rest:'lead'};
-const FOUNDER_ACTS=['fvision','meeting','front','discover','invest','write','source','colleague','deptlife','fsales','fpartner','fbrand','fraise','fhire','fbureau','network','gad','portal','facility','fcrisis','fethics','life','rest'];
+const FOUNDER_ACTS=['revenue','fvision','meeting','front','discover','invest','write','source','colleague','deptlife','fsales','fpartner','fbrand','fraise','fhire','fbureau','network','gad','portal','facility','fcrisis','fethics','life','rest'];
 const FSTRAT={digital:['디지털 퍼스트','트래픽 성장↑, 종이·방송 비용 절감'],inv:['탐사 보도 집중','보도 품질·평판↑, 비용↑'],local:['독자 밀착','구독·후원 독자↑'],profit:['수익 다각화','광고·사업 수입↑, 품질 조금↓']};
 RUN.fvision=function(){openModal('전략 회의',`<p class="lede">앞으로 반년(24주), 회사는 무엇에 집중할까?</p>${S.fStrat&&S.fStrat.due>S.turn?`<p class="hint">지금 전략: ${FSTRAT[S.fStrat.k][0]} (${S.fStrat.due-S.turn}주 남음)</p>`:''}`,Object.keys(FSTRAT).map(k=>({label:FSTRAT[k][0],sub:FSTRAT[k][1],fn:()=>{spend(1,3);setCd('fvision');S.fStrat={k,due:S.turn+24};fgain('vis',.8);log(`전략: ${FSTRAT[k][0]}`);toast(`전략 확정 · ${FSTRAT[k][0]}`);}})).concat([{label:'취소',cls:'ghost'}]));};
 RUN.fsales=function(){const o=OUT();const p=clamp(.35+fs('sales')/140,.3,.92);const amt=+(o.ad*(.2+fs('sales')/220)).toFixed(2);
@@ -4541,6 +4585,68 @@ const D_EV=[
 function swapMate(m,why){const L=S.mates||[];const i=L.indexOf(m);log(`${m.name} ${why}`);if(i>=0){const n=genMember(S.dept);n.r=m.r;n.role=m.role;n.yrs=Math.max(1,(m.yrs||1)-R(0,2));n.rel=R(0,10);fitSk(n);L[i]=n;}else if(S.team){const j=S.team.indexOf(m);if(j>=0)S.team.splice(j,1,fitSk(Object.assign(genMember(S.dept),{yrs:R(1,5)})));}}
 F_EVENTS.push(...D_EV);
 
+// ===== 취재의 재미: 아이템 등급 · 현장의 순간 · 반전 =====
+function gradeOf(it){const v=(it.imp||0)+(it.excl?12:0)+(it.chain?6:0);return v>=82?'S':v>=66?'A':v>=48?'B':'C';}
+const GRADE_N={S:'대특종감',A:'특종감',B:'쓸 만함',C:'단신감'};
+function gradeTag(it){const g=gradeOf(it);return `<span class="gr g${g}" title="${GRADE_N[g]}">${g}</span>`;}
+function itemFound(it,how){const g=gradeOf(it);if(g==='S'||g==='A'){sfx(g==='S'?'scoop':'success');Q.unshift?0:0;
+   openModal(g==='S'?'대특종의 냄새가 난다':'좋은 아이템을 잡았다',`<div class="fcard g${g}"><div class="fg">${g}</div><div><b>「${esc(it.title)}」</b><p>${esc(how)}</p><p class="meta"><span>${DEPTS[it.d].n}</span><span>파급력 ${it.imp}</span>${it.excl?'<span>단독</span>':''}<span>확인 ${it.facts.filter(fOK).length}/${it.facts.length}</span></p></div></div><p class="hint">${it.excl?`타사가 냄새를 맡기 전에(${wkTxt(it.heat)}) 핵심 사실을 두 경로로 확인하자.`:'공통 아이템이라도 먼저 깊게 파면 기사가 달라진다.'}</p>`);}
+  else toast(`${how} → [${g}] 「${it.title}」`);}
+// 현장의 순간: 취재 방법을 쓸 때 가끔 고를 일이 생긴다
+const MOMENTS={
+ call:[['상대가 수화기 너머에서 한참 머뭇거린다.',[['오프더레코드를 약속한다','성공↑ · 기사에 출처를 못 밝힌다',{p:.2}],['기다린다','성공 조금↑',{p:.06}],['"다른 데선 벌써 확인해 줬다"고 떠본다','성공↑↑ · 상대 경계↑ · 신뢰 조금↓',{p:.28,al:10,trust:-.4}]]],
+       ['전화를 받은 건 본인이 아니라 비서다.',[['메시지를 남긴다','성공 조금↓ · 경계↓',{p:-.05,al:-4}],['직통 번호를 알아낸다','인맥이 좋을수록 성공↑',{p:()=>S.st.net/250}],['비서에게 넌지시 묻는다','성공↑ · 경계↑',{p:.15,al:6}]]]],
+ docs:[['받은 문건의 핵심 쪽이 가려져 있다.',[['원본을 요구한다','성공↑ · 상대 경계↑',{p:.15,al:8}],['가려진 채로 받는다','그대로',{p:0}],['다른 부서 사람을 통해 다시 구한다','성공↑ · 컨디션↓',{p:.12,hp:5}]]],
+       ['취재원이 "이건 진짜 마지막"이라며 USB를 내민다.',[['고맙게 받고 출처를 철저히 숨긴다','성공↑',{p:.18}],['출처 노출 위험을 설명하고 사본만 받는다','성공 조금↑ · 취재원 신뢰↑',{p:.08,src:5}]]]],
+ scene:[['현장 입구에서 경비원이 막아선다.',[['신분을 밝히고 정중히 부탁한다','성공 조금↑',{p:.05}],['뒷문으로 돌아간다','성공↑ · 경계↑ · 컨디션↓',{p:.2,al:12,hp:5}],['주민인 척 들어간다','성공↑↑ · 신뢰↓ (취재 윤리)',{p:.3,trust:-1.2}]]],
+        ['비가 쏟아진다. 현장 사진을 찍기 어렵다.',[['그래도 버틴다','성공↑ · 컨디션↓↓',{p:.15,hp:10}],['비가 그칠 때까지 근처에서 탐문한다','성공 조금↑',{p:.06}]]]],
+ ask:[['동네 주민이 기자라는 말에 표정이 굳는다.',[['커피를 사며 천천히 말을 건다','성공↑ · 통장 -1만',{p:.15,money:-1}],['명함부터 건넨다','그대로',{p:0}],['세 번째 찾아간다','성공↑ · 컨디션↓',{p:.2,hp:6}]]],
+      ['한 상인이 "그 얘기 아는 사람 따로 있다"며 누군가를 가리킨다.',[['그 사람을 찾아간다','성공↑ · 새 취재원이 생길 수도',{p:.15,newsrc:.4}],['지금 대화에 집중한다','그대로',{p:.03}]]]],
+ data:[['숫자가 앞뒤가 안 맞는다.',[['원자료를 다시 요청한다','성공↑',{p:.18}],['통계 전문가에게 물어본다','성공↑ · 전문가 코멘트 확보',{p:.12,expert:1}],['그냥 계산해 본다','데이터 능력에 달렸다',{p:()=>(S.st.dat-45)/200}]]]]
+};
+function moment(m,it,go){const L=MOMENTS[m];if(!L||!chance(.32)){go(0);return;}const [txt,opts]=pick(L);
+  openModal('현장의 순간',`<p class="lede">${txt}</p><p class="hint">「${esc(it.title)}」 취재 중</p>`,opts.map(([l,sub,fx])=>({label:l,sub,fn:()=>{let b=typeof fx.p==='function'?fx.p():(fx.p||0);if(fx.al)it.alert=clamp(it.alert+fx.al,0,100);if(fx.hp)S.hp=clamp(S.hp-fx.hp,0,100);if(fx.trust)apply({trust:fx.trust});if(fx.money)S.money+=fx.money;if(fx.expert)it.expert=1;if(fx.src){const s=srcOf(it.d);if(s)s.trust=clamp(s.trust+fx.src,0,100);}if(fx.newsrc&&chance(fx.newsrc)){const s=addSource(it.d,R(15,30));toast(`새 취재원: ${s.name} ${s.role}`);}go(b);return false;}})));}
+// 반전: 사실을 확인할 때 가끔 판이 바뀐다
+function twist(it,T){if(it._tw||!chance(.1))return;it._tw=1;const r=Math.random();
+  if(r<.4){it.imp=Math.min(99,it.imp+R(8,15));T.lines.push({c:'g',t:`반전 — 판이 커졌다. 윗선이 연결돼 있다. (파급력 ${it.imp})`});sfx('alarm');}
+  else if(r<.7){const f=makeItem(it.d,{excl:true,pre:1,mult:1.1});f.title=`[후속] ${it.title.replace(/^\[후속\d*\] /,'')} — ${pick(['돈의 흐름','두 번째 피해자','윗선 지시','은폐 정황'])}`;f.chain=(it.chain||0)+1;f.from=it.from;S.items.push(f);T.lines.push({c:'g',t:`새 단서 — 후속 아이템이 생겼다: 「${f.title}」`});}
+  else if(it.hoax){T.lines.push({c:'r',t:'이상하다 — 제보 내용 일부가 조작된 흔적이 있다. 허위 제보일 수도 있다.'});it.hoaxHint=1;}
+  else{it.heat=Math.max(1,it.heat-1);T.lines.push({c:'r',t:'타사 기자가 같은 사람을 만나고 갔다는 말을 들었다. 서둘러야 한다.'});}}
+
+// ===== 수익 다변화: 광고만으로는 못 버틴다 =====
+// [이름, 설명, 시작 비용(억, ★4 기준), 월 수입 공식, 월 유지비 배율, 조건, 부작용]
+const BIZ={
+ newsletter:['유료 뉴스레터','기자 이름을 건 심층 뉴스레터. 충성 독자가 돈을 낸다',.15,(c,o,l)=>c.subs*o.rate*.05*l+S.fame/600*l,.2,()=>S.fame>=12,'평판이 높을수록 잘 팔린다'],
+ video:['영상·유튜브 채널','기사를 영상으로 다시 만든다. 트래픽이 곧 수입',.6,(c,o,l)=>c.tr*.0012*l*(isTV()?1.6:1),.35,()=>true,'트래픽이 클수록 유리 · 방송사는 1.6배'],
+ forum:['포럼·콘퍼런스','업계 리더를 모으는 행사 사업. 협찬이 붙는다',.4,(c,o,l)=>o.p*.07*l*(1+S.fame/150),.3,()=>S.fame>=20,'신뢰도가 매달 조금 깎인다 (협찬 의존)'],
+ native:['기획 기사·협찬','광고주와 함께 만드는 기사. 돈은 되지만 위험하다',.1,(c,o,l)=>o.ad*.1*l,.15,()=>true,'신뢰도↓ · 포털 벌점 위험'],
+ synd:['기사 판매·제휴','다른 매체·외신·기업에 기사를 판다',.2,(c,o,l)=>(c.q/100)*o.p*.06*l,.2,()=>S.co.q>=50,'보도 품질이 높을수록 잘 팔린다'],
+ archive:['아카이브·데이터 판매','과거 기사와 데이터를 연구소·기업에 판다',.3,(c,o,l)=>o.p*.035*l*(1+Math.min(1,(S.turn-(S.fStart||0))/480)),.15,()=>true,'회사가 오래될수록 가치가 오른다'],
+ academy:['저널리즘 아카데미','기자 지망생 교육 사업',.35,(c,o,l)=>o.p*.05*l*(1+S.fame/200),.25,()=>S.fame>=25,'평판이 높아야 수강생이 모인다'],
+ member:['후원 멤버십','독자가 회원이 되어 매달 후원한다',.2,(c,o,l)=>c.subs*o.rate*.12*l*(S.trust/60),.2,()=>S.trust>=45,'신뢰도가 높을수록 수입↑ · 구독 성장↑']
+};
+function bizSz(){const p=OUT()?OUT().p:3;return {1:.3,2:.45,3:.7,4:1,5:1.4}[p]||1;}
+function bizCost(k,l){return +(BIZ[k][2]*bizSz()*Math.pow(1.8,(l||0))).toFixed(2);}
+function bizRev(k){const c=S.co,o=OUT();const l=(S.biz||{})[k]||0;if(!l)return 0;return Math.max(0,BIZ[k][3](c,o,l));}
+function bizMonth(){if(!S.biz)return {rev:0,cost:0,list:[]};let rev=0,cost=0;const list=[];for(const k in S.biz){const l=S.biz[k];if(!l)continue;const r=bizRev(k)*(.85+Math.random()*.3);const u=BIZ[k][2]*bizSz()*BIZ[k][4]*l*.25;rev+=r;cost+=u;list.push([BIZ[k][0],r,u]);
+   if(k==='forum')S.trust=Math.max(0,S.trust-.15*l);if(k==='native'){S.trust=Math.max(0,S.trust-.25*l);if(chance(.08*l))portalPen(1,'협찬 기사');}if(k==='member')S.co.bS+=.002*l;}
+  return {rev,cost,list};}
+function canBiz(){return S.rank===7||S.founder;}
+RUN.revenue=function(){const c=S.co,o=OUT();S.biz=S.biz||{};const L=S.co.last||{};
+  openModal('수익 다변화',`<p>광고에만 기대면 경기와 관계망에 휘둘린다. 수익원을 늘려 보자. 사업마다 시작 비용과 매달 유지비가 들고, 단계(최대 3)를 올릴수록 커진다.</p>${revBox()}`,Object.keys(BIZ).map(k=>{const B=BIZ[k],l=S.biz[k]||0,ok=B[5]();const cost=bizCost(k,l);const est=l<3?Math.max(0,B[3](c,o,l+1)):0;
+    return{label:`${B[0]} ${l?`· ${l}단계`:''}`,sub:l>=3?`최고 단계 · 월 약 ${f1(bizRev(k))}억`:!ok?`조건 미달 · ${B[6]}`:`${l?'키우기':'시작'} ${f1(cost)}억 → 월 약 ${f1(est)}억 · ${B[1]} · ${B[6]}`,disabled:l>=3||!ok||c.cash<cost,fn:()=>{spend(1,3);c.cash-=cost;S.biz[k]=l+1;log(`수익 사업: ${B[0]} ${l+1}단계`);tick(`${o.n}, ${B[0]} ${l?'확대':'시작'}`);toast(`${B[0]} ${l+1}단계 · 자금 -${f1(cost)}억`);}};}).concat(Object.keys(S.biz).filter(k=>S.biz[k]).length?[{label:'사업 하나를 접는다',sub:'유지비를 줄인다',cls:'ghost',fn:()=>{openModal('어떤 사업을 접을까',``,Object.keys(S.biz).filter(k=>S.biz[k]).map(k=>({label:BIZ[k][0],sub:`월 약 ${f1(bizRev(k))}억`,fn:()=>{S.biz[k]=0;toast(`${BIZ[k][0]} 정리`);}})).concat([{label:'취소',cls:'ghost'}]));return false;}}]:[]).concat([{label:'닫기',cls:'ghost'}]));};
+function revBox(){const L=S.co&&S.co.last;if(!L)return '';const parts=[['광고',L.ad],['구독·후원',L.subsRev],['트래픽(포털)',L.trRev],['CP 전재료',L.cp],['수익 사업',L.bizRev]].filter(x=>x[1]>0.001);const t=parts.reduce((a,x)=>a+x[1],0)||1;const col=['var(--siren)','var(--good)','var(--sodium)','var(--pink)','var(--dev)'];
+  return `<div class="sec">지난달 수익 구조 · 월 ${f1(L.rev)}억</div><div class="tshare" style="height:24px">${parts.map((x,i)=>`<i style="width:${x[1]/t*100}%;background:${col[i]}" title="${x[0]} ${f1(x[1])}억">${x[1]/t>=.12?x[0]:''}</i>`).join('')}</div><p class="hint" style="margin:6px 0 0">${parts.map(x=>`${x[0]} ${f1(x[1])}억(${Math.round(x[1]/t*100)}%)`).join(' · ')}${L.ad/t>.5?' — 광고 의존이 높다. 관계망이 흔들리면 돈줄도 흔들린다.':''}</p>`;}
+// 포털·구독 이벤트
+F_EVENTS.push(
+ {w:2,c:()=>(S.rank>=5||S.founder)&&S.portal&&S.portal.lv>=1,run:()=>{const up=chance(.5);openModal('포털 알고리즘 개편',`<p class="lede">포털이 뉴스 배열 알고리즘을 바꿨다. ${up?'우리 기사 노출이 늘었다.':'우리 기사 노출이 뚝 떨어졌다.'}</p>`,up?[fCh('이 흐름을 탄다','트래픽↑',{tr:.08})]:[fCh('자체 앱·뉴스레터로 독자를 묶는다','구독↑ · 자금↓',{cash:-.1,subs:.02}),fCh('제목을 더 세게 단다','트래픽 회복 · 포털 벌점',{tr:.05,pen:1,penWhy:'자극적 제목'}),fCh('버틴다','트래픽↓',{tr:-.06})]);}},
+ {w:2,c:()=>(S.rank>=5||S.founder)&&S.portal&&S.portal.lv===3,run:()=>openModal('CP 전재료 협상',`<p class="lede">포털이 내년 콘텐츠 제휴 전재료 협상을 하자고 한다. "트래픽 기준으로 재산정하겠습니다."</p>`,[fCh('독점 기사를 무기로 인상을 요구한다','자금↑ 또는 관계↓',{},()=>{if(chance(.45+S.co.q/250)){S.cpBoost=(S.cpBoost||1)*1.15;toast('전재료 15% 인상');}else{netUp('portal',-10);toast('포털과 관계가 틀어졌다');}}),fCh('조건을 받아들인다','',{}),fCh('다른 포털과도 제휴를 추진한다','평판↑ · 협상력↑',{fame:.5},()=>{S.cpBoost=(S.cpBoost||1)*1.05;})])},
+ {w:2,c:()=>(S.rank>=5||S.founder)&&S.co.subs>0,run:()=>openModal('구독 해지 러시',`<p class="lede">가격 인상 뒤 구독 해지가 평소의 세 배다.</p>`,[fCh('장기 구독 할인을 연다','구독 유지 · 수입↓',{subs:.01,cash:-.1}),fCh('구독자 전용 기사를 늘린다','품질↑ · 구독↑',{q:1,subs:.02,hp:-4}),fCh('가격을 되돌린다','신뢰↑',{trust:1,subs:.01})])},
+ {w:2,c:()=>(S.rank>=5||S.founder)&&month()===12,run:()=>openModal('연말 구독 캠페인',`<p class="lede">연말은 구독·후원이 가장 많이 들어오는 시기다.</p>`,[fCh('기자들이 쓴 손편지 캠페인','구독↑↑ · 컨디션↓',{subs:.05,hp:-5}),fCh('할인 이벤트','구독↑ · 수입↓',{subs:.04,cash:-.15}),fCh('평소대로','',{})])},
+ {w:1,c:()=>(S.rank>=5||S.founder)&&!(S.biz&&S.biz.video),run:()=>openModal('영상 제작사의 제안',`<p class="lede">외주 영상 제작사가 "기사 영상화 수익을 반씩 나누자"고 한다.</p>`,[fCh('계약한다','영상 사업 1단계 무료 시작',{},()=>{S.biz=S.biz||{};S.biz.video=1;}),fCh('직접 하겠다고 한다','',{})])},
+ {w:1,c:()=>(S.rank>=5||S.founder)&&(S.biz&&S.biz.native),run:()=>openModal('협찬 기사 논란',`<p class="lede">우리 협찬 기사에 "광고"라는 표시가 작다는 지적이 나왔다.</p>`,[fCh('표시를 크게 바꾼다','신뢰↑ · 협찬 수입↓',{trust:2},()=>{S.biz.native=Math.max(1,S.biz.native-1);}),fCh('업계 관행이라고 해명한다','신뢰↓ · 포털 벌점',{trust:-2,pen:1,penWhy:'협찬 기사 표시'})])}
+);
+
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
@@ -4551,7 +4657,7 @@ function loaderDone(min){const el=$('#loader');if(!el)return;const g=LD.gen||0;c
 function flashLoad(msg,ms){loaderRun(msg);loaderDone(ms||750);}
 
 // ================= 시작 =================
-function migrate(s){if(!s)return s;if((s.ver4||0)<2){s.mates=null;s.ros=null;s.corr=null;s.ver4=2;}if(s.custom){const i=OUTLETS.findIndex(x=>x.id==='mine');if(i>=0)OUTLETS.splice(i,1);OUTLETS.push(s.custom);}if(s.phase==='game'&&!s.cols){const k=S;S=s;initColleagues(true);S=k;}if(s.phase==='game'&&!s.portal){const k=S;S=s;initPortal(OUT());initComp();S=k;}if(s.phase==='game'&&(!s.net||!s.ents)){const k=S;S=s;initNet(s.net||null);S=k;}if(s.ents){const bw={};[...Object.values(ENT_BASE).flat(),...Object.values(TYPE_ENT).flat(),...Object.values(ID_ENT).flat()].forEach(e=>{if(e[3]>0&&!(e[0] in bw))bw[e[0]]=e[3];});s.ents.forEach(e=>{if(!e[4]&&bw[e[0]])e[4]=bw[e[0]];});normEnts(s.ents);setEnts(s.ents);}for(const k in ST0)if(s.st&&s.st[k]==null)s.st[k]=ST0[k];(s.items||[]).forEach(i=>{if(!i.ent)i.ent=findEnt(i.title,i.subj||'',i.d);});s.cd=s.cd||{};s.ach=s.ach||{};s.ticker=s.ticker||[];s.flags=s.flags||{};s.items=(s.items||[]).filter(i=>i.facts&&i.facts[0]&&'conf' in i.facts[0]);return s;}
+function migrate(s){if(!s)return s;if((s.ver4||0)<2){s.mates=null;s.ros=null;s.corr=null;s.ver4=2;}if(s.custom){const i=OUTLETS.findIndex(x=>x.id==='mine');if(i>=0)OUTLETS.splice(i,1);OUTLETS.push(s.custom);}if(s.phase==='game'&&!s.cols){const k=S;S=s;initColleagues(true);S=k;}if(s.phase==='game'&&!s.portal){const k=S;S=s;initPortal(OUT());initComp();S=k;}if(s.phase==='game'&&(!s.net||!s.ents)){const k=S;S=s;initNet(s.net||null);S=k;}if(s.ents){const bw={};[...Object.values(ENT_BASE).flat(),...Object.values(TYPE_ENT).flat(),...Object.values(ID_ENT).flat()].forEach(e=>{if(e[3]>0&&!(e[0] in bw))bw[e[0]]=e[3];});s.ents.forEach(e=>{if(!e[4]&&bw[e[0]])e[4]=bw[e[0]];});normEnts(s.ents,OUTLETS.find(x=>x.id===s.outlet));setEnts(s.ents);}for(const k in ST0)if(s.st&&s.st[k]==null)s.st[k]=ST0[k];(s.items||[]).forEach(i=>{if(!i.ent)i.ent=findEnt(i.title,i.subj||'',i.d);});s.cd=s.cd||{};s.ach=s.ach||{};s.ticker=s.ticker||[];s.flags=s.flags||{};s.items=(s.items||[]).filter(i=>i.facts&&i.facts[0]&&'conf' in i.facts[0]);return s;}
 function start(data){
   let dev=false;try{dev=localStorage.getItem('byline-dev')==='1';}catch(e){}
   S=(data&&data.S)?migrate(data.S):newState();S.dev=devOK()&&(S.dev||dev);
