@@ -1355,7 +1355,7 @@ function rankChain(o){o=o||OUT();if(S&&S.rankSys&&S.rankSys[o.id])return S.rankS
 function orgK(o){o=o||OUT();const p=o?o.p:3;const t=o?o.type:'daily';const ten={1:.62,2:.72,3:.88,4:1.05,5:1.2}[p]||1;const tt={online:-.06,trade:-.04,weekly:-.04,local:-.02,wire:.06,tv:.05,jp:.06}[t]||0;
   return{ten:(ten+tt)*otr('ten',o),ev:{1:-8,2:-6,3:-2,4:1,5:3}[p]||0,fm:{1:-13,2:-10,3:-4,4:2,5:5}[p]||0,pick:Math.min(1,({1:1,2:1,3:.95,4:.82,5:.68}[p]||1)*otr('pick',o)),
    n:{1:'아주 작은 회사 — 사람이 모자라 금방 올라간다',2:'작은 회사 — 승진이 빠르고 문턱이 낮다',3:'중견 매체 — 보통 속도',4:'큰 매체 — 자리가 적어 경쟁이 붙는다',5:'메이저 — 동기들과 몇 안 되는 자리를 다툰다'}[p]||''};}
-function promoMinW(r){return Math.round(rankMin(r)*DF().ten*orgK().ten);}
+function promoMinW(r){return Math.round(rankMin(r)*DF().ten*orgK().ten*(S&&S.simple?.75:1));}
 function promoEv(r){return RANKS[r].ev+DF().need+orgK().ev;}
 function promoFm(r){return Math.max(5,RANKS[r].fm+DF().need+orgK().fm);}
 function rankMin(r){const n=nextRank(r);const sk=n==null?0:Math.max(0,n-r-1);return RANKS[r].min*(1+.45*sk);}
@@ -1485,7 +1485,7 @@ function apply(o){const out=[];for(const k in o){let v=o[k];if(v>0&&S&&GAINK[k])
 const FSUR={fvision:1,meeting:1,front:1,invest:1,write:1,fsales:1,fpartner:1,fbrand:1,fraise:2,fhire:1,fbureau:1,network:1,portal:1,facility:1,fcrisis:1,fethics:1};
 // 일반·간소화: 손이 많이 가는 일은 행동력 1 더
 const GSUR={special:1,desk:1,plan:1,meeting:1,front:1,direction:1,taskforce:1,campaign:1,adsales:1,adsell:1,event:1,portal:1,facility:1,personnel:1,newdept:1,paypol:1,hire:1,recruit:1,network:1,column:1};
-function surOf(id){return (S&&S.founder?FSUR:GSUR)[id]||0;}
+function surOf(id){if(S&&S.simple)return 0;return (S&&S.founder?FSUR:GSUR)[id]||0;}
 function actCost(id){const a=ACT[id]?ACT[id].ap:0;return a?a+surOf(id):0;}
 // 들고 있는 아이템이 많을수록 새 아이템이 덜 나온다
 function glut(){const n=(S.items||[]).length;return clamp((1-.12*Math.max(0,n-1))*(S.outlet?otr('item'):1),.3,1.15);}
@@ -1722,7 +1722,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='5.1';
+const VERSION='5.2';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -1811,7 +1811,7 @@ const TIPS={
  adsales:'사장은 광고 영업 총력전을 지휘한다.',digital:'디지털 플랫폼에 투자한다.',hire:'수습기자를 공채로 뽑는다.',cut:'희망퇴직으로 비용을 줄인다.',event:'후원 포럼으로 부대 수입을 올린다.'
 };
 function apParts(){const o=OUT()||{p:3,type:'daily'};const p=[['기본',4]];{if(S.apBonus>S.turn)p.push(['부서 성적 1위',1]);const ta=otrAp(o);if(ta)p.push(['회사 특성',ta]);const da=(S.phase==='game'&&(deptFx()||{}).ap)||0;if(da)p.push(['일당백 부서',da]);}if(hasF('ai'))p.push(['AI 편집 보조',1]);if(o.p<=2)p.push(['작은 매체, 일당백',1]);if(['wire','ch','online'].includes(o.type))p.push(['속보 매체',1]);if(S.rank>=4)p.push(['간부 보좌',1]);if(S.rank===0)p.push(['막내의 발',1]);if(S.rank===3||S.rank===7&&(!S.founder||o.p>=4))p.push([S.rank===7?'비서실':'부서 장악',1]);if(S.founder&&o.p>=3)p.push(['편집국이 손발',1]);if(S.rank>=1&&S.rank<=3){if(['case','soc','nat','loc','sigun','spo','base','foot','court'].includes(S.dept))p.push(['현장 부서',1]);else if(['inv','int','diplo'].includes(S.dept))p.push(['호흡 긴 부서',-1]);}if(o.p>=4&&S.rank>=4)p.push(['큰 조직의 손발',1]);if(S.st.sta>=65)p.push(['체력',1]);if(S.st.spd>=70)p.push(['속도',1]);if(S.hp<30)p.push(['컨디션 저하',-1]);if(S.hp>85)p.push(['컨디션 최상',1]);return p;}
-function apBase(){const sum=clamp(apParts().reduce((a,x)=>a+x[1],0),3,8);const v=S&&S.simple?clamp(Math.round(sum*1.4),6,10):S&&S.founder?clamp(Math.round(sum*1.6),7,11):clamp(Math.round(sum*1.7),6,12);return S&&S.sick>S.turn?Math.max(4,Math.floor(v/2)):v;}
+function apBase(){const sum=clamp(apParts().reduce((a,x)=>a+x[1],0),3,8);const v=S&&S.simple?clamp(Math.round(sum*1.3),6,9):S&&S.founder?clamp(Math.round(sum*1.6),7,11):clamp(Math.round(sum*1.7),6,12);return S&&S.sick>S.turn?Math.max(4,Math.floor(v/2)):v;}
 const wkTxt=w=>w<=4?'이번 달 안':`약 ${Math.ceil(w/4)}달`;const moTxt=w=>`${Math.floor(w/4)}개월`;
 function setCd(id){const cd=ACT[id].cd;if(!cd)return;if(cd<4){S.cdUse=S.cdUse||{};const k=id+':'+S.turn;S.cdUse[k]=(S.cdUse[k]||0)+1;if(S.cdUse[k]>=Math.floor(4/cd))S.cd[id]=S.turn+1;return;}S.cd[id]=S.turn+cd;}
 function cdLeft(id){const c=S.cdUse&&S.cdUse[id+':'+S.turn];const cd=ACT[id].cd;return cd&&cd<4?Math.floor(4/cd)-(c||0):null;}
@@ -3130,8 +3130,8 @@ function endWeek(){
   const fresh=checkUnlocks();if(fresh.length)Q.push(()=>openModal('새로 열린 일',fresh.map(id=>`<p><b>${actName(id)}</b><br><span style="color:var(--mute);font-size:13.5px">${TIPS[id]||ACT[id].d}</span></p>`).join('')));
   const evK=S._bw!=null?.5:1;
   if(!seasonal&&chance((S.simple?.1:.2)*evK)){const ev=pickEvent();if(ev)Q.push(()=>{let ok=true;try{ok=ev.c();}catch(e){ok=false;}if(ok)return ev.run();closeModal();});}
-  else if(S.cols&&chance(.15*evK)){const ce=pickColEvent();if(ce)Q.push(safeRun(ce));}
-  else if(S.net&&S.rank>=1&&chance(.14*evK)){const el=NET_EVENTS.filter(e=>{try{return e.c();}catch(x){return false;}});if(el.length)Q.push(safeRun(pick(el)));}
+  else if(S.cols&&chance((S.simple?.06:.15)*evK)){const ce=pickColEvent();if(ce)Q.push(safeRun(ce));}
+  else if(S.net&&S.rank>=1&&chance((S.simple?.05:.14)*evK)){const el=NET_EVENTS.filter(e=>{try{return e.c();}catch(x){return false;}});if(el.length)Q.push(safeRun(pick(el)));}
   if(S.flags.colOffer&&(S.founder||S.story))S.flags.colOffer=0;
   if(S.flags.colOffer){S.flags.colOffer=0;Q.push(()=>{const o=pick(OUTLETS.filter(x=>x.id!==S.outlet&&x.p>=OUT().p-1));const f={o,ok:true,rank:clamp(S.rank+(o.p<OUT().p?1:0),1,5)};openModal('먼저 떠난 동료의 제안',`<p class="lede">먼저 옮긴 동료가 연락해 왔다. "${o.n}에 자리 하나 있는데, 올래?"</p>`,[{label:'이야기를 들어 본다',fn:()=>{confirmMove(f);return false;}},{label:'지금 회사에 남는다',cls:'ghost'}]);});}
   if(S.flags.favor&&chance(.5)){const id=S.flags.favor;S.flags.favor=null;Q.push(()=>favorEvent(id));}
@@ -3289,13 +3289,16 @@ const TUTF=()=>[
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['5.2','간소화 모드 손질',[
+  '대규모|간소화 모드를 이름답게: 행동마다 붙던 추가 행동력이 없어지고(한 달 행동력 6~9), 수습 기간은 한두 달 짧게(작은 매체 2개월 · 중견 3개월 · 메이저 4개월), 승진 재직 기간은 25% 짧다',
+  '주요|간소화 모드는 끼어드는 일이 적다: 동료·관계망 이벤트가 절반 이하로 줄고, 광고주와의 줄다리기·오보 발견도 덜 자주 온다. 가벼운 정정과 중간 정도 오보는 자동으로 \"바로잡습니다\" 처리',
+  '주요|간소화 모드 수습: 내가 맡은 수습의 탈락 확률이 10%p 낮고, 사수 부담(컨디션)도 절반',
+  '주요|수습이 끝나면 여러 부서로 흩어지고, 수습도 떨어질 수 있다 (사회부 수습 탈락 확률 약 40% · 1월·7월에 약 50% 확률로 배치)',
+  '주요|인력 수급 균형: 부서가 붐비면 다른 부서 발령·이직·진로 변경이 늘고, 경쟁사도 북적이는 곳과 갓 키운 후배를 노린다. 회사 인원이 불어나면 고참 명예퇴직이 는다'],'2026.10.17',['간소화 모드: 행동력 추가 비용 없음 · 수습·승진 짧게','끼어드는 이벤트 절반 이하','수습 배치·탈락 · 인력 수급 균형']],
  ['5.1','수습기자 · 광고 주기 · 보기 쉬운 화면',[
   '대규모|수습기자: 사회부 계열 부서에는 1월·7월 공채 시즌에 수습이 배치될 수 있다(확정이 아니라 시즌마다 절반쯤). 최종 평가에서 열에 넷은 떨어진다. 사수를 맡아 직접 가르치면(컨디션↓·정보보고 거리↑) 든든한 후배나 제자가 되고, 기본만 챙기거나 혹독하게 굴릴 수도 있다(못 버티고 떠날 수 있다)',
-  '주요|수습도 떨어질 수 있다: 실력이 낮거나 평판에 흠이 있으면 수습 기간이 연장되거나 탈락·중도 포기·타사 이탈이 나온다(어려움일수록 잦다). 내가 가르친 수습이 탈락 위기면 사수로서 보증을 서거나 한 달 연장을 요청할 수 있다',
-  '주요|수습이 끝나면 여러 부서로 흩어진다: 회사 수요·본인 희망·사수와의 관계로 배치가 정해지고, 우리 부서로 데려오고 싶다고 요청할 수도 있다(부장일수록 잘 통한다). 다른 부서로 간 후배는 가끔 그 부서 아이템을 귀띔해 준다. 채용한 수습도 사람이 모자란 부서로 배치될 수 있다',
   '대규모|채용에서 수습기자를 뽑을 수 있다: 인건비가 싸고(수습 기간 약 40% 할인) 3년간 잘 떠나지 않으며 빨리 크지만, 실력이 낮고 수습 기간엔 전력 외이며 선배들 시간이 들고 실수가 잦다. 경쟁 매체도 해마다 수습을 뽑는다',
   '주요|경쟁사 AI: 우리와 틀어진 광고주를 낚아채고, 우리 \"몰래 수정\"이 들통나면 사설로 저격한다. 매체마다 임금 수준이 달라 처우가 좋은 곳이 기자를 더 잘 빼 가고, 낚시 기사를 남발한 곳은 무더기 정정에 나선다',
-  '주요|인력 수급 균형: 수습이 들어와 부서가 정원보다 붐비면 다른 부서 발령·이직·진로 변경이 늘고, 경쟁사도 북적이는 곳과 갓 키운 후배를 더 노린다. 회사 인원이 불어나면 고참 명예퇴직이 는다. 경쟁 매체 수습도 일부는 중도에 그만둔다',
   '수정|할 일 창의 취소·닫기·뒤로 버튼이 사라지던 문제',
   '대규모|비판 보도 뒤 줄다리기: 기사가 나가면 광고주·기관과 관계가 틀어지고, 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 1년간 광고를 늘리거나 ③ 광고 장기 중단·협찬 철회·자료 거부·법적 대응으로 보복한다. 받으면 돈, 거절하면 신뢰 — 무마를 받았다가 들키면 오보급 논란',
   '주요|수습 기간: 작은 매체(★1~2) 3개월 · 중견(★3~4) 4개월 · 메이저(★5) 6개월. 수습 평가 기준도 매체마다 다르다 — 큰 곳일수록 평가 문턱이 높고, 정보보고 횟수와 함께 신문·지역지는 사쓰마와리, 통신사는 속도, 방송사는 방송감, 온라인은 출고 기사, ★4 이상은 캡과의 관계, ★5는 캡 미션까지 본다. 못 채우면 한 달씩 두 번까지 연장',
@@ -5285,11 +5288,11 @@ const CORR_WHO={reader:['독자 지적','독자가 기사 속 숫자와 사실�
 function errTick(Qx){if(S.phase!=='game'||S.story==='rookie')return;const D=DF();
   const L=(S.clips||[]).filter(c=>c.fl&&!c.corr&&!c.flDone&&c.turn>S.turn-YW/2&&c.by===S.name);let hit=null;
   if((S.corrCd||0)>S.turn)L.length=0;for(const c of L){const f=c.fl;const p=clamp((f.unv*.05+(f.key?.06:0)+(f.norb?.03:0)+(f.bait?.04:0)+(f.low?.04:0)+(f.hoax?.3:0))*(D.risk||1)*(hasF('fact')?.75:1)*((c.imp||0)>=50?1.3:1)*(S.simple?.7:1),0,.6);if(chance(p)){hit=c;break;}}
-  if(hit){const f=hit.fl;const who=f.hoax||f.key&&chance(.5)?(chance(.5)?'rival':'media'):f.norb&&chance(.5)?'subj':OUT().p>=4&&(f.low||f.bait)&&chance(.4)?'inside':'reader';hit.flDone=1;S.corrCd=S.turn+8;Qx.push(()=>corrModal(hit,who));return;}
+  if(hit){const f=hit.fl;const who=f.hoax||f.key&&chance(.5)?(chance(.5)?'rival':'media'):f.norb&&chance(.5)?'subj':OUT().p>=4&&(f.low||f.bait)&&chance(.4)?'inside':'reader';hit.flDone=1;S.corrCd=S.turn+(S.simple?16:8);Qx.push(()=>corrModal(hit,who));return;}
   // 데스크: 부서원 기사의 흠도 내 책임이다
   if(!S.founder&&S.rank>=2&&S.rank<=6&&(S.team||[]).length&&chance(.05*(D.risk||1)*(hasF('fact')?.7:1))){const J=S.team.filter(x=>npcStage(x)==='jr'||x.rk!=null);const m=J.length&&chance(.7)?pick(J):pick(S.team);Qx.push(()=>deskErr(m));}}
 function corrModal(c,who){const f=c.fl;const [wt,wd]=CORR_WHO[who];const sev=f.hoax?3:f.key?2:who==='reader'||who==='inside'?.8:1.2;const k=honestK()*(S.simple?.6:1);
-  if(S.simple&&sev<1){corrAdd(c,'정정');toast(`${wt} → "바로잡습니다" 처리 · ${apply({trust:-.4})}`);return;}
+  if(S.simple&&sev<2){corrAdd(c,'정정');toast(`${wt} → "바로잡습니다" 처리 · ${apply({trust:-.4})}`);return;}
   const hide=chance(clamp(.25*(DF().risk||1)*(sev>=2?1.5:1),.1,.6));
   const ch=[
    {label:'"바로잡습니다" 정정을 낸다',sub:`틀린 부분을 인정하고 고친다 · 신뢰 조금↓${sev>=2?' · 오보로 기록':''}`,fn:()=>{corrAdd(c,'정정',sev>=2);toast(apply({trust:-.8*sev*k,eval:-(S.founder?0:.5*sev)}));log(`정정: ${c.h}`);}},
@@ -5425,7 +5428,7 @@ function adMonth(o,F){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);const nk=nam
 // ===== 비판 보도 뒤 광고주·기관과의 줄다리기 =====
 // 기사가 나가면 처음엔 관계가 틀어진다. 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 광고를 늘리거나 ③ 보복(광고 장기 중단·협찬 철회·자료 거부·소송)한다.
 function arcStart(id,d,head){const E=ENT[id];if(!E||!(E.kind==='corp'||E.kind==='gov'&&E.w>0)||d<4)return;S.arc=S.arc||{};if(S.arc[id]){S.arc[id].d+=d*.5;return;}S.arc[id]={t:S.turn,d,head:head||''};}
-function arcTick(Qx){if(!S.arc)return;const D=DF();for(const id in S.arc){const a=S.arc[id];const e=S.net&&S.net[id],E=ENT[id];if(!e||!E){delete S.arc[id];continue;}const age=S.turn-a.t;if(age<6)continue;if(age>60){delete S.arc[id];continue;}if(!chance(.3))continue;
+function arcTick(Qx){if(!S.arc)return;const D=DF();for(const id in S.arc){const a=S.arc[id];const e=S.net&&S.net[id],E=ENT[id];if(!e||!E){delete S.arc[id];continue;}const age=S.turn-a.t;if(age<6)continue;if(age>60){delete S.arc[id];continue;}if(!chance(S.simple?.18:.3))continue;
   const tr=entTrait(id);const fol=(S.items||[]).find(i=>i.ent===id);const w={pay:(fol?3:0)+(tr.press?1.5:0)+(E.kind==='corp'?1:0),make:1.2+(tr.open?1.5:0)+(e.rel>-40?1:0)+(age>24?1:0),hit:.8+(tr.press?1:0)+(tr.lit?1.2:0)+(a.d>12?1:0)};
   w.hit*=D===DIFF.hard?1.4:D===DIFF.easy?.7:1;w.make*=D===DIFF.easy?1.3:1;if(E.kind==='gov')w.pay*=.4;
   let t=(w.pay+w.make+w.hit)*Math.random();const k=(t-=w.pay)<0?'pay':(t-=w.make)<0?'make':'hit';delete S.arc[id];Qx.push(()=>arcEvent(id,k,fol,a));return;}}
@@ -5477,7 +5480,7 @@ function relGlance(){if(!S.simple||!S.net)return '';const K=ENTS.filter(e=>S.net
   return `<div class="card"><div class="t">관계 한눈에</div><div class="meta"><b style="color:var(--good)">내 편</b>${top.map(e=>chip(entName(e[0]),S.net[e[0]].rel)).join('')||'<span>아직 없다</span>'}</div>${bad.length?`<div class="meta"><b style="color:var(--red)">주의</b>${bad.map(e=>chip(entName(e[0])+(S.net[e[0]].cut?'(광고 중단)':''),S.net[e[0]].rel,1)).join('')}</div>`:''}${cs.length?`<div class="meta"><b>사내</b>${cs.slice(0,2).map(c=>chip(c.name,c.rel,c.rel<=-10)).join('')}${cs.length>2&&cs[cs.length-1].rel<=-10?chip(cs[cs.length-1].name,cs[cs.length-1].rel,1):''}</div>`:''}</div>`;}
 // ===== 수습 기간과 수습 평가 기준 (매체 규모·성격별) =====
 // 기간: ★1~2 3개월 · ★3~4 4개월 · ★5 6개월. 기준: 큰 곳일수록 평가 문턱이 높고, 매체 성격마다 보는 게 다르다.
-function rookieWeeks(o){o=o||OUT();return o.p>=5?24:o.p>=3?16:12;}
+function rookieWeeks(o){o=o||OUT();const w=o.p>=5?24:o.p>=3?16:12;return S&&S.simple?Math.max(8,w-(o.p>=5?8:4)):w;}
 function rookieEv(o){o=o||OUT();return Math.round(({1:40,2:42,3:45,4:48,5:52}[o.p]||45)+(DF().need||0)/2);}
 function rookieReqs(o){o=o||OUT();if(S.story)return [];const mo=rookieWeeks(o)/4;const L=[{t:`수습 평가 ${Math.round(S.eval)}/${rookieEv(o)}`,ok:S.eval>=rookieEv(o)}];
   const rep=Math.max(2,Math.round(mo*(o.p>=4?1.5:1.2)*(S.simple?.6:1)));L.push({t:`정보보고 ${S.rkRep||0}/${rep}회`,ok:(S.rkRep||0)>=rep});
@@ -5529,10 +5532,10 @@ function traineeEvent(){const nm=rname();const st=pick(['집요함','눈치','�
    {label:'기본만 챙겨 준다',sub:'부담 없음 · 관계는 무난 · 탈락 확률 약 40%',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'basic',rel:10};toast('기본만 챙기기로 했다');}},
    {label:'혹독하게 굴린다',risk:true,sub:'평가 조금↑ · 탈락 확률 약 50% · 독하게 크거나, 버티지 못하고 떠난다',fn:()=>{S.trainee={name:nm,t:S.turn,mode:'hard',rel:-5};toast(apply({eval:.5}));}}]);}
 function traineeMonth(lines){const T=S.trainee;if(!T)return;const age=S.turn-T.t;
-  if(T.mode==='teach'){S.memo=(S.memo||0)+1;S.hp=clamp(S.hp-4,0,100);T.rel+=3;if(chance(.25))lines.push({c:'',t:`${T.name} 수습이 새벽 3시에 라인 보고를 올렸다. "선배, 이거 기사 될까요?"`});}
+  if(T.mode==='teach'){S.memo=(S.memo||0)+1;S.hp=clamp(S.hp-(S.simple?2:4),0,100);T.rel+=3;if(!S.simple&&chance(.25))lines.push({c:'',t:`${T.name} 수습이 새벽 3시에 라인 보고를 올렸다. "선배, 이거 기사 될까요?"`});}
   if(T.mode==='hard'&&chance(.12)){lines.push({c:'r',t:`${T.name} 수습이 "도저히 못 하겠다"며 사표를 냈다`});apply({eval:-1});S.trainee=null;return;}
   if(T.mode!=='basic'&&chance(.08)){lines.push({c:'r',t:`${T.name} 수습이 확인 안 된 첩보를 그대로 보고했다. 캡에게 같이 깨졌다`});apply({eval:-.4});}
-  if(age>=rookieWeeks()){S.trainee=null;const pf=clamp(.4+({teach:-.08,basic:0,hard:.1}[T.mode]||0)+(DF()===DIFF.hard?.05:DF()===DIFF.easy?-.05:0),.2,.6);if(chance(pf))Q.push(()=>traineeFail(T));else Q.push(()=>traineePlace(T));}}
+  if(age>=rookieWeeks()){S.trainee=null;const pf=clamp(.4+({teach:-.08,basic:0,hard:.1}[T.mode]||0)+(DF()===DIFF.hard?.05:DF()===DIFF.easy?-.05:0)-(S.simple?.1:0),.15,.6);if(chance(pf))Q.push(()=>traineeFail(T));else Q.push(()=>traineePlace(T));}}
 // 수습 평가에서 떨어질 때: 사수라면 보증을 서 볼 수 있다
 function traineeFail(T){openModal('수습 탈락 위기',`<p class="lede">${esc(T.name)} 수습이 최종 평가에서 기준에 못 미쳤다. 인사위원회가 탈락 쪽으로 기울고 있다.</p>`,[
    ...(T.mode==='teach'?[{label:'사수로서 보증을 선다',sub:'성공하면 정식 배치 · 실패하면 내 평가↓',fn:()=>{if(chance(.6+T.rel/250)){toast('보증이 받아들여졌다');traineePlace(T);return false;}toast(`보증에도 탈락했다 · ${apply({eval:-1})}`);log(`${T.name} 수습 탈락`);}}]:[]),
