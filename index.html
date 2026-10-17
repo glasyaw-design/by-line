@@ -3407,6 +3407,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|기자 명단에 재직 연차 표시: "경력 12년 차 · 재직 5년 차"처럼 지금 회사에 몇 년째인지 보인다 (경력 입사 기자 구분)',
   '주요|광고 집행 주기 다양화: 작은 매체·창간 매체도 매달·2~3개월마다 광고를 주는 곳이 섞이고, 관공서도 매달·격월 소액 집행이 있다. 주기가 길수록 한 번에 묶어서 나가 연간 총액은 같다',
   '주요|광고 금액에 굴곡: 집행할 때마다 ±15% 흔들리고, 관공서는 연말 예산 집행 때 늘고 연초엔 줄며, 기업은 가정의 달·추석·연말에 는다. 가끔 캠페인 증액(+45%)이나 예산 축소(-30%)도 있다. 평균은 그대로라 재정 균형은 유지된다',
+  '수정|차장 이상이나 경력 기자로 시작하면 관계망·사내 관계·회사·조직 탭이 몇 달 동안 잠겨 있던 문제 (예: 온뉴스24 국장). 간소화 모드에서 관계망 탭이 아예 안 보이던 문제',
   '수정|부장 이상이 있는 부서에 "부장 직무대리"가 함께 부서장으로 나오던 문제. 내가 부장인 부서에 다른 부서장이 잡히던 문제',
   '수정|본사 차장이 지역 주재로 나가며 평기자로 강등되던 문제'],'2026.10.17',['매체 위상 변동','본사 승진 적체 해소','기사마다 다른 야마','PC·모바일 화면 재배치']],
  ['5.2','간소화 모드 손질',[
@@ -4015,8 +4016,8 @@ function gameHTML(){
   const body=cat==='rec'?`<div class="acts">${recL.map(btn).join('')||'<p class="empty">지금 할 수 있는 일이 없다. 다음 달로 넘기자.</p>'}</div><p class="hint" style="margin:8px 0 0">위 칸에서 분야를 고르면 그 분야의 일을 모두 볼 수 있다.</p>`:(()=>{const l=groups.find(g=>g[0]===cat)[2];const on=l.filter(live),off=l.filter(id=>!live(id));return `<div class="acts">${on.map(btn).join('')}</div>${off.length?`<details class="more"><summary>아직 못 하는 일 ${off.length}개</summary><div class="acts" style="margin-top:8px">${off.map(btn).join('')}</div></details>`:''}`;})();
   const acts=chips+body;
   const tabs=[['me',S.founder?'대표 수첩':'수첩'],['cols',S.founder?'창간 멤버':'사내 관계'],['net','관계망'],['items',`아이템 ${S.items.length}`],['src',`취재원 ${S.sources.length}${S.newSrc?` · 새 ${S.newSrc}`:''}`],['clips','스크랩'],['co','회사'],['org','조직'],...(S.rank>=6?[['team',`전체 기자 ${S.co.staff}`]]:S.rank>=2?[['team',`부서원 ${S.team.length}`]]:S.rank<=1&&!S.founder?[['mates','같은 부서']]:[]),['log','기록']];
-  const TUN={cols:()=>!S.simple&&S.turn>=2,net:()=>!S.simple&&(S.rank>=1&&S.inRank>=4||S.rank>=2),items:()=>S.items.length>0||S.turn>=1,src:()=>S.sources.length>0,clips:()=>(S.totalArticles||0)>0,co:()=>S.turn>=4||S.rank>=4,org:()=>S.turn>=4||S.rank>=2,log:()=>S.turn>=1};
-  S.tabSeen=S.tabSeen||{};const NB={cols:8,net:20,co:12,org:16,mates:4,src:4,clips:0,log:4,team:4};const FNB={net:12,org:8,co:4};const nbOK=t=>fNewbie()?(S.turn-(S.fStart||0))>=(FNB[t]||0):(!newbie()||S.turn>=(NB[t]||0));const vis=tabs.filter(t=>S.devUnlock||((!TUN[t[0]]||TUN[t[0]]())&&nbOK(t[0])));vis.forEach(t=>{if(!S.tabSeen[t[0]]){S.tabSeen[t[0]]=1;if(S.turn>0&&t[0]!=='me')setTimeout(()=>toast(`새 탭이 열렸다: ${t[1].replace(/ \d.*$/,'')}`),300);}});tabs.length=0;vis.forEach(t=>tabs.push(t));
+  const TUN={cols:()=>!S.simple&&S.turn>=2,net:()=>S.rank>=2||S.rank>=1&&(S.inRank>=4||years()>=2),items:()=>S.items.length>0||S.turn>=1,src:()=>S.sources.length>0,clips:()=>(S.totalArticles||0)>0,co:()=>S.turn>=4||S.rank>=4,org:()=>S.turn>=4||S.rank>=2,log:()=>S.turn>=1};
+  S.tabSeen=S.tabSeen||{};const NB={cols:8,net:20,co:12,org:16,mates:4,src:4,clips:0,log:4,team:4};const FNB={net:12,org:8,co:4};const nbOK=t=>fNewbie()?(S.turn-(S.fStart||0))>=(FNB[t]||0):(!newbie()||S.rank>=2||years()>=3||S.turn>=(NB[t]||0));const vis=tabs.filter(t=>S.devUnlock||((!TUN[t[0]]||TUN[t[0]]())&&nbOK(t[0])));vis.forEach(t=>{if(!S.tabSeen[t[0]]){S.tabSeen[t[0]]=1;if(S.turn>0&&t[0]!=='me')setTimeout(()=>toast(`새 탭이 열렸다: ${t[1].replace(/ \d.*$/,'')}`),300);}});tabs.length=0;vis.forEach(t=>tabs.push(t));
   if(!tabs.some(t=>t[0]===S.tab))S.tab='me';
   const TG=[['me','나',['me','clips','log']],['work','취재',['items','src']],['people','사람',['cols','mates','team','net']],['company','회사',['co','org']]];
   const tg=TG.map(([g,n,l])=>[g,n,tabs.filter(t=>l.includes(t[0]))]).filter(x=>x[2].length);const curG=(tg.find(x=>x[2].some(t=>t[0]===S.tab))||tg[0]);S.tabLast=S.tabLast||{};S.tabLast[curG[0]]=S.tab;
