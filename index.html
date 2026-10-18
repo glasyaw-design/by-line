@@ -707,6 +707,25 @@ b,strong{font-weight:600}
 
 /* 스토리 모드는 당분간 닫아 둔다 (개발자 콘솔에서만) */
 [data-pm="story"],[data-smode="story"]{display:none!important}
+
+/* ===== 5.7 승진 발령장 ===== */
+.promo{position:relative;overflow:hidden;text-align:center;padding:18px 14px 14px;border-radius:16px;border:1px solid color-mix(in srgb,var(--sodium) 60%,transparent);background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--sodium) 22%,transparent),transparent 70%),var(--panel2);box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 12px 30px rgba(0,0,0,.35);margin-bottom:10px}
+.promo small{display:block;color:var(--mute);font-size:12px;letter-spacing:.04em}
+.promo .prk{font-family:var(--f-display);font-size:34px;line-height:1.15;margin:6px 0 2px;background:linear-gradient(180deg,#fff3c4,var(--sodium));-webkit-background-clip:text;background-clip:text;color:transparent;animation:prk .7s cubic-bezier(.2,1.4,.4,1) both}
+.promo .pst{font-size:15px;letter-spacing:3px;color:var(--sodium)}.promo .pst i{font-style:normal;opacity:.18}
+.promo .pl{margin:8px 0 6px;font-size:15px;line-height:1.55}
+.promo .ptags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.promo .pconf{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#ffd36b 0 2px,transparent 3px),radial-gradient(circle,#ff8fb1 0 2px,transparent 3px),radial-gradient(circle,#77a6ff 0 2px,transparent 3px),radial-gradient(circle,#5ad49b 0 2px,transparent 3px);background-size:90px 70px,120px 90px,70px 110px,100px 80px;background-position:10px 0,40px 20px,70px 10px,20px 30px;opacity:.55;animation:pconf 2.4s linear 1 both}
+@keyframes pconf{from{transform:translateY(-60%)}to{transform:translateY(40%);opacity:0}}
+@keyframes prk{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.psum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:4px}
+.psum>div{border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center;background:var(--panel)}
+.psum b{display:block;font-size:20px}.psum small{color:var(--mute);font-size:11.5px}
+.pline{display:flex;flex-direction:column;gap:6px;border-left:2px solid color-mix(in srgb,var(--sodium) 50%,transparent);margin-left:6px;padding-left:12px}
+.pli{position:relative}.pli::before{content:'';position:absolute;left:-18px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--sodium);box-shadow:0 0 0 3px var(--panel)}
+.pli b{font-size:15px}.pli span{display:block;color:var(--mute);font-size:12.5px}.pli small{color:var(--mute);font-size:12px}
+.pli.fast b::after{content:' ⚡';color:var(--sodium)}
+@media (prefers-reduced-motion:reduce){.promo .pconf,.promo .prk{animation:none}}
 </style>
 
 <div class="wrap">
@@ -1558,7 +1577,7 @@ const IVL={
  rebutGot:['"절차상 문제는 없었다고 생각합니다."','"일부 오해가 있습니다. 서면으로 드리죠."','"사실관계를 확인 중이며 필요하면 조치하겠습니다."'],
  rebutNo:['"노코멘트입니다."','"드릴 말씀이 없습니다."']
 };
-const ACH={first:['첫 바이라인','첫 기사 출고'],scoop:['첫 단독','단독 기사 출고'],front:['1면 톱','톱기사 배치'],tape:['녹취 확보','인터뷰에서 결정적 발언'],foi:['청구의 힘','정보공개청구로 사실 확인'],series:['연속 보도','후속 3탄까지'],award:['이달의 기자상','기자상 수상'],legend:['기자상 3관왕','기자상 3회'],move:['경력 이직','첫 이직'],deptmove:['새 출입처','부서 이동'],desk:['데스크 데뷔','차장 승진'],chief:['편집국장','편집국 지휘'],ceo:['사장실','사장 취임'],hundred:['기사 100건','출고 100건'],clean:['무오보','오보 없이 3년'],rival:['라이벌 격파','라이벌보다 먼저 단독']};
+const ACH={first:['첫 바이라인','첫 기사 출고'],scoop:['첫 단독','단독 기사 출고'],front:['1면 톱','톱기사 배치'],tape:['녹취 확보','인터뷰에서 결정적 발언'],foi:['청구의 힘','정보공개청구로 사실 확인'],series:['연속 보도','후속 3탄까지'],award:['이달의 기자상','기자상 수상'],legend:['기자상 3관왕','기자상 3회'],move:['경력 이직','첫 이직'],deptmove:['새 출입처','부서 이동'],desk:['데스크 데뷔','차장 승진'],fast:['고속 승진','최소 재직 기간 안에 승진'],boss3:['부서장','부장 승진'],exec4:['편집국 간부','부국장 승진'],chief5:['국장','국장 승진'],chief:['편집국장','편집국 지휘'],ceo:['사장실','사장 취임'],hundred:['기사 100건','출고 100건'],clean:['무오보','오보 없이 3년'],rival:['라이벌 격파','라이벌보다 먼저 단독']};
 
 // ================= 상태 =================
 let S=null;
@@ -1963,7 +1982,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='5.6';
+const VERSION='5.7';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -3460,7 +3479,7 @@ function endWeek(){
       if(S.rank<7)apply({eval:(perf-56)/12});}
     const vals=[];if(S.monthQ.length)vals.push(avg(S.monthQ));if(perf!==null)vals.push(perf);
     S.co.q=S.co.q*.75+(vals.length?avg(vals):50+R(-5,5))*.25;S.monthQ=[];
-    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
+    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
     if(t%24===23)portalReview(lines);
     if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);staffBalance(lines);owePay(lines);}catch(e){console.error(e);}corrMonth(lines);
     if(S.rank>=6)S.trust=clamp(S.trust+(S.co.q-55)/25+(55-S.trust)*.03,0,100);
@@ -3550,7 +3569,8 @@ function graduate(){
     log(`수습 종료, ${DEPTS[got].n} 배치`);if(S.net)knowMore();
     const head=d==null?`회사 인사로 <b>${DEPTS[got].n}</b>`:`${got===d?'희망대로':'희망과 달리'} <b>${DEPTS[got].n}</b>`;
     const t=deptTier(got)[0];const note=d==null?(t==='A'?' 신입이 바로 가기 어려운 부서다. 동기들이 부러워했다.':t==='D'?' 신입은 대개 여기서 굴러 본다.':''):'';
-    openModal('정식 발령',`<p class="lede">${head}${cat1(got)==='loc'?` (${pick(CITIES)} 주재)`:''} 발령.${note}</p><p>출입처: ${DEPTS[got].beat}. 선배가 취재원 두 명을 넘겨줬다. 매주 아침 발제로 지면을 받고, 취재 나가기로 사실을 모으자.</p>${d==null?'<p class="hint">이번엔 희망 부서를 받지 않았다. 나중에 부서 이동 신청을 할 수 있다.</p>':''}`);return false;};
+    if(d!==undefined){(S.promoHist=S.promoHist||[]).push({r:1,d:dateShort(),y:years(),o:OUT().n,arts:S.totalArticles||0,ex:S.scoops||0,fast:false});S.pSnap=promoSnap();}
+    openModal('정식 발령',`<div class="promo"><div class="pconf" aria-hidden="true"></div><small>${esc(OUT().n)} 수습 수료</small><div class="prk">${esc(rankName(1))}</div><p class="pl">${esc(PROMO_LINE[1][S.turn%2])}</p></div><p class="lede">${head}${cat1(got)==='loc'?` (${pick(CITIES)} 주재)`:''} 발령.${note}</p><p>출입처: ${DEPTS[got].beat}. 선배가 취재원 두 명을 넘겨줬다. 매주 아침 발제로 지면을 받고, 취재 나가기로 사실을 모으자.</p>${d==null?'<p class="hint">이번엔 희망 부서를 받지 않았다. 나중에 부서 이동 신청을 할 수 있다.</p>':''}`);return false;};
   if(o.depts.length<2||chance(.8)){const got=autoPick();return openModal('수습 종료 · 부서 배치',`<p class="lede">${S.capName} 캡: "그동안 고생했다. 인사 났다. 가서 잘해라."</p><p>올해는 희망 부서를 받지 않고 회사가 배치했다.</p>`,[{label:'발령장을 받는다',fn:()=>place(got,null)}]);}
   openModal('수습 종료 · 부서 배치 희망',`<p class="lede">${S.capName} 캡: "그동안 고생했다. 어디 가고 싶냐."</p><p>올해는 희망 부서를 받는다. 평가가 높을수록 희망대로 될 가능성이 크지만, 정치·법조 같은 인기 부서는 경쟁이 세다. (현재 ${Math.round(S.eval)}) 나중에 부서 이동 신청도 할 수 있다.</p>`,o.depts.map(d=>{const t=deptTier(d)[0];return {label:DEPTS[d].n,sub:`${DEPTS[d].lede}${catOf(d).includes(aff)?' · 전공 적합':''}${t==='A'?' · 인기 부서(경쟁↑)':t==='D'?' · 지원자 적음':''}`,fn:()=>{
     const pen={A:-.25,B:-.1,C:0,D:.12}[t]||0;
@@ -3604,19 +3624,48 @@ function jinsa(){
   openModal('정기 인사 발표',parts.join(''));
 }
 function promote(){
-  const prev=S.rank;S.rank=nextRank(S.rank)??S.rank;S.inRank=0;S.eval=55+(S.eval-55)*.4;const r=S.rank;
+  const prev=S.rank,inR=S.inRank,minW0=promoMinW(S.rank);S.rank=nextRank(S.rank)??S.rank;S.inRank=0;S.eval=55+(S.eval-55)*.4;const r=S.rank;
   if(r>=2&&!S.team.length)S.team=genTeam();
   if(r===2&&!S.team.length)S.team=genTeam();
   if(r===2&&S.cols&&!colBy('junior'))S.cols.push(mkCol('junior',20));
   if(r===4){S.area=AREAS[cat1(S.dept)];S.items=[];for(let i=0;i<3;i++)S.team.push(genMember(pick(OUT().depts),45,70));}
   if((r===2||r===3)&&!S.story&&!S.founder&&OUT().depts.length>=4&&chance(.35)){const area=AREAS[cat1(S.dept)];const c=OUT().depts.filter(d=>d!==S.dept&&!isRegD(d)&&AREAS[cat1(d)]===area);if(c.length){const nd=pick(c);Q.push(()=>openModal('승진과 함께 발령',`<p class="lede">${rankName(r)} 승진과 함께 <b>${DEPTS[nd].n}</b> 데스크로 간다.</p><p>승진하면 다른 부서로 보내는 게 이 회사 관행이다.</p>`,[{label:'새 부서로',fn:()=>doRotate(nd)}]));}}
-  if(r>=2)ach('desk');if(r===6)ach('chief');if(r===7)ach('ceo');
+  if(r>=2)ach('desk');if(r===3)ach('boss3');if(r===4)ach('exec4');if(r===5)ach('chief5');if(r===6)ach('chief');if(r===7)ach('ceo');const fast=inR<=minW0*1.15;if(fast)ach('fast');
   const unlock={2:'데스킹이 열렸다. 부서원 4명의 기사를 봐줘야 한다.',3:'부서 기획회의와 기자 영입을 할 수 있다.',4:'1면 회의와 칼럼이 열렸다. 이제 편집국 전체를 본다.',5:'구독 캠페인을 경영진에 제안할 수 있다.',6:'매체의 편집 방향을 정한다.',7:'경영을 맡는다. 구독·광고·인력·투자를 결정하고 이사회 신임을 지켜야 한다. 임기는 1년.'}[r]||'';
   checkUnlocks();Q.unshift(()=>{const ids=RANK_ACTS[r].filter(id=>id!=='breaking'&&!RANK_ACTS[prev].includes(id));if(!ids.length)return closeModal();openModal(`${rankName(r)}의 일`,ids.map(id=>`<p><b>${actName(id)}</b>${lockReason(id)?` <span class="tag">${lockReason(id)}</span>`:''}<br><span style="color:var(--mute);font-size:13.5px">${TIPS[id]||ACT[id].d}</span></p>`).join(''));});
   {const nk=knowMore();if(nk)log(`직급이 오르며 새로 닿은 기관·인물 ${nk}곳`);}
   log(`${rankName(r)} 승진`);tick(`${OUT().n} 인사 — ${S.name} ${rankName(r)}`,1);S.scene=baseScene();
-  openModal('정기 인사 발령',`<p class="lede"><b>${esc(S.name)}</b> ${rankName(prev)} → <b>${rankName(r)}</b></p>${prev+1!==r?`<p class="hint">작은 회사라 중간 직급 없이 바로 올라간다.</p>`:''}<p>${unlock}</p>${fxLine(apply({fame:3}))}`);
+  const bonus=S.founder?0:Math.round(payOf(OUT())*.5/10)*10;if(bonus)S.money+=bonus;
+  openModal(`${rankName(r)} 승진`,promoCard(prev,r,inR,fast)+`${prev+1!==r?`<p class="hint">작은 회사라 중간 직급 없이 바로 올라간다.</p>`:''}<p>${unlock}</p>${fxLine(apply({fame:3,men:1})+(bonus?` · 승진 축하금 +${bonus}만`:''))}`,[{label:'자리에 앉는다'}]);
 }
+// ===== 5.7 승진의 순간: 화려한 발령장 · 이번 직급 성적표 · 동료 반응 · 커리어 연대기 =====
+const PROMO_LINE={1:['수습 딱지를 뗐다. 이제 기사 끝에 내 이름이 박힌다.','"이제부터 진짜 기자다." 캡이 처음으로 웃었다.'],
+ 2:['데스크 자리에 앉았다. 이제 남의 기사에 빨간 펜을 댈 차례다.','후배들이 처음으로 "선배"가 아니라 "차장님"이라고 불렀다.'],
+ 3:['부장. 한 부서의 지면이 이제 내 손에 달렸다.','책상에 부서장 명패가 올라왔다. 부서원들이 일어나 박수를 쳤다.'],
+ 4:['부국장. 편집국 전체가 내려다보이는 자리다.','1면 회의 테이블 상석에 의자가 하나 늘었다. 내 자리다.'],
+ 5:['국장. 기자들의 기자가 됐다.','편집국 게시판 맨 위에 내 이름이 붙었다. 축하 화분이 복도까지 늘어섰다.'],
+ 6:['편집국장. 내일 자 마지막 결정은 이제 내 몫이다.','윤전기가 돈다. 오늘부터 이 매체의 얼굴은 나다.'],
+ 7:['사장. 기자로 시작해 회사의 주인이 됐다.','첫 출근길, 정문 경비가 거수경례를 했다. 사장실 문패에 내 이름이 걸렸다.']};
+function promoSnap(){return{t:S.turn,arts:S.totalArticles||0,ex:S.scoops||0,tok:S.tokjong||0,aw:S.awards||0,fame:Math.round(S.fame||0)};}
+function promoCard(prev,r,inR,fast){const P=S.pSnap||{t:Math.max(0,S.turn-inR),arts:0,ex:0,tok:0,aw:0,fame:0};const tv=isTV();
+  const L=(PROMO_LINE[r]||['새 자리에 앉았다.'])[S.turn%2].replace('신문',tv?'뉴스':'신문');
+  const arts=(S.totalArticles||0)-P.arts,ex=(S.scoops||0)-P.ex,tk=(S.tokjong||0)-P.tok,aw=(S.awards||0)-P.aw,fg=Math.round((S.fame||0)-P.fame);
+  const best=(S.clips||[]).filter(c=>c.turn>=P.t&&!c.staff&&String(c.by||'').split(/[·,\s/]+/).includes(S.name)).sort((a,b)=>(b.imp||0)-(a.imp||0))[0];
+  const N=8+hashId(S.name+r,3)%7;const pos=clamp(Math.round(1+(inR/Math.max(1,promoMinW(prev))-1)*5+(hashId(S.name,r)%3)),1,N);
+  const C=S.cols||[];const nm=role=>{const c=C.find(x=>x.role===role);return c?c.name:null;};const R=[];
+  if(nm('boss'))R.push(`${esc(nm('boss'))}: "${pick(['기대한다. 이제 핑계는 없다.','네가 올라갈 줄 알았다. 잘해라.','자리 무게가 다를 거다. 버텨라.'])}"`);
+  if(nm('peer'))R.push(`${esc(nm('peer'))}: "${pick(['축하한다! 오늘 술은 네가 사라.','역시 동기 중에 네가 제일 먼저다.','부럽다… 진심으로 축하해.'])}"`);
+  if(nm('junior'))R.push(`${esc(nm('junior'))}: "${rankName(r)}님, 축하드립니다! 저도 따라가겠습니다."`);
+  if(nm('rivalpeer'))R.push(`${esc(nm('rivalpeer'))}은(는) 멀리서 굳은 얼굴로 박수를 쳤다.`);
+  if(S.rival&&S.rival.name)R.push(`라이벌 ${esc(S.rival.name)}에게서 짧은 문자가 왔다. "축하. 다음엔 내 차례다."`);
+  (S.promoHist=S.promoHist||[]).push({r,d:dateShort(),y:years(),o:OUT().n,arts,ex,fast:!!fast});S.pSnap=promoSnap();
+  const stars='★'.repeat(Math.min(7,r))+'<i>'+'★'.repeat(Math.max(0,7-r))+'</i>';
+  return `<div class="promo"><div class="pconf" aria-hidden="true"></div><small>${esc(OUT().n)} 인사 발령 · ${dateStr()}</small><div class="prk">${esc(rankName(r))}</div><div class="pst">${stars}</div><p class="pl">${esc(L)}</p>
+   <div class="ptags">${fast?'<span class="tag ok">고속 승진</span>':''}<span class="tag">입사 동기 ${N}명 중 ${pos}번째</span><span class="tag">경력 ${years()}년 차</span><span class="tag">이번 직급 ${moTxt(inR)}</span></div></div>
+   <div class="psum"><div><b>${arts}</b><small>출고</small></div><div><b>${ex}</b><small>단독</small></div><div><b>${tk+aw}</b><small>특종·수상</small></div><div><b>${fg>=0?'+':''}${fg}</b><small>평판</small></div></div>
+   ${best?`<p class="hint" style="margin:8px 0 0">이번 직급의 대표작 — 「${esc(best.h)}」 (${esc(best.place||'')})</p>`:''}
+   ${R.length?`<ul class="feed" style="margin-top:8px">${R.slice(0,4).map(x=>`<li>${x}</li>`).join('')}</ul>`:''}`;}
+function promoLineHTML(){const H=S.promoHist||[];if(!H.length||S.story)return '';return `<div class="sec">커리어 연대기</div><div class="pline">${H.map(h=>`<div class="pli${h.fast?' fast':''}"><b>${esc(rankName(h.r))}</b><span>${esc(h.d)} · ${h.y}년 차 · ${esc(h.o)}</span><small>그 직급까지 출고 ${h.arts} · 단독 ${h.ex}${h.fast?' · 고속 승진':''}</small></div>`).join('')}</div>`;}
 function failCheck(monthEnd){
   if(S.founder){if(monthEnd&&S.co.cash<fBankLine()+2&&!S.fRescue&&S.diff!=='hard'){S.fRescue=1;return ()=>openModal('마지막 자금줄',`<p class="lede">통장이 바닥을 보인다. 이대로면 다음 달 월급을 못 준다.</p><p class="hint">한 번만 쓸 수 있는 구명줄이다.</p>`,[{label:'독자 긴급 후원 호소',sub:'자금 +1.5억 · 신뢰↑ · 다음엔 안 통한다',fn:()=>{S.co.cash+=1.5;toast(apply({trust:2}));}},{label:'지인·가족에게 빌린다',sub:'자금 +2억 · 내 통장 -3000만',fn:()=>{S.co.cash+=2;S.money-=3000;}},{label:'투자사에 지분을 판다',sub:'자금 +4억 · 지분 -15%',fn:()=>{S.co.cash+=4;S.equity=Math.max(10,(S.equity||100)-15);S.investor=Math.max(S.investor||0,1);}}]);}if(monthEnd&&S.co.cash<fBankLine())return ()=>ending('창간 실패 · 파산');return null;}
   if(S.rank===7&&!S.story&&S.inRank>=Math.round(48*DF().ten)){if(!S.story){S.goals=S.goals||{};S.goals.ceo=dateShort();}return ()=>ending('임기 만료 · 사장실의 주인');}
@@ -3667,6 +3716,8 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['5.7','승진의 순간',[
+  '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
  ['5.6','균형 맞추기',[
   '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(단독도 터진다), 대표는 "기자에게 취재 맡기기"로 아이템을 넘길 수 있다. 대표 기사도 구독·트래픽에 바로 반영',
   '주요|모바일·태블릿 화면 개편: 아래 탭바(할 일·현황·나·취재·사람·회사)로 한 화면씩. 할 일은 격자로, "다음 달로"는 늘 보이게',
@@ -4393,7 +4444,7 @@ function dashHTML(needTxt){const o=OUT(),D=DF(),nr=RANKS[S.rank];const nx=nextRa
   </section>`;}
 function tabBody(){
   const t=S.tab,o=OUT();
-  if(t==='me'){const rv=S.rival;return `${threadsHTML()}${milesHTML()}${S.story?storyBox():goalsBox()}${rankBox()}${corrBox()}${relGlance()}${S.founder?`${fMixBox()}<p class="hint" style="margin:10px 0 0">발행인은 기자와 다른 능력치로 회사를 이끈다. 행동마다 관련 능력치가 오른다.</p>${fstBox()}<div class="sec">기자 시절 능력치</div><p class="hint" style="margin:0">${Object.keys(STN).map(k=>`${STN[k]} ${Math.round(S.st[k])}`).join(' · ')}</p>`:STG.map(([g,ks])=>`<div class="sec">${g}</div>${ks.map(k=>`<button type="button" class="statrow stk" data-stat="${k}" title="${esc(statTitle(k))}"><span>${STN[k]} <i class="qi">?</i></span>${bar(S.st[k])}<span class="num">${Math.round(S.st[k])}</span><small class="sfx">${STAT_FX[k]?STAT_FX[k][0]:''}</small></button>`).join('')}`).join('')}
+  if(t==='me'){const rv=S.rival;return `${threadsHTML()}${milesHTML()}${slHTML()}${promoLineHTML()}${S.story?storyBox():goalsBox()}${rankBox()}${corrBox()}${relGlance()}${S.founder?`${fMixBox()}<p class="hint" style="margin:10px 0 0">발행인은 기자와 다른 능력치로 회사를 이끈다. 행동마다 관련 능력치가 오른다.</p>${fstBox()}<div class="sec">기자 시절 능력치</div><p class="hint" style="margin:0">${Object.keys(STN).map(k=>`${STN[k]} ${Math.round(S.st[k])}`).join(' · ')}</p>`:STG.map(([g,ks])=>`<div class="sec">${g}</div>${ks.map(k=>`<button type="button" class="statrow stk" data-stat="${k}" title="${esc(statTitle(k))}"><span>${STN[k]} <i class="qi">?</i></span>${bar(S.st[k])}<span class="num">${Math.round(S.st[k])}</span><small class="sfx">${STAT_FX[k]?STAT_FX[k][0]:''}</small></button>`).join('')}`).join('')}
    <div class="sec">평가</div>
    <div class="statrow"><span>${S.founder?(S.investor?'투자자 신뢰':'구성원 신뢰'):S.rank===7?'이사회':'사내평가'}</span>${bar(S.eval,'var(--siren)')}<span class="num">${Math.round(S.eval)}</span></div>
    <div class="statrow"><span>업계평판</span>${bar(S.fame,'var(--sodium)')}<span class="num">${Math.round(S.fame)}</span></div>
@@ -6164,7 +6215,7 @@ function termTick(lines){if(!S.net)return;const news=[];
 // ===== 결과 카드: "확인" 하나뿐인 팝업은 화면을 막지 않는 카드로 =====
 // 중요한 순간(결산·승진·발령·합격·엔딩·징계·퇴직·이직·창간·튜토리얼 등)은 그대로 팝업으로 남긴다
 const KICK={retire:['퇴직·송별','#b9a6ff'],board:['광고','#ffb84d'],press:['매체','#77a6ff'],coin:['투자','#ffd166'],pet:['생활','#9be38a'],age:['나이','#c6c6ff'],paper:['지면','#e8dcc0'],scoop:['단독','#ff7b6b'],phone:['제보','#6fd6ff'],siren:['사건','#ff5c6c'],court:['법정','#a7b4c8'],money:['돈','#4fd1a5'],trophy:['성과','#ffcf5a'],mic:['인터뷰','#8ab4ff'],meeting:['회의','#9fb3d9'],run:['행사','#6ee7b7'],hand:['협상','#f6ad7b'],doc:['자료','#cbd5e1'],warn:['경고','#ff9b5c'],city:['관공서','#93c5fd'],people:['사람','#f9a8d4'],cal:['일정','#a5b4fc'],tv:['방송','#c084fc'],pen:['기사','#fcd34d']};
-const CARD_KEEP=/년 결산|권고사직|라이벌|연속 달성|이정표|출고|처음 안내|결산|승진|발령|합격|불합격|엔딩|클리어|튜토리얼|도움말|업데이트|메뉴|저장|개발자|설정|징계|정년|퇴임|퇴직|사표|이직 결심|새 출근|창간|입사|수습 평가|최종|면접|필기|서류|기자상|대특종|폐간|파산|해고|권고사직|은퇴|임기 만료|게임 오버|처음 해 보는 일|정식 발령|1면 대결|이사회/;
+const CARD_KEEP=/이야기 완결|년 결산|권고사직|라이벌|연속 달성|이정표|출고|처음 안내|결산|승진|발령|합격|불합격|엔딩|클리어|튜토리얼|도움말|업데이트|메뉴|저장|개발자|설정|징계|정년|퇴임|퇴직|사표|이직 결심|새 출근|창간|입사|수습 평가|최종|면접|필기|서류|기자상|대특종|폐간|파산|해고|권고사직|은퇴|임기 만료|게임 오버|처음 해 보는 일|정식 발령|1면 대결|이사회/;
 const CARD_OK_L=/^(확인|알겠다|좋다|닫기|넘어간다)$/;
 function cardOK(title,body,choices){if(!S||S.phase!=='game'||S.cardsOn===false||S.dev&&window.__noCards)return false;if(CARD_KEEP.test(title||''))return false;if(String(body||'').includes('tfig')||String(body||'').includes('<input')||String(body||'').includes('<select'))return false;
   const L=(choices||[]).filter(c=>c&&c.cls!=='ghost');if((choices||[]).some(c=>c&&c.cls==='ghost'))return false;if(L.length>1)return false;if(L.length===1&&!CARD_OK_L.test(String(L[0].label).replace(/<[^>]+>/g,'').trim()))return false;if(L.length===1&&L[0].disabled)return false;return true;}
@@ -6443,6 +6494,148 @@ function mobileNav(){let nav=$('#mnav');const on=!!(S&&S.phase==='game');documen
   const items=[['act','할 일',S.ap>0?S.ap:''],['dash','현황',''],...tg.map(g=>['tab:'+g[0],g[1],''])];
   nav.innerHTML=items.map(([k,n,b])=>{const key=k.split(':')[1]||k;const sel=k==='act'?mv==='act':k==='dash'?mv==='dash':(mv==='tab'&&key===curG);return `<button data-mv="${k}" aria-pressed="${sel}"><i aria-hidden="true">${MNAV_IC[key]||'•'}</i><span>${n}</span>${b!==''?`<em>${b}</em>`:''}</button>`;}).join('');
   nav.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const k=b.dataset.mv;if(k.startsWith('tab:')){window.__MV='tab';const g=tg.find(x=>x[0]===k.slice(4));if(g){const last=S.tabLast&&S.tabLast[g[0]];S.tab=g[2].some(t=>t[0]===last)?last:g[2][0][0];}}else window.__MV=k;render();try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}});}
+// ===== 5.7 스토리라인 30편: 평소 플레이 중에 시작돼 몇 달에 걸쳐 이어지는 이야기. 끝까지 가면 칭호가 남는다 =====
+const SLG={item:o=>{const it=makeItem(S.dept,Object.assign({excl:true,pre:1},o||{}));S.items.push(it);return `→ 「${it.title}」`;},rel:(r,v)=>{const c=colBy(r);if(c)relUp(c,v,'이야기');},money:v=>{S.money+=v;},co:(k,v)=>{if(S.co)S.co[k]=(S.co[k]||0)+v;}};
+const slRk=(a,b)=>!S.founder&&S.rank>=a&&S.rank<=b,slCat=(...c)=>catOf(S.dept).some(x=>c.includes(x));
+const SL=[
+ {id:'whistle',n:'제보자를 지켜라',b:'제보자의 방패',c:()=>slRk(1,3),st:[
+  {t:'익명의 전화. "회사 내부 자료가 있어요. 대신 제 이름은 절대…" 떨리는 목소리였다.',o:[{l:'신원 보호를 약속하고 만난다',fx:{trust:1},go:1},{l:'자료만 받고 바로 쓴다',fx:{fame:1,trust:-2},end:'제보자는 다시 연락하지 않았다.'}]},
+  {t:'회사 측이 "기사 출처를 밝히라"며 편집국에 압박을 넣었다. 제보자가 불안해한다.',o:[{l:'끝까지 출처를 숨긴다',fx:{trust:2,eval:-.5},go:1},{l:'데스크에만 귀띔한다',fx:{eval:.5},go:1,fn:()=>SLG.rel('boss',3)}]},
+  {t:'보도가 나갔다. 제보자가 문자를 보냈다. "덕분에 바뀌었어요. 고맙습니다."',o:[{l:'후속 보도를 준비한다',fx:{fame:2},fn:()=>SLG.item({mult:1.2})},{l:'조용히 답장만 한다',fx:{men:2,trust:1}}]}],rw:{trust:3,fame:2}},
+ {id:'mentor',n:'선배의 마지막 기사',b:'바통을 받은 기자',c:()=>slRk(1,3)&&years()>=2,st:[
+  {t:'정년을 석 달 앞둔 선배가 낡은 취재 수첩을 내밀었다. "끝내지 못한 기획이야. 네가 마무리해 줄래?"',o:[{l:'받는다',fx:{kno:.5},go:1},{l:'"제가 감당할 수 있을까요"',fx:{men:-1},go:1}]},
+  {t:'수첩 속 이름들을 하나씩 찾아갔다. 20년 전 증언과 지금 증언이 맞아떨어진다.',o:[{l:'선배 이름을 공동 바이라인에 넣자고 한다',fx:{eval:.5},go:1,fn:()=>SLG.rel('senior',6)},{l:'내 이름으로 낸다',fx:{fame:1},go:1}]},
+  {t:'송별회 날, 선배가 1면에 실린 기사를 액자에 넣어 왔다. "이제 네 거다."',o:[{l:'술잔을 채운다',fx:{men:2}}]}],rw:{fame:3,eval:1},it:1},
+ {id:'rivalteam',n:'라이벌과 한 팀',b:'적과의 동맹',c:()=>slRk(1,4)&&S.rival,st:[
+  {t:()=>`라이벌 ${S.rival.name}이(가) 먼저 연락해 왔다. "이건 혼자 못 파. 같이 하자."`,o:[{l:'공동 취재에 응한다',fx:{net:.5},go:1},{l:'"내가 먼저 쓴다"',fx:{fame:1},end:'경쟁은 계속된다.'}]},
+  {t:'함께 밤을 새웠다. 서로의 취재원을 처음으로 소개했다.',o:[{l:'내 핵심 취재원도 보여 준다',fx:{trust:1,net:.6},go:1},{l:'핵심은 숨긴다',fx:{inv:.4},go:1}]},
+  {t:'두 매체가 같은 날 아침 동시에 보도했다. 업계에서 "드문 협업"이라는 말이 돌았다.',o:[{l:'다음엔 다시 경쟁이다',fx:{fame:2}}]}],rw:{fame:3,net:1}},
+ {id:'headline',n:'제목 한 줄의 무게',b:'고개 숙일 줄 아는 기자',c:()=>slRk(1,3)&&(S.totalArticles||0)>=10,st:[
+  {t:'내 기사 제목이 피해자를 조롱하는 것처럼 읽힌다며 항의가 쏟아졌다.',o:[{l:'즉시 제목을 고치고 사과문을 쓴다',fx:{trust:1,eval:-.5},go:1},{l:'"의도는 아니었다"며 버틴다',fx:{trust:-2},go:1}]},
+  {t:'피해자 가족이 편집국을 찾아왔다.',o:[{l:'직접 만나 사과한다',fx:{men:-1,trust:2},go:1},{l:'데스크에 맡긴다',fx:{},go:1,fn:()=>SLG.rel('boss',-2)}]},
+  {t:'한 달 뒤 손편지가 왔다. "그날 사과해 줘서 고마웠습니다."',o:[{l:'책상 앞에 붙여 둔다',fx:{men:2,wri:.4}}]}],rw:{trust:3}},
+ {id:'fire',n:'새벽 3시의 화재',b:'현장의 기자',c:()=>slRk(1,3)&&slCat('soc','loc'),st:[
+  {t:'새벽 3시, 휴대전화가 울렸다. 대형 물류창고 화재. 사망자가 나올 것 같다.',o:[{l:'택시를 잡는다',fx:{hp:-8},go:1},{l:'전화로만 확인한다',fx:{},end:'타사가 현장 사진으로 1면을 덮었다.'}]},
+  {t:'현장에서 비상구가 잠겨 있었다는 증언을 들었다.',o:[{l:'잠긴 비상구를 끝까지 추적한다',fx:{inv:.6},go:1,fn:()=>SLG.item({mult:1.2})},{l:'속보 위주로 쓴다',fx:{spd:.5},go:1}]},
+  {t:'비상구 관리 기준이 바뀌었다. 유족 대표가 고맙다며 고개를 숙였다.',o:[{l:'유족 인터뷰를 정리한다',fx:{wri:.4}}]}],rw:{fame:3,eval:1}},
+ {id:'retrial',n:'무죄의 기록',b:'진실을 다시 쓴 기자',c:()=>slRk(1,4)&&slCat('soc','court','case','inv'),st:[
+  {t:'20년 전 살인 사건으로 복역한 남자가 편지를 보냈다. "저는 하지 않았습니다."',o:[{l:'사건 기록을 다시 연다',fx:{kno:.5},go:1},{l:'흔한 편지라 넘긴다',fx:{},end:'편지는 서랍 속에 남았다.'}]},
+  {t:'당시 수사 기록에서 앞뒤가 맞지 않는 진술을 찾았다.',o:[{l:'당시 형사를 찾아간다',fx:{inv:.5,hp:-4},go:1},{l:'법의학 전문가에게 감정을 맡긴다',fx:{ver:.5,money:-30},go:1}]},
+  {t:'재심이 열렸다. 법정에서 무죄가 선고되는 순간, 그가 내 쪽을 돌아봤다.',o:[{l:'기사를 쓴다',fx:{fame:3}}]}],rw:{fame:4,trust:2}},
+ {id:'excel',n:'엑셀 속의 비리',b:'숫자를 읽는 기자',c:()=>slRk(1,4)&&(S.st.dat||0)>=20,st:[
+  {t:'공공데이터 포털에서 받은 계약 내역. 같은 업체가 3년간 수의계약 87건을 따냈다.',o:[{l:'밤새 데이터를 정리한다',fx:{dat:.6,hp:-5},go:1},{l:'일단 쓰고 본다',fx:{},end:'근거가 약해 데스크에서 킬됐다.'}]},
+  {t:'업체 대표가 구청장의 사촌이라는 등기부를 찾았다.',o:[{l:'정보공개청구를 추가로 넣는다',fx:{ver:.5},go:1},{l:'구청에 바로 묻는다',fx:{},go:1}]},
+  {t:'3회 시리즈가 나가고 감사원 감사가 시작됐다.',o:[{l:'데이터를 독자에게 공개한다',fx:{trust:2}}]}],rw:{fame:3,dat:1},it:1},
+ {id:'landfill',n:'작은 마을의 큰 싸움',b:'지역의 목소리',c:()=>slRk(1,4)&&(slCat('loc')||['local'].includes(OUT().type)),st:[
+  {t:'인구 800명 마을에 대형 매립장이 들어선다. 할머니들이 군청 앞에 돗자리를 깔았다.',o:[{l:'마을에 사흘 머문다',fx:{hp:-6},go:1},{l:'보도자료로 정리한다',fx:{},end:'기사는 단신으로 묻혔다.'}]},
+  {t:'환경영향평가서 일부가 다른 지역 것을 베낀 흔적이 보인다.',o:[{l:'원본과 대조한다',fx:{ver:.6},go:1,fn:()=>SLG.item({})},{l:'주민 목소리 위주로 간다',fx:{wri:.4},go:1}]},
+  {t:'계획이 백지화됐다. 마을 회관에서 할머니가 삶은 감자를 내밀었다.',o:[{l:'감사히 먹는다',fx:{men:3}}]}],rw:{fame:2,trust:2}},
+ {id:'matchfix',n:'승부조작의 그림자',b:'그라운드의 감시자',c:()=>slRk(1,4)&&slCat('spo'),st:[
+  {t:'2군 선수가 술자리에서 흘렸다. "요즘 이상한 돈이 돈다."',o:[{l:'조용히 파 본다',fx:{inv:.4},go:1},{l:'구단에 바로 묻는다',fx:{},end:'선수는 입을 닫았다.'}]},
+  {t:'불법 도박 사이트 배당 흐름이 특정 경기와 겹친다.',o:[{l:'경기 영상을 한 프레임씩 본다',fx:{dat:.5,hp:-5},go:1},{l:'브로커를 만난다',fx:{trust:-1,inv:.6},go:1}]},
+  {t:'리그 사무국이 조사에 착수했다. 팬 커뮤니티에 내 기사가 고정 글로 걸렸다.',o:[{l:'후속을 준비한다',fx:{fame:2},fn:()=>SLG.item({})}]}],rw:{fame:3}},
+ {id:'ponzi',n:'사라진 투자금',b:'돈의 흐름을 쫓는 기자',c:()=>slRk(1,4)&&slCat('eco','fin','ind','stock'),st:[
+  {t:'"월 5% 확정 수익" 광고를 낸 업체에 투자자 수천 명이 몰렸다. 피해자 카페가 생겼다.',o:[{l:'피해자들을 만난다',fx:{net:.4},go:1},{l:'금융당국 입장만 받는다',fx:{},end:'다음 달, 업체 대표가 잠적했다.'}]},
+  {t:'신규 투자금으로 기존 투자자 이자를 막는 구조, 전형적인 폰지다.',o:[{l:'자금 흐름도를 그린다',fx:{dat:.6},go:1},{l:'대표를 직접 찾아간다',fx:{hp:-5,inv:.5},go:1}]},
+  {t:'보도 다음 날 경찰이 압수수색에 들어갔다. 피해 확산이 멈췄다.',o:[{l:'피해 회복 방안까지 쓴다',fx:{trust:2}}]}],rw:{fame:3,eval:1}},
+ {id:'aide',n:'보좌관의 수첩',b:'여의도의 기록자',c:()=>slRk(1,4)&&slCat('pol'),st:[
+  {t:'해고된 보좌관이 수첩 한 권을 보여 줬다. 후원금 명단이 빼곡하다.',o:[{l:'수첩을 받는다',fx:{},go:1},{l:'의도를 의심하고 거절한다',fx:{ver:.3},end:'수첩은 다른 매체로 갔다.'}]},
+  {t:'명단 속 기업들이 같은 날 같은 금액을 쪼개 넣었다.',o:[{l:'기업들에 하나씩 확인한다',fx:{ver:.6,hp:-4},go:1},{l:'의원실 반론부터 받는다',fx:{trust:1},go:1}]},
+  {t:'선관위가 고발했다. 국회 기자실에서 타사 기자들이 내 자리로 몰려왔다.',o:[{l:'담담하게 커피를 마신다',fx:{fame:2}}]}],rw:{fame:3,net:1},it:1},
+ {id:'trainee',n:'연습생의 계약서',b:'무대 뒤를 비춘 기자',c:()=>slRk(1,4)&&slCat('ent','cul'),st:[
+  {t:'데뷔를 앞둔 연습생 부모가 계약서 사진을 보냈다. 위약금이 20억이다.',o:[{l:'변호사 자문을 받는다',fx:{kno:.5,money:-20},go:1},{l:'기획사에 먼저 묻는다',fx:{},go:1}]},
+  {t:'같은 기획사 출신들이 하나둘 입을 열었다.',o:[{l:'익명 인터뷰로 엮는다',fx:{wri:.5},go:1},{l:'실명 증언을 설득한다',fx:{trust:1,hp:-4},go:1}]},
+  {t:'공정위가 표준계약서 개정을 발표했다. 그 연습생은 무사히 데뷔했다.',o:[{l:'데뷔 무대를 보러 간다',fx:{men:3}}]}],rw:{fame:3,trust:1}},
+ {id:'corresp',n:'특파원의 꿈',b:'세계를 본 기자',c:()=>slRk(1,3)&&(S.st.lng||0)>=35&&!['local','trade'].includes(OUT().type),st:[
+  {t:'사내 특파원 공모가 떴다. 경쟁자는 다섯 명.',o:[{l:'지원서를 낸다',fx:{lng:.5},go:1},{l:'이번엔 넘긴다',fx:{},end:'다음 공모는 3년 뒤다.'}]},
+  {t:'최종 면접. "현지에서 무엇을 쓰겠습니까?"',o:[{l:'한국 기업의 현지 노동 문제',fx:{kno:.5},go:1},{l:'그 나라 사람들의 삶',fx:{wri:.5},go:1}]},
+  {t:'합격 통보가 왔다. 공항에서 부모님이 손을 흔들었다. 첫 현지발 기사가 국제면 톱에 실렸다.',o:[{l:'현지 취재원을 늘려 간다',fx:{net:.6,lng:1}}]}],rw:{fame:4,lng:2}},
+ {id:'award',n:'기자상 도전',b:'수상 기자',c:()=>slRk(1,5)&&(S.scoops||0)>=3,st:[
+  {t:'데스크가 말했다. "그 시리즈, 기자협회 상에 내 보자."',o:[{l:'응모서를 쓴다',fx:{wri:.4},go:1},{l:'"아직 부족합니다"',fx:{},end:'다음 해를 기약했다.'}]},
+  {t:'1차 심사 통과. 심사위원 질의에 답해야 한다.',o:[{l:'취재 과정을 솔직하게 쓴다',fx:{trust:1},go:1},{l:'성과를 강조한다',fx:{fame:.5},go:1}]},
+  {t:'시상식. 이름이 불렸다. 무대에서 내려와 가장 먼저 제보자에게 문자를 보냈다.',o:[{l:'상패를 편집국에 둔다',fx:{eval:1}}]}],rw:{fame:5,eval:2},aw:1},
+ {id:'book',n:'첫 책',b:'저자',c:()=>!S.founder&&years()>=5&&(S.totalArticles||0)>=40,st:[
+  {t:'출판사에서 연락이 왔다. "그동안 쓰신 기사로 책을 내고 싶습니다."',o:[{l:'계약한다',fx:{},go:1},{l:'시간이 없다',fx:{},end:'메일함에 계약서가 남았다.'}]},
+  {t:'주말마다 원고를 썼다. 기사에는 못 쓴 뒷이야기가 쏟아졌다.',o:[{l:'끝까지 쓴다',fx:{hp:-6,wri:.8},go:1},{l:'편집자 도움을 받는다',fx:{wri:.4},go:1}]},
+  {t:'서점 매대에 내 이름이 박힌 책이 놓였다. 북토크에 독자 40명이 왔다.',o:[{l:'사인을 한다',fx:{men:3}}]}],rw:{fame:4,money:300}},
+ {id:'junior',n:'후배의 첫 단독',b:'키우는 선배',c:()=>slRk(2,4),st:[
+  {t:'막내가 머뭇거리며 말했다. "선배, 이거 기사가 될까요?" 손에 든 메모가 떨린다.',o:[{l:'같이 확인해 준다',fx:{hp:-3},go:1,fn:()=>SLG.rel('junior',6)},{l:'"혼자 해 봐"',fx:{},go:1}]},
+  {t:'후배가 반론을 받다 막혔다. 상대가 소송을 운운한다.',o:[{l:'반론 받는 법을 알려 준다',fx:{eval:.5},go:1},{l:'내가 대신 통화한다',fx:{},go:1}]},
+  {t:'후배의 첫 단독이 나갔다. 회식에서 후배가 잔을 들고 왔다. "선배 덕분입니다."',o:[{l:'"네가 한 거야"',fx:{men:2},fn:()=>SLG.rel('junior',8)}]}],rw:{eval:2,fame:1}},
+ {id:'deptlast',n:'꼴찌 부서의 반란',b:'부서를 일으킨 부장',c:()=>!S.founder&&S.rank===3,st:[
+  {t:'부서 성적표가 나왔다. 꼴찌. 국장이 지나가며 한마디 했다. "부장, 분발해."',o:[{l:'기획 회의를 소집한다',fx:{},go:1},{l:'부서원들을 하나씩 만난다',fx:{cha:.4},go:1}]},
+  {t:'한 부서원이 묵혀 둔 아이템을 꺼냈다. 크다.',o:[{l:'부서 전체를 붙인다',fx:{hp:-5},go:1,fn:()=>SLG.item({mult:1.3})},{l:'그 기자에게 전권을 준다',fx:{},go:1}]},
+  {t:'분기 성적표 맨 위에 우리 부서 이름이 올라갔다.',o:[{l:'부서원들에게 저녁을 산다',fx:{money:-30,men:3}}]}],rw:{eval:3,fame:2}},
+ {id:'union',n:'노조의 부름',b:'동료의 대표',c:()=>slRk(1,3)&&years()>=4&&colBy('union'),st:[
+  {t:'노조 위원장이 찾아왔다. "다음 집행부에 들어와 줘. 기자들이 너를 믿는다."',o:[{l:'수락한다',fx:{},go:1},{l:'취재에 집중하겠다',fx:{},end:'위원장은 아쉬워하며 돌아갔다.'}]},
+  {t:'임금 협상이 결렬 직전이다. 회사는 "적자"를, 노조는 "3년 동결"을 말한다.',o:[{l:'회사 재무제표를 직접 분석한다',fx:{dat:.6},go:1},{l:'파업 찬반 투표를 준비한다',fx:{eval:-1},go:1}]},
+  {t:'잠정 합의. 동료들이 "고생했다"며 어깨를 두드렸다.',o:[{l:'다시 취재 현장으로',fx:{men:2},fn:()=>SLG.rel('union',10)}]}],rw:{trust:1,men:2}},
+ {id:'burnout',n:'번아웃',b:'다시 일어선 기자',c:()=>!S.founder&&S.hp<40,st:[
+  {t:'아침에 눈을 떴는데 노트북을 열 수가 없었다. 손이 떨린다.',o:[{l:'휴가를 낸다',fx:{hp:15,eval:-1},go:1},{l:'커피로 버틴다',fx:{hp:-5},go:1}]},
+  {t:'상담 선생님이 말했다. "기사는 내일도 있어요. 당신은 하나뿐이고요."',o:[{l:'매일 한 시간 걷는다',fx:{hp:8,men:2},go:1},{l:'취미를 하나 만든다',fx:{men:3},go:1}]},
+  {t:'다시 편집국에 앉았다. 같은 자리인데 공기가 다르게 느껴진다.',o:[{l:'천천히 시작한다',fx:{hp:10}}]}],rw:{men:4,hp:10}},
+ {id:'parents',n:'부모님의 스크랩북',b:'자랑스러운 자식',c:()=>!S.founder&&(S.totalArticles||0)>=20,st:[
+  {t:'명절에 고향에 갔다. 아버지가 장롱에서 두꺼운 스크랩북을 꺼냈다. 내 기사가 전부 오려져 있다.',o:[{l:'한 장씩 넘겨 본다',fx:{men:3},go:1}]},
+  {t:'어머니가 물었다. "이 기사 쓰고 혼나진 않았니?" 처음 쓴 단신까지 붙어 있다.',o:[{l:'취재 뒷이야기를 들려준다',fx:{men:2},go:1},{l:'"괜찮았어요"라며 웃는다',fx:{men:1},go:1}]},
+  {t:'서울로 돌아오는 기차. 아버지에게 문자가 왔다. "다음 기사도 기다린다."',o:[{l:'답장을 쓴다',fx:{men:3}}]}],rw:{men:5}},
+ {id:'lawsuit',n:'소송의 계절',b:'법정에서 이긴 기자',c:()=>slRk(1,5)&&(S.totalArticles||0)>=15,st:[
+  {t:'법원 등기가 왔다. 내 기사에 대한 10억 원 손해배상 청구.',o:[{l:'취재 자료를 정리한다',fx:{ver:.4},go:1},{l:'회사 법무팀에만 맡긴다',fx:{},go:1}]},
+  {t:'변론 기일. 상대 변호사가 녹취의 앞뒤 맥락을 문제 삼는다.',o:[{l:'원본 녹취 전체를 제출한다',fx:{trust:1},go:1},{l:'취재원을 증인으로 부른다',fx:{net:-.5},go:1,fn:()=>{}}]},
+  {t:'원고 청구 기각. 판결문에 "공익을 위한 보도"라는 문장이 있었다.',o:[{l:'판결문을 출력해 둔다',fx:{eval:1}}]}],rw:{trust:3,fame:2}},
+ {id:'adcall',n:'광고주의 전화',b:'편집권의 수호자',c:()=>!S.founder&&S.rank>=4&&S.rank<=6,st:[
+  {t:'최대 광고주 회장실에서 직접 전화가 왔다. "그 시리즈, 내일 3탄은 안 나가는 걸로 알겠습니다."',o:[{l:'"편집국이 판단합니다"',fx:{trust:2},go:1},{l:'일단 하루 미룬다',fx:{trust:-1},go:1}]},
+  {t:'사장실 호출. "광고 연간 계약이 걸렸어. 알지?"',o:[{l:'3탄을 그대로 낸다',fx:{trust:3,eval:-2},go:1,fn:()=>SLG.co('cash',-1)},{l:'표현만 다듬어 낸다',fx:{trust:1},go:1}]},
+  {t:'후배 기자들이 사내 게시판에 글을 올렸다. "우리 국장님이 자랑스럽다."',o:[{l:'게시판을 조용히 닫는다',fx:{fame:2}}]}],rw:{trust:4,fame:2}},
+ {id:'digital',n:'편집국 디지털 전환',b:'변화를 이끈 간부',c:()=>!S.founder&&S.rank>=4,st:[
+  {t:'"종이 신문 독자가 매년 7%씩 준다." 사장이 디지털 전환 TF를 맡겼다.',o:[{l:'젊은 기자들로 TF를 꾸린다',fx:{},go:1},{l:'외부 전문가를 영입한다',fx:{},go:1,fn:()=>SLG.co('cash',-.5)}]},
+  {t:'고참 기자들이 반발한다. "기자가 무슨 영상을 찍어."',o:[{l:'고참들과 일대일로 만난다',fx:{cha:.5,hp:-4},go:1},{l:'성과로 보여 준다',fx:{},go:1}]},
+  {t:'디지털 구독자가 처음으로 종이 구독자를 넘었다.',o:[{l:'TF를 정식 부서로 만든다',fx:{eval:1},fn:()=>{SLG.co('bT',.03);SLG.co('bS',.02);}}]}],rw:{eval:3,fame:2}},
+ {id:'bigscoop',n:'대특종의 밤',b:'역사를 쓴 데스크',c:()=>!S.founder&&S.rank>=5,st:[
+  {t:'밤 10시. 탐사팀이 정권 핵심의 비자금 장부를 확보했다. 판단은 내 몫이다.',o:[{l:'내일 1면으로 간다',fx:{hp:-5},go:1},{l:'한 주 더 검증한다',fx:{ver:.5},go:1}]},
+  {t:'청와대·대통령실에서 전화가 빗발친다. 사장도 "신중하라"고 한다.',o:[{l:'윤전기를 돌린다',fx:{trust:2},go:1},{l:'변호사와 문장을 한 줄씩 본다',fx:{trust:1},go:1}]},
+  {t:'다음 날 아침, 모든 방송이 우리 1면을 인용했다. 편집국에 박수가 터졌다.',o:[{l:'기자들을 한 명씩 안아 준다',fx:{men:3}}]}],rw:{fame:6,eval:3}},
+ {id:'board',n:'이사회의 반란',b:'흔들리지 않은 사장',c:()=>!S.founder&&S.rank===7,st:[
+  {t:'대주주 측 이사들이 "편집 방향을 바꾸라"며 해임안을 준비한다는 소문이 돈다.',o:[{l:'이사들을 한 명씩 만난다',fx:{net:.5},go:1},{l:'편집국과 먼저 상의한다',fx:{trust:1},go:1}]},
+  {t:'이사회 당일. 표결이 3대 3으로 갈렸다.',o:[{l:'경영 성과로 설득한다',fx:{eval:1},go:1},{l:'편집권 독립을 정관에 넣자고 한다',fx:{trust:2},go:1}]},
+  {t:'해임안 부결. 편집국 기자들이 사장실 앞에 꽃다발을 두고 갔다.',o:[{l:'꽃을 편집국에 돌려보낸다',fx:{fame:2}}]}],rw:{eval:4,trust:2}},
+ {id:'f1000',n:'첫 유료 독자 1,000명',b:'독자가 키운 매체',c:()=>S.founder,st:[
+  {t:'유료 후원자 999명. 한 명만 더 오면 1,000명이다. 편집국이 새로고침만 누른다.',o:[{l:'후원 독자 감사 편지를 쓴다',fx:{trust:1},go:1},{l:'구독 캠페인을 연다',fx:{},go:1,fn:()=>SLG.co('bS',.01)}]},
+  {t:'1,000번째 후원자는 지방의 한 고등학교 선생님이었다. "학생들과 기사를 함께 읽어요."',o:[{l:'학교를 찾아간다',fx:{hp:-4,men:3},go:1},{l:'감사 영상을 찍는다',fx:{},go:1,fn:()=>SLG.co('bT',.01)}]},
+  {t:'창간 멤버들과 작은 케이크를 잘랐다. 촛불은 1,000개 대신 1개.',o:[{l:'다음 목표는 1만 명',fx:{men:2},fn:()=>SLG.co('bS',.01)}]}],rw:{fame:3,trust:2}},
+ {id:'fvc',n:'투자 제안',b:'흔들리지 않은 발행인',c:()=>S.founder&&S.turn-(S.fStart||0)>=24,st:[
+  {t:'벤처캐피털이 30억 투자를 제안했다. 조건은 "클릭이 나오는 콘텐츠".',o:[{l:'협상 테이블에 앉는다',fx:{},go:1},{l:'단칼에 거절한다',fx:{trust:2},end:'투자자는 경쟁 매체로 갔다.'}]},
+  {t:'계약서에 "편집 방향 협의" 조항이 숨어 있다.',o:[{l:'조항을 빼면 받는다',fx:{trust:1},go:1,fn:()=>SLG.co('cash',8)},{l:'그대로 받는다',fx:{trust:-3},go:1,fn:()=>SLG.co('cash',15)}]},
+  {t:'투자금으로 기자 다섯 명을 더 뽑았다. 편집국 책상이 모자라 새 사무실로 옮겼다.',o:[{l:'새 사무실에 첫 출근',fx:{men:2},fn:()=>SLG.co('staff',3)}]}],rw:{fame:2}},
+ {id:'fcrew',n:'창간 멤버의 고백',b:'함께 버틴 동료',c:()=>S.founder&&colBy('cofound'),st:[
+  {t:()=>`공동창업자 ${colBy('cofound').name}이(가) 술자리에서 말했다. "솔직히 요즘 그만두고 싶어."`,o:[{l:'끝까지 이야기를 듣는다',fx:{men:1},go:1,fn:()=>SLG.rel('cofound',5)},{l:'"힘든 건 다 똑같아"',fx:{},go:1,fn:()=>SLG.rel('cofound',-5)}]},
+  {t:'월급을 석 달째 깎아 왔다. 가족이 걱정한다고 했다.',o:[{l:'내 몫을 줄여 동료 월급을 올린다',fx:{money:-200},go:1,fn:()=>SLG.rel('cofound',10)},{l:'지분을 더 나눈다',fx:{},go:1,fn:()=>SLG.rel('cofound',8)}]},
+  {t:'다음 날 아침, 동료가 평소보다 일찍 출근해 있었다. "커피 사 왔어."',o:[{l:'함께 마신다',fx:{men:3}}]}],rw:{men:3,trust:1}},
+ {id:'reader',n:'독자의 편지',b:'누군가의 삶을 바꾼 기자',c:()=>(S.totalArticles||0)>=8,st:[
+  {t:'편집국으로 손편지가 왔다. "기자님 기사를 보고 체불 임금을 받았습니다."',o:[{l:'편지의 주인을 찾아간다',fx:{hp:-3},go:1},{l:'답장을 쓴다',fx:{men:1},go:1}]},
+  {t:'그는 같은 처지의 동료 20명을 모아 함께 진정을 냈다고 했다.',o:[{l:'후속 기사로 쓴다',fx:{},go:1,fn:()=>SLG.item({excl:false,pre:2})},{l:'조용히 응원만 한다',fx:{men:1},go:1}]},
+  {t:'노동청이 사업장 전체를 근로감독했다. 편지 한 통이 여기까지 왔다.',o:[{l:'편지를 수첩에 끼워 둔다',fx:{men:3}}]}],rw:{trust:2,men:2}},
+ {id:'ten',n:'10년 차의 질문',b:'흔들리지 않는 기자',c:()=>!S.founder&&years()>=10,st:[
+  {t:'대기업 홍보실에서 연봉 두 배 제안이 왔다. "기자 경력, 저희가 제일 잘 압니다."',o:[{l:'일단 만나 본다',fx:{},go:1},{l:'정중히 거절한다',fx:{trust:1},go:1}]},
+  {t:'신입 시절 쓴 첫 기사를 다시 꺼내 읽었다. 서툴지만 뜨겁다.',o:[{l:'"나는 아직 기자다"',fx:{men:3},go:1},{l:'고민을 더 해 본다',fx:{},go:1}]},
+  {t:'다음 날 아침, 다시 출입처로 향했다. 제보 전화가 울린다.',o:[{l:'받는다',fx:{fame:1},fn:()=>SLG.item({})}]}],rw:{men:4,trust:2}}
+];
+const SL_MAP=Object.fromEntries(SL.map(x=>[x.id,x]));
+function slTxt(v){return typeof v==='function'?v():v;}
+// 달마다: 진행 중인 이야기를 잇거나, 조건이 맞는 새 이야기를 연다 (한 번에 하나)
+function slTick(){if(S.story||S.phase!=='game')return;S.sl=S.sl||{};const act=Object.keys(S.sl).find(k=>S.sl[k]&&!S.sl[k].done&&SL_MAP[k]);
+  if(act){const a=S.sl[act];if(S.turn>=a.due)(window.__wq=window.__wq||[]).push(()=>slStage(act));return;}
+  if(S.turn-(S.slLast??-99)<8||!chance(S.simple?.16:.24))return;const pool=SL.filter(x=>!S.sl[x.id]&&(()=>{try{return x.c();}catch(e){return false;}})());if(!pool.length)return;
+  const x=pick(pool);S.sl[x.id]={st:0,due:S.turn,t:S.turn};S.slLast=S.turn;(window.__wq=window.__wq||[]).push(()=>slStage(x.id));}
+function slStage(id){const x=SL_MAP[id],a=S.sl&&S.sl[id];if(!x||!a||a.done)return closeModal();const st=x.st[a.st];const n=x.st.length;
+  openModal(`이야기 · ${x.n} (${a.st+1}/${n})`,`<p class="hint" style="margin:0 0 6px">진행 중인 이야기 · 끝까지 가면 칭호 「${esc(x.b)}」</p><p class="lede">${esc(slTxt(st.t))}</p>`,st.o.map(o=>({label:o.l,sub:o.end?'이야기가 여기서 끝난다':fxPreview(o.fx),fn:()=>{const t=apply(o.fx||{});let extra='';try{const r=o.fn&&o.fn();if(typeof r==='string')extra=r;}catch(e){}
+    if(o.end){a.done=1;a.fail=1;log(`이야기 「${x.n}」 — ${o.end}`);toast(`${o.end}${t?' · '+t:''}`);return;}
+    a.st++;a.t=S.turn;if(a.st>=n){a.done=1;a.ok=dateShort();S.slDone=(S.slDone||0)+1;const rt=apply(x.rw||{});if(x.aw)S.awards=(S.awards||0)+1;if(x.it)extra+=' '+SLG.item({mult:1.1});log(`이야기 완결: 「${x.n}」 · 칭호 「${x.b}」`);
+      openModal(`이야기 완결 · ${x.n}`,`<div class="promo"><div class="pconf" aria-hidden="true"></div><small>나의 이야기 ${S.slDone}/${SL.length}</small><div class="prk" style="font-size:26px">${esc(x.b)}</div><p class="pl">「${esc(x.n)}」을 끝까지 걸어왔다. 수첩에 칭호가 새겨졌다.</p></div>${fxLine([t,rt].filter(Boolean).join(' · '))}${extra?`<p class="fx">${esc(extra)}</p>`:''}`,[{label:'수첩에 적는다'}]);return false;}
+    a.due=S.turn+4*R(1,2);toast(`이야기 「${x.n}」 · 다음 장은 한두 달 뒤${t?' · '+t:''}${extra?' '+extra:''}`);}})));}
+function fxPreview(fx){if(!fx)return '';const N={trust:'신뢰',fame:'평판',eval:'평가',hp:'컨디션',men:'멘탈',money:'통장'};const L=Object.entries(fx).filter(([k,v])=>v&&N[k]).map(([k,v])=>`${N[k]}${v>0?'↑':'↓'}`);return L.join(' · ');}
+function slHTML(){if(S.story)return '';const M=S.sl||{};const done=SL.filter(x=>M[x.id]&&M[x.id].ok);const act=SL.find(x=>M[x.id]&&!M[x.id].done);
+  return `<div class="sec">나의 이야기 ${done.length}/${SL.length}</div>${act?`<div class="card"><div class="t">진행 중 · ${esc(act.n)} <span class="tg">${M[act.id].st+1}/${act.st.length}장</span></div><p class="hint" style="margin:4px 0 0">다음 장은 ${Math.max(0,Math.ceil((M[act.id].due-S.turn)/4))}개월 안에 · 끝까지 가면 칭호 「${esc(act.b)}」</p></div>`:''}${done.length?`<div class="chips" style="margin-top:6px">${done.map(x=>`<span class="cp" title="${esc(x.n)} · ${esc(M[x.id].ok)}">🏅 ${esc(x.b)}</span>`).join('')}</div>`:`<p class="hint">평소처럼 일하다 보면 이야기가 찾아온다. 상황(직급·부서·경력)에 맞는 이야기 ${SL.length}편이 있다.</p>`}`;}
+
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
