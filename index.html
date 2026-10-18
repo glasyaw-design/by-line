@@ -3565,6 +3565,8 @@ function graduate(){
   const autoPick=()=>{const w=o.depts.map(d=>{const t=deptTier(d)[0];let x=TW[t]||1;if(catOf(d).includes(aff))x*=1.3;if((t==='A'||t==='B')&&S.eval>=65)x*=1.6;return x;});let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){r-=w[i];if(r<=0)return o.depts[i];}return o.depts[o.depts.length-1];};
   const place=(got,d)=>{
     S.rank=1;S.inRank=0;S.dept=got;S.eval=52+(S.eval-50)*.4;S.items=S.items.filter(i=>catOf(got).includes(i.d));
+    // 수습용 미션·캡 미션을 비우고 기자 미션으로 새로 시작
+    S.mission=null;S.rkExt=0;S.mis=null;S.mAct={};S.mWin={};try{misEnsure();}catch(e){}
     for(let i=0;i<2;i++)addSource(got);
     log(`수습 종료, ${DEPTS[got].n} 배치`);if(S.net)knowMore();
     const head=d==null?`회사 인사로 <b>${DEPTS[got].n}</b>`:`${got===d?'희망대로':'희망과 달리'} <b>${DEPTS[got].n}</b>`;
@@ -3717,7 +3719,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['5.7','승진의 순간',[
-  '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','수정|캡이 명단에서 빠지거나 평기자로 나오던 문제. 캡은 부서의 차장급(아주 작은 부서는 선임 기자)이 맡고, 같은 부서 탭에 "캡"으로 표시된다. 차장이 된 뒤에는 사내 관계에 "옛 캡"으로 남는다','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
+  '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','수정|수습 건너뛰기 뒤 이달의 미션이 수습용(사쓰마와리·정보보고)으로 남고 행동력·쿨타임이 정리되지 않던 문제. 이제 새 달 첫 주에 정식 기자로 깨끗하게 시작한다','수정|캡이 명단에서 빠지거나 평기자로 나오던 문제. 캡은 부서의 차장급(아주 작은 부서는 선임 기자)이 맡고, 같은 부서 탭에 "캡"으로 표시된다. 차장이 된 뒤에는 사내 관계에 "옛 캡"으로 남는다','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
  ['5.6','균형 맞추기',[
   '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(단독도 터진다), 대표는 "기자에게 취재 맡기기"로 아이템을 넘길 수 있다. 대표 기사도 구독·트래픽에 바로 반영',
   '주요|모바일·태블릿 화면 개편: 아래 탭바(할 일·현황·나·취재·사람·회사)로 한 화면씩. 할 일은 격자로, "다음 달로"는 늘 보이게',
@@ -6033,14 +6035,16 @@ function rookieReqs(o){o=o||OUT();if(S.story)return [];const mo=rookieWeeks(o)/4
 function rookieSkipOK(){return S.phase==='game'&&S.rank===0&&!S.story&&!S.founder;}
 function skipRookie(){if(!rookieSkipOK())return;const left=Math.max(0,rookieWeeks()-S.inRank);
   openModal('수습 건너뛰기',`<p class="lede">남은 수습 ${moTxt(left)}을 자동으로 보내고 바로 정식 기자로 발령받는다.</p><div class="deal"><div class="dp"><b>좋은 점</b><ul><li>바로 본게임 시작</li><li>수습 평가는 기준선으로 통과</li></ul></div><div class="dc"><b>아쉬운 점</b><ul><li>능력치가 직접 할 때보다 덜 오른다</li><li>취재원 2명만 얻는다 (신뢰 낮음)</li><li>캡·동기와의 관계가 덜 쌓인다</li><li>정보보고 수당·평가 보너스 없음</li></ul></div></div>`,[
-   {label:'건너뛴다',fn:()=>{const st0={...S.st};const m0=S.money;let g=0;while(S.rank===0&&S.inRank<rookieWeeks()-1&&g++<40&&S.phase==='game'){S.ap=0;endWeekQuiet();}
+   {label:'건너뛴다',fn:()=>{const st0={...S.st};const m0=S.money;let g=0;while(S.rank===0&&(S.inRank<rookieWeeks()-1||S.turn%4!==0)&&g++<52&&S.phase==='game'){S.ap=0;endWeekQuiet();}
      // 직접 했을 때의 절반쯤만 남긴다
      for(const k in S.st){const d=S.st[k]-st0[k];if(d>0)S.st[k]=st0[k]+d*.6;}
      ['inv','net','sta','kno'].forEach(k=>gain(k,.6));
      for(let i=0;i<2;i++){const sc=addSource(S.dept,R(8,15));}
      const cp=colBy('cap');if(cp)cp.rel=Math.min(cp.rel,20);
      S.eval=Math.max(S.eval,rookieEv())-1;S.memo=0;S.rkSkip=1;S.items=[];
-     S.inRank=rookieWeeks();log('수습 기간을 건너뛰었다');Q.length=0;$('#modal').hidden=true;mTok++;graduate();return false;}},
+     S.inRank=rookieWeeks();log('수습 기간을 건너뛰었다');Q.length=0;$('#modal').hidden=true;mTok++;graduate();
+     // 수습 때 쓰던 것들을 비우고 정식 기자로 새 달을 시작한다 (이달의 미션·캡 미션·수습 연장 횟수·행동력)
+     S.mission=null;S.rkExt=0;S.memo=0;S.mis=null;S.mAct={};S.mWin={};S.cd={};if(S.flags)S.flags.bait=0;S.ap=apBase();S.hp=Math.max(S.hp,80);try{misEnsure();}catch(e){}render();saveGame();return false;}},
    {label:'직접 한다',cls:'ghost'}]);}
 // ===== 선택지 읽기 쉽게: 설명(sub)을 효과 칩으로 쪼갠다 =====
 const BAD_RE=/↓|위험|벌점|들키|논란|소송|반발|사표|이탈|비용|손해|불이익|깎|감소|줄어|낮아|-\d|−|적발|징계|체불|무너|흔들|부담|압박|떨어/;
