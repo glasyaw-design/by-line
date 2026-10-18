@@ -1773,9 +1773,9 @@ function makeItem(d0,opts={}){
   const facts=parseFacts(t[5],f);
   for(let i=0;i<(opts.pre||0);i++){const c=facts.filter(x=>!fOK(x)&&!x.key);if(c.length){const x=pick(c);x.conf=x.need;x.via.push('보도자료');}}
   if(opts.keyConf){const k=facts.find(x=>x.key);k.conf=Math.max(k.conf,1);k.via.push('취재원');}
-  const excl=opts.excl??chance(t[2]<30?.08:.14);const qv=opts.story||opts.anyScale||opts.ticker?1:(.78+Math.random()*.3);
+  const st=S.st||{},sk=clamp(((st.inv||0)+(st.net||0))/200,0,1),vk=clamp((st.ver||0)/100,0,1),plain=opts.story||opts.anyScale||opts.ticker;const excl=opts.excl??chance((t[2]<30?.08:.15)*(.6+1.1*sk));const qlo=.78+.14*sk;const qv=plain?1:(qlo+Math.random()*(1.1+.04*sk-qlo));if(!plain&&!opts.pre&&S.phase==='game'&&!S.story&&chance(Math.min(.25,(typeof years==='function'?years():0)*.025))){const c=facts.filter(x=>!fOK(x)&&!x.key);if(c.length){const x=pick(c);x.conf=x.need;x.via.push('출입처');}}
   const _ti=f(t[1]),_sj=f(t[4]);
-  return{id:uid(),ent:findEnt(_ti,_sj,t[0]),base:t[1],title:_ti,d:t[0],subj:_sj,facts,imp:Math.round(t[2]*(opts.mult||1)*qv),heat:heatFor(excl),excl,ideo:t[3].includes('i'),adv:t[3].includes('a'),hoax:opts.hoax!=null?!!opts.hoax:(!opts.ticker&&!opts.anyScale&&S.phase==='game'&&S.story!=='rookie'&&chance(.025*(DF().risk||1))),dud:!opts.hoax&&!opts.ticker&&!opts.anyScale&&!opts.pre&&S.phase==='game'&&chance(.11),alert:0,rebut:null,expert:0,tape:0,slot:null,chain:opts.chain||0,born:S.turn,src:opts.src||''};
+  return{id:uid(),ent:findEnt(_ti,_sj,t[0]),base:t[1],title:_ti,d:t[0],subj:_sj,facts,imp:Math.round(t[2]*(opts.mult||1)*qv),heat:heatFor(excl),excl,ideo:t[3].includes('i'),adv:t[3].includes('a'),hoax:opts.hoax!=null?!!opts.hoax:(!opts.ticker&&!opts.anyScale&&S.phase==='game'&&S.story!=='rookie'&&chance(.025*(DF().risk||1))),dud:!opts.hoax&&!opts.ticker&&!opts.anyScale&&!opts.pre&&S.phase==='game'&&chance(.11*(1-.55*vk)),alert:0,rebut:null,expert:0,tape:0,slot:null,chain:opts.chain||0,born:S.turn,src:opts.src||''};
 }
 function followUp(it,clip){
   const f=filler(vars());const n=it.chain+1;
@@ -3607,7 +3607,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|불쾌함 줄이기: 할 일 맨 위 경고 상자(곧 물먹을 단독·마감·컨디션·평가·신뢰·자금·다음 달 인사), 물먹기·오보·정정·권고사직 뒤 "다음엔" 팁, 큰 악재 뒤 두 달은 위기·오보 발각이 쉬어 간다, 권고사직이어도 재취업 길은 항상 하나 이상. 결과 카드는 최대 2장만 작게 떠서 화면을 가리지 않는다',
   '주요|자동 저장 3개(최근 3달)를 저장 메뉴에서 불러와 실수를 되돌릴 수 있다. 12월 결산 뒤엔 1년 결산(출고·단독·1면·평가·평판·통장·올해의 기사)',
   '주요|이달의 미션 개편: "버튼 N번" 대신 결과 미션(완성도 55 이상 기사·단독 기사 출고·반론 받은 기사·지면 배정·출입처 장악도 +5·취재원 신뢰 +10·단독 물먹지 않기·굵직한 정보보고·1면 대결 승리·흑자·사기 지키기 등). 미션마다 "어떻게" 한 줄, 지금 해낼 수 있는 것만 나온다. 스토리 모드에선 미션이 뜨지 않는다',
-  '조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.','조정|아이템이 너무 쉽게, 너무 좋게 들어오던 것을 줄였다. 발굴·브리핑 성공률↓, 단독 비율↓, 같은 아이템도 파급력에 편차가 생기고 "알고 보니 기사가 안 되는" 아이템이 조금 늘었다.','수정|아침 발제로 "면 톱"을 배정받았는데 "1면 톱"으로 나가던 문제. 이제 지면은 발제 배정을 따르고(완성도가 낮으면 한 단계 내려간다), 사회면 톱·경제면 톱 같은 "면 톱" 단계가 생겼다. 1면 톱 배정은 단독이거나 파급력이 큰 기사만 3달에 한 번까지, 면 톱은 한 달에 한 번까지. 배정 없이 쓴 기사가 1면 톱에 오르기는 훨씬 어려워졌다',
+  '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.','조정|아이템이 너무 쉽게, 너무 좋게 들어오던 것을 줄였다. 발굴·브리핑 성공률↓, 단독 비율↓, 같은 아이템도 파급력에 편차가 생기고 "알고 보니 기사가 안 되는" 아이템이 조금 늘었다.','수정|아침 발제로 "면 톱"을 배정받았는데 "1면 톱"으로 나가던 문제. 이제 지면은 발제 배정을 따르고(완성도가 낮으면 한 단계 내려간다), 사회면 톱·경제면 톱 같은 "면 톱" 단계가 생겼다. 1면 톱 배정은 단독이거나 파급력이 큰 기사만 3달에 한 번까지, 면 톱은 한 달에 한 번까지. 배정 없이 쓴 기사가 1면 톱에 오르기는 훨씬 어려워졌다',
   '수정|조직 탭의 부서장·같은 부서 명단·사내 관계의 부장/캡/선배가 서로 다른 사람으로 나오던 문제. 이제 회사 명단 하나를 함께 쓴다',
   '수정|수습 정보보고로 선배가 쓴 기사(공동 바이라인)의 선배가 같은 부서 명단에 없는 사람으로 나오던 문제. 이제 같은 부서 3년 차 이상 선배(없으면 캡)가 쓰고, 그 선배와 관계가 오른다',
   '수정|승진 조건에서 나이(차장 31세 등)를 빼고 연차 기준으로 바꿨다. 23세에 입사하면 8년, 29세에 입사하면 2년을 기다리던 문제. 대신 필요 연차를 조금 늘렸다(★3 기준 차장 4년·부장 7년, ★5 차장 6년·부장 10년). 이직할 때 직급 대우도 연차로 정한다',
