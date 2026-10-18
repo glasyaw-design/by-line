@@ -6115,7 +6115,7 @@ const MIS_W={sasu:3,report:2.5,invest:3,pitch:2.5,beat:2,source:2,discover:1.5,d
 function misIdx(){return Math.floor(S.turn/4);}
 function misMetric(k){if(k==='art')return S.totalArticles||0;if(k==='excl')return (S.items||[]).filter(i=>i.excl&&i.born>=S.mis.t0).length+(S.clips||[]).filter(c=>c.excl&&c.turn>=S.mis.t0&&c.by===S.name).length;if(k==='src')return (S.sources||[]).length;if(k==='trust')return Math.max(0,...(S.sources||[]).map(x=>x.trust||0));if(k==='fame')return Math.round(S.fame||0);return (S.mAct&&S.mAct[k])||0;}
 // 결과 중심 미션: '버튼 N번'보다 '무엇을 이뤄라'. 지금 상태에서 해낼 수 있는 것만 고른다
-const mine=()=>(S.clips||[]).filter(c=>String(c.by||'').includes(S.name));
+const mine=()=>(S.clips||[]).filter(c=>!c.staff&&String(c.by||'').split(/[·,\s/]+/).includes(S.name));
 const mClips=()=>mine().filter(c=>c.turn>=S.mis.t0);
 const bmNow=()=>(S.beatM&&S.beatM[S.dept])||0;
 const MIS_DEF={
@@ -6141,7 +6141,7 @@ const MIS_DEF={
 function misMake(){const r=S.rank,sim=!!S.simple,acts=rankActs();const can=id=>acts.includes(id)&&ACT[id]&&(['write','pitch','invest'].includes(id)?(!why(id)||/아이템/.test(why(id))):!why(id));const hasIt=(S.items||[]).length>0,hasEx=(S.items||[]).some(i=>i.excl);const L=[];
   const add=(k,g,t,o={})=>{if(L.some(x=>x.k===k))return;const x={k,g,t,h:o.h||(MIS_DEF[k]&&MIS_DEF[k].h)||'',rel:!!o.rel,b:o.b??0,...(o.x||{})};L.push(x);};
   const pool=[];const P=(w,f)=>pool.push([w,f]);
-  if(S.founder){if(can('write'))P(2,()=>add('art',1,'대표가 직접 기사 1건 출고'));P(2.5,()=>add('profit',1,'이번 달 흑자 내기',{rel:true}));if(S.co)P(1.5,()=>add('subs',sim?1:2,`구독자 ${sim?1:2}% 늘리기`,{b:S.co.subs,rel:true}));P(1.2,()=>add('trustUp',1,'신뢰도 1 올리기',{b:S.trust,rel:true}));if(can('fsales'))P(2,()=>add('fsales',1,'광고·후원 영업 1건 따내기',{h:'광고·후원 영업'}));if(can('fassign'))P(1.6,()=>add('fassign',1,'기자에게 취재 1번 맡기기',{h:'기자에게 취재 맡기기'}));P(1.2,()=>add('fnewsx',1,'편집국 단독 1건',{b:S.fNewsX||0}));}
+  if(S.founder){if(can('write'))P(2,()=>add('art',1,'대표 이름으로 기사 1건 출고',{h:'아이템 발굴 → 취재 나가기 → 기사 쓰기 (기자에게 맡긴 기사는 제외)'}));P(2.5,()=>add('profit',1,'이번 달 흑자 내기',{rel:true}));if(S.co)P(1.5,()=>add('subs',sim?1:2,`구독자 ${sim?1:2}% 늘리기`,{b:S.co.subs,rel:true}));P(1.2,()=>add('trustUp',1,'신뢰도 1 올리기',{b:S.trust,rel:true}));if(can('fsales'))P(2,()=>add('fsales',1,'광고·후원 영업 1건 따내기',{h:'광고·후원 영업'}));if(can('fassign'))P(1.6,()=>add('fassign',1,'기자에게 취재 1번 맡기기',{h:'기자에게 취재 맡기기'}));P(1.2,()=>add('fnewsx',1,'편집국 단독 1건',{b:S.fNewsX||0}));}
   else if(r===0){P(3,()=>add('sasu',sim?1:2,`사쓰마와리 ${sim?1:2}번 돌기`,{h:'사쓰마와리 (두 번째부터 "평소처럼 돌기")'}));P(2.5,()=>add('bigrep',1,'메모 2건 이상 모아 정보보고 1번',{b:S.bigRep||0}));P(2,()=>add('src',1,'새 취재원 1명 사귀기',{b:(S.sources||[]).length}));
     const cp=colBy('cap');if(cp&&(cp.rel||0)<70)P(1.5,()=>add('caprel',4,'캡과 관계 +4',{b:cp.rel||0}));}
   else if(r<=3){if(can('write')){P(3,()=>add('art',r===1&&!sim&&apBase()>=10?2:1,`기사 ${r===1&&!sim&&apBase()>=10?2:1}건 출고`));if(hasIt)P(1.8,()=>add('q60',1,'완성도 55 이상 기사 1건'));if(hasEx)P(2,()=>add('exw',1,'단독 기사 1건 출고'));if(hasIt&&!sim)P(1.2,()=>add('rb',1,'반론을 받은 기사 1건'));if(hasIt)P(1.2,()=>add('place',1,'온라인 단신이 아닌 지면에 기사 싣기'));}
