@@ -1632,7 +1632,7 @@ function deptTarget(d,o,sf){const T=o.type;const core={sports:['spo','base','foo
   const small={cul:[3,6],culspo:[3,6],spo:[3,5],base:[2,4],foot:[2,4],ent:[2,4],med:[2,5],edu:[2,5],it:[3,7],estate:[2,5],stock:[3,7],inv:[3,8],diplo:[3,9],int:[3,10],court:[4,14],case:[5,18],fin:[3,9],ind:[4,14],city:[3,10]}[d];
   if(!small)return null;return Math.round(clamp(small[0]+(small[1]-small[0])*sf,small[0],small[1]));}
 const rTitle=m=>m.desk?'편집장(데스크)':m.acting?'차장(부장 직무대리)':MR[Math.min(3,m.r||0)];
-function roster(){const o=OUT(),c=S.co;const total=Math.min(c.staff,700);if(!S.ros||S.rosOut!==S.outlet||Math.abs(S.ros.n-total)>Math.max(4,total*.15)||S.ros.dk!==o.depts.join()||!S.ros.v2){
+function roster(){const o=OUT(),c=S.co;const total=Math.min(c.staff,700);if(!S.ros||S.rosOut!==S.outlet||Math.abs(S.ros.n-total)>Math.max(4,total*.15)||S.ros.dk!==o.depts.join()||!S.ros.v3){
   const per={};o.depts.forEach(d=>per[d]=[]);S.team.forEach(m=>{(per[m.d]||(per[m.d]=[])).push(m);});const CR=corrs();const regD=o.depts.find(x=>isRegD(x));if(regD&&CR.length)CR.forEach(m=>per[regD].push(m));
   const sf=clamp((total-30)/300,0,1);const tv=['tv','jp','ch'].includes(o.type);
   const sup=total>=25?{x_edit:Math.round(total*(tv?.08:o.type==='wire'?.05:.11)),x_photo:Math.round(total*(tv?.12:.05)),x_digi:Math.round(total*.06),x_op:o.p>=3&&!tv?Math.max(2,Math.round(total*.03)):0}:{x_edit:total>=10?1:0};
@@ -1641,12 +1641,16 @@ function roster(){const o=OUT(),c=S.co;const total=Math.min(c.staff,700);if(!S.r
   const fixed={};o.depts.forEach(d=>{if(d===regD&&CR.length)return;const t=deptTarget(d,o,sf);if(t!=null){fixed[d]=Math.max(t,per[d].length);left-=fixed[d]-per[d].length;}});
   const free=o.depts.filter(d=>fixed[d]==null&&!(d===regD&&CR.length));const w=free.map(d=>DEPT_W[d]||1);const ws=w.reduce((a,b)=>a+b,0)||1;left=Math.max(free.length*2,left);
   const tiny=total<14;const want={};free.forEach((d,i)=>want[d]=Math.max(tiny?1:2,Math.round(left*w[i]/ws)));Object.assign(want,fixed);
+  // 정치·경제·사회 같은 핵심·인기 부서는 편집국 규모에 맞는 최소 인원을 둔다 (다른 부서에서 떼어 온다)
+  {const CORE_MIN={pol:.09,eco:.09,soc:.1,ind:.06,case:.06};const hqN=Object.keys(want).filter(d=>!(d===regD&&CR.length)).reduce((a,d)=>a+want[d],0);
+   o.depts.forEach(d=>{const sh=CORE_MIN[d];if(!sh||want[d]==null||(d===regD&&CR.length))return;const need=Math.max(tiny?1:2,Math.round(hqN*sh));let gap=need-want[d];if(gap<=0)return;
+     const donors=Object.keys(want).filter(x=>!CORE_MIN[x]&&!(x===regD&&CR.length)&&want[x]>(tiny?1:3)).sort((a,b)=>want[b]-want[a]);let g=0;while(gap>0&&donors.length&&g++<200){const x=donors[g%donors.length];if(want[x]>(tiny?1:3)){want[x]--;want[d]++;gap--;}else donors.splice(donors.indexOf(x),1);}});}
   const fill=(d,n)=>{per[d]=per[d]||[];const k0=per[d].length;for(let k=k0;k<n;k++){const m=genMember(d,30,75);m.r=k===0?(n<=6&&chance(.35)?1:o.p>=4&&chance(.15)&&!SUPPORT[d]?3:2):(k===1&&n>=4&&chance(.8))||(n>=12&&k%11===0&&chance(.7))?1:0;if(k===0&&m.r===1)m.acting=1;m.yrs=yrsFor(m.r);per[d].push(m);}fixDept(per[d],d);};
   Object.keys(want).forEach(d=>fill(d,want[d]));if(regD&&CR.length)fixDept(per[regD],regD);
   Object.keys(sup).forEach(d=>{if(sup[d]>0)fill(d,sup[d]);});
   if(tiny){// 작은 매체: 부서장 대신 편집장(데스크) 한 명이 전체를 본다
     const all=Object.values(per).flat().filter(m=>!S.team.includes(m));const top=all.sort((a,b)=>myrs(b)-myrs(a))[0];all.forEach(m=>{if(m!==top){m.r=0;m.acting=0;}});if(top){top.r=2;top.acting=0;top.desk=1;}}
-  S.ros={per,n:total,dk:o.depts.join(),v2:1};S.rosOut=S.outlet;S.rosDept=S.dept;}Object.values(S.ros.per).forEach(a=>a.forEach(fitSk));try{rosterMove(S.ros.per);}catch(e){console.error(e);}actingFix(S.ros.per);try{syncPeople(S.ros.per);}catch(e){}return S.ros.per;}
+  S.ros={per,n:total,dk:o.depts.join(),v2:1,v3:1};S.rosOut=S.outlet;S.rosDept=S.dept;}Object.values(S.ros.per).forEach(a=>a.forEach(fitSk));try{rosterMove(S.ros.per);}catch(e){console.error(e);}actingFix(S.ros.per);try{syncPeople(S.ros.per);}catch(e){}return S.ros.per;}
 // --- 주재 지역 · 부서 변경 시 구성원 교체 ---
 const REGION_DEPTS=['nat','sigun','loc','city'];
 const SUBCITY=['가람시','누리군','한솔시','바다군','솔내시','강마루시','들녘군','새터시'];
@@ -1663,9 +1667,15 @@ function corrRegions(){const o=OUT();return REGIONS[o.id]?SUBCITY.slice(0,6).map
 function corrs(){const o=OUT();if(S.founder){S.posts=S.posts||{};const L=[];S.corrList=S.corrList||{};Object.keys(S.posts).forEach(r=>{S.corrList[r]=(S.corrList[r]||[]).slice(0,S.posts[r]);while(S.corrList[r].length<S.posts[r]){const m=genMember(o.depts.find(d=>['nat','loc','sigun'].includes(d))||o.depts[0],35,65);m.reg=r;m.role='주재기자';m.rel=R(0,20);S.corrList[r].push(m);}if(S.corrList[r].length>=2&&!S.corrList[r].some(x=>x.r>=1)){const c=S.corrList[r].slice().sort((a,b)=>myrs(b)-myrs(a))[0];c.r=corrSmall(o)?Math.max(1,corrRankFree()):1;c.role=corrTitle(c.r,o);const nd=[0,10,15,19][c.r];if(myrs(c)<nd)c.yrs+=nd-myrs(c);}L.push(...S.corrList[r]);});return L;}
   if(!hasCorrDept(o))return [];if(!S.corr||S.corrOut!==S.outlet||S.corrV!==2){S.corrV=2;const d=o.depts.find(x=>['nat','loc','sigun'].includes(x));S.corr=[];const P0=corrPlan(o);
     P0.regs.forEach(r=>{const n=R(P0.lo,P0.hi);const small=corrSmall(o);const sl=corrSlots(P0,r,n).filter(k=>k===1||chance(.75));for(let i=0;i<n;i++){const m=genMember(d,35,70);m.reg=r;m.r=small?corrRankFree():(sl[i]||0);m.role=corrTitle(m.r,o);m.yrs=yrsFor(m.r);m.rel=R(0,20);S.corr.push(m);}});
-    fixDept(S.corr,d);S.corrOut=S.outlet;}S.corr=S.corr.filter(m=>m.reg);S.corr.forEach(fitSk);return S.corr;}
+    fixDept(S.corr,d);S.corrOut=S.outlet;}S.corr=S.corr.filter(m=>m.reg);
+  if(S.corrTrim!==S.outlet){S.corrTrim=S.outlet;const cap=Math.ceil(corrCap(o)*1.15);if(S.corr.length>cap){const keep=m=>(m.r||0)>=1||(m.owe||0)>0||(m.rel||0)>=30;const drop=S.corr.filter(m=>!keep(m)).slice(0,S.corr.length-cap);S.corr=S.corr.filter(m=>!drop.includes(m));S.ros=null;}}
+  S.corr.forEach(fitSk);return S.corr;}
 // 매체마다 다른 지역 취재망: 통신사·지상파는 지역 본부·총국이 크고, 지역 일간지는 시·군 주재가 편집국의 큰 몫, 중앙 일간지는 광역마다 1~3명
-function corrPlan(o){const T=o.type,p=o.p;const W17=['인천','경기남부','경기북부','강원','대전·세종','충남','충북','광주','전남','전북','대구','경북','부산','울산','경남','제주'];const none={regs:[],lo:0,hi:0,lead:0,leadN:'',alt:1};
+// 지역 취재망이 편집국을 다 잡아먹지 않게: 매체 유형별로 주재기자 몫을 전체 기자의 일정 비율 안으로
+const CORR_SH={wire:.34,tv:.28,local:.4,daily:.12,econ:.06,jp:.1,ch:.1};
+function corrCap(o){return Math.max(0,Math.round((o.staff||20)*(CORR_SH[o.type]||.1)));}
+function corrPlan(o){const P=corrPlan0(o);if(!P.regs.length)return P;const cap=corrCap(o);let regs=P.regs;if(cap<regs.length)regs=regs.slice(0,Math.max(1,cap));const per=Math.max(1,Math.floor(cap/regs.length));const hi=Math.max(1,Math.min(P.hi,per)),lo=Math.min(P.lo,hi);return Object.assign({},P,{regs,lo,hi,lead:hi>=2?P.lead:Math.min(P.lead,1)});}
+function corrPlan0(o){const T=o.type,p=o.p;const W17=['인천','경기남부','경기북부','강원','대전·세종','충남','충북','광주','전남','전북','대구','경북','부산','울산','경남','제주'];const none={regs:[],lo:0,hi:0,lead:0,leadN:'',alt:1};
   if(T==='wire')return p>=4?{regs:W17,lo:3,hi:6,lead:2,leadN:'지역취재본부장'}:p===3?{regs:NAT_REG,lo:1,hi:2,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,3),lo:1,hi:1,lead:0,leadN:''};
   if(T==='tv')return p>=4?{regs:['부산','대구','광주','대전','청주','전주','춘천','창원','제주'],lo:6,hi:10,lead:2,leadN:'총국 보도부장'}:p===3?{regs:NAT_REG.slice(0,4),lo:2,hi:3,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,2),lo:1,hi:1,lead:0,leadN:''};
   if(T==='jp'||T==='ch')return p>=4?{regs:NAT_REG.slice(0,5),lo:1,hi:2,lead:1,leadN:'주재 차장'}:{regs:NAT_REG.slice(0,3),lo:1,hi:1,lead:0,leadN:''};
@@ -3719,7 +3729,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['5.7','승진의 순간',[
-  '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','수정|수습 건너뛰기 뒤 이달의 미션이 수습용(사쓰마와리·정보보고)으로 남고 행동력·쿨타임이 정리되지 않던 문제. 이제 새 달 첫 주에 정식 기자로 깨끗하게 시작한다','수정|캡이 명단에서 빠지거나 평기자로 나오던 문제. 캡은 부서의 차장급(아주 작은 부서는 선임 기자)이 맡고, 같은 부서 탭에 "캡"으로 표시된다. 차장이 된 뒤에는 사내 관계에 "옛 캡"으로 남는다','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
+  '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','수정|정치·경제·사회 같은 핵심 부서 인원이 적던 문제. 지역 취재망(주재기자)이 편집국의 큰 몫을 가져가 본사 부서가 2~3명뿐이던 매체(통신사·지역지 등)를 바로잡았다. 주재기자는 매체 유형별 비율 안에서, 핵심 부서는 편집국 규모에 맞는 최소 인원을 둔다','수정|수습 건너뛰기 뒤 이달의 미션이 수습용(사쓰마와리·정보보고)으로 남고 행동력·쿨타임이 정리되지 않던 문제. 이제 새 달 첫 주에 정식 기자로 깨끗하게 시작한다','수정|캡이 명단에서 빠지거나 평기자로 나오던 문제. 캡은 부서의 차장급(아주 작은 부서는 선임 기자)이 맡고, 같은 부서 탭에 "캡"으로 표시된다. 차장이 된 뒤에는 사내 관계에 "옛 캡"으로 남는다','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
  ['5.6','균형 맞추기',[
   '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(단독도 터진다), 대표는 "기자에게 취재 맡기기"로 아이템을 넘길 수 있다. 대표 기사도 구독·트래픽에 바로 반영',
   '주요|모바일·태블릿 화면 개편: 아래 탭바(할 일·현황·나·취재·사람·회사)로 한 화면씩. 할 일은 격자로, "다음 달로"는 늘 보이게',
