@@ -1584,7 +1584,7 @@ function roster(){const o=OUT(),c=S.co;const total=Math.min(c.staff,700);if(!S.r
   Object.keys(sup).forEach(d=>{if(sup[d]>0)fill(d,sup[d]);});
   if(tiny){// 작은 매체: 부서장 대신 편집장(데스크) 한 명이 전체를 본다
     const all=Object.values(per).flat().filter(m=>!S.team.includes(m));const top=all.sort((a,b)=>myrs(b)-myrs(a))[0];all.forEach(m=>{if(m!==top){m.r=0;m.acting=0;}});if(top){top.r=2;top.acting=0;top.desk=1;}}
-  S.ros={per,n:total,dk:o.depts.join(),v2:1};S.rosOut=S.outlet;}Object.values(S.ros.per).forEach(a=>a.forEach(fitSk));actingFix(S.ros.per);try{syncPeople(S.ros.per);}catch(e){}return S.ros.per;}
+  S.ros={per,n:total,dk:o.depts.join(),v2:1};S.rosOut=S.outlet;S.rosDept=S.dept;}Object.values(S.ros.per).forEach(a=>a.forEach(fitSk));try{rosterMove(S.ros.per);}catch(e){console.error(e);}actingFix(S.ros.per);try{syncPeople(S.ros.per);}catch(e){}return S.ros.per;}
 // --- 주재 지역 · 부서 변경 시 구성원 교체 ---
 const REGION_DEPTS=['nat','sigun','loc','city'];
 const SUBCITY=['가람시','누리군','한솔시','바다군','솔내시','강마루시','들녘군','새터시'];
@@ -1916,7 +1916,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='5.5';
+const VERSION='5.6';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -3486,12 +3486,21 @@ function graduate(){
   const o=OUT();const aff=MAJORS[S.major].aff;
   if(window.__skip){S.rank=1;S.inRank=0;S.dept=o.depts.find(d=>catOf(d).includes(aff))||o.depts[0];S.eval=55;addSource(S.dept);log(`수습 종료, ${DEPTS[S.dept].n} 배치`);return;}
   
-  openModal('수습 종료 · 부서 배치 희망',`<p class="lede">${S.capName} 캡: "그동안 고생했다. 어디 가고 싶냐."</p><p>희망 부서를 적어 낸다. 평가가 높을수록 희망대로 될 가능성이 크다. (현재 ${Math.round(S.eval)}) 나중에 부서 이동 신청도 할 수 있다.</p>`,o.depts.map(d=>({label:DEPTS[d].n,sub:`${DEPTS[d].lede}${catOf(d).includes(aff)?' · 전공 적합':''}`,fn:()=>{
-    const got=chance(.4+S.eval/230+(catOf(d).includes(aff)?.1:0)+((colBy('boss')||{rel:0}).rel)/500)?d:pick(o.depts);
+  // 8할은 회사가 알아서 배치한다. 인기 부서(정치·법조·탐사·외교)는 신입에게 잘 안 준다
+  const TW={A:.25,B:.6,C:1,D:1.6};
+  const autoPick=()=>{const w=o.depts.map(d=>{const t=deptTier(d)[0];let x=TW[t]||1;if(catOf(d).includes(aff))x*=1.3;if((t==='A'||t==='B')&&S.eval>=65)x*=1.6;return x;});let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){r-=w[i];if(r<=0)return o.depts[i];}return o.depts[o.depts.length-1];};
+  const place=(got,d)=>{
     S.rank=1;S.inRank=0;S.dept=got;S.eval=52+(S.eval-50)*.4;S.items=S.items.filter(i=>catOf(got).includes(i.d));
     for(let i=0;i<2;i++)addSource(got);
     log(`수습 종료, ${DEPTS[got].n} 배치`);if(S.net)knowMore();
-    openModal('정식 발령',`<p class="lede">${got===d?'희망대로':'희망과 달리'} <b>${DEPTS[got].n}</b>${cat1(got)==='loc'?` (${pick(CITIES)} 주재)`:''} 발령.</p><p>출입처: ${DEPTS[got].beat}. 선배가 취재원 두 명을 넘겨줬다. 매주 아침 발제로 지면을 받고, 취재 나가기로 사실을 모으자.</p>`);return false;}})));
+    const head=d==null?`회사 인사로 <b>${DEPTS[got].n}</b>`:`${got===d?'희망대로':'희망과 달리'} <b>${DEPTS[got].n}</b>`;
+    const t=deptTier(got)[0];const note=d==null?(t==='A'?' 신입이 바로 가기 어려운 부서다. 동기들이 부러워했다.':t==='D'?' 신입은 대개 여기서 굴러 본다.':''):'';
+    openModal('정식 발령',`<p class="lede">${head}${cat1(got)==='loc'?` (${pick(CITIES)} 주재)`:''} 발령.${note}</p><p>출입처: ${DEPTS[got].beat}. 선배가 취재원 두 명을 넘겨줬다. 매주 아침 발제로 지면을 받고, 취재 나가기로 사실을 모으자.</p>${d==null?'<p class="hint">이번엔 희망 부서를 받지 않았다. 나중에 부서 이동 신청을 할 수 있다.</p>':''}`);return false;};
+  if(o.depts.length<2||chance(.8)){const got=autoPick();return openModal('수습 종료 · 부서 배치',`<p class="lede">${S.capName} 캡: "그동안 고생했다. 인사 났다. 가서 잘해라."</p><p>올해는 희망 부서를 받지 않고 회사가 배치했다.</p>`,[{label:'발령장을 받는다',fn:()=>place(got,null)}]);}
+  openModal('수습 종료 · 부서 배치 희망',`<p class="lede">${S.capName} 캡: "그동안 고생했다. 어디 가고 싶냐."</p><p>올해는 희망 부서를 받는다. 평가가 높을수록 희망대로 될 가능성이 크지만, 정치·법조 같은 인기 부서는 경쟁이 세다. (현재 ${Math.round(S.eval)}) 나중에 부서 이동 신청도 할 수 있다.</p>`,o.depts.map(d=>{const t=deptTier(d)[0];return {label:DEPTS[d].n,sub:`${DEPTS[d].lede}${catOf(d).includes(aff)?' · 전공 적합':''}${t==='A'?' · 인기 부서(경쟁↑)':t==='D'?' · 지원자 적음':''}`,fn:()=>{
+    const pen={A:-.25,B:-.1,C:0,D:.12}[t]||0;
+    const got=chance(.4+S.eval/230+pen+(catOf(d).includes(aff)?(t==='A'?.05:.1):0)+((colBy('boss')||{rel:0}).rel)/500)?d:autoPick();
+    return place(got,d);}};}));
 }
 // 순환 보직: 한 부서에 2~3년 있으면 원하지 않아도 옮긴다. 큰 회사일수록 잦고, 작은 회사는 부서가 적어 드물다. 평가가 바닥이면 문책성 인사
 function rotation(){const o=OUT();if(S.deptT==null)S.deptT=Math.max(0,S.turn-48);const ten=S.turn-S.deptT;const big=o.p>=4?1:o.p===3?.8:.45;
@@ -3603,11 +3612,18 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['5.6','균형 맞추기',[
+  '수정|아침 발제로 "면 톱"을 배정받았는데 "1면 톱"으로 나가던 문제. 이제 지면은 발제 배정을 따르고(완성도가 낮으면 한 단계 내려간다), 사회면 톱·경제면 톱 같은 "면 톱" 단계가 생겼다. 1면 톱 배정은 단독이거나 파급력이 큰 기사만 3달에 한 번까지, 면 톱은 한 달에 한 번까지. 배정 없이 쓴 기사가 1면 톱에 오르기는 훨씬 어려워졌다',
+  '조정|아이템이 너무 쉽게, 너무 좋게 들어오던 것을 줄였다. 발굴·브리핑 성공률↓, 단독 비율↓, 같은 아이템도 파급력에 편차가 생기고 "알고 보니 기사가 안 되는" 아이템이 조금 늘었다.',
+  '조정|출입처 장악도가 너무 빨리 차던 것을 늦췄다(터줏대감 약 1년 반, 전설 3~4년). 장악도가 쌓일 수 없는 직급이거나 거의 다 찼을 때는 "장악도 올리기" 미션이 나오지 않는다.',
+  '조정|수습이 끝나면 대개(8할) 회사가 부서를 배치한다. 정치·법조·탐사 같은 인기 부서는 신입에게 잘 돌아가지 않고, 희망을 받는 해에도 경쟁이 세다.',
+  '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.',
+  '수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
  ['5.5','커리어가 움직인다',[
   '주요|불쾌함 줄이기: 할 일 맨 위 경고 상자(곧 물먹을 단독·마감·컨디션·평가·신뢰·자금·다음 달 인사), 물먹기·오보·정정·권고사직 뒤 "다음엔" 팁, 큰 악재 뒤 두 달은 위기·오보 발각이 쉬어 간다, 권고사직이어도 재취업 길은 항상 하나 이상. 결과 카드는 최대 2장만 작게 떠서 화면을 가리지 않는다',
   '주요|자동 저장 3개(최근 3달)를 저장 메뉴에서 불러와 실수를 되돌릴 수 있다. 12월 결산 뒤엔 1년 결산(출고·단독·1면·평가·평판·통장·올해의 기사)',
   '주요|이달의 미션 개편: "버튼 N번" 대신 결과 미션(완성도 55 이상 기사·단독 기사 출고·반론 받은 기사·지면 배정·출입처 장악도 +5·취재원 신뢰 +10·단독 물먹지 않기·굵직한 정보보고·1면 대결 승리·흑자·사기 지키기 등). 미션마다 "어떻게" 한 줄, 지금 해낼 수 있는 것만 나온다. 스토리 모드에선 미션이 뜨지 않는다',
-  '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.','조정|아이템이 너무 쉽게, 너무 좋게 들어오던 것을 줄였다. 발굴·브리핑 성공률↓, 단독 비율↓, 같은 아이템도 파급력에 편차가 생기고 "알고 보니 기사가 안 되는" 아이템이 조금 늘었다.','수정|아침 발제로 "면 톱"을 배정받았는데 "1면 톱"으로 나가던 문제. 이제 지면은 발제 배정을 따르고(완성도가 낮으면 한 단계 내려간다), 사회면 톱·경제면 톱 같은 "면 톱" 단계가 생겼다. 1면 톱 배정은 단독이거나 파급력이 큰 기사만 3달에 한 번까지, 면 톱은 한 달에 한 번까지. 배정 없이 쓴 기사가 1면 톱에 오르기는 훨씬 어려워졌다',
+  
   '수정|조직 탭의 부서장·같은 부서 명단·사내 관계의 부장/캡/선배가 서로 다른 사람으로 나오던 문제. 이제 회사 명단 하나를 함께 쓴다',
   '수정|수습 정보보고로 선배가 쓴 기사(공동 바이라인)의 선배가 같은 부서 명단에 없는 사람으로 나오던 문제. 이제 같은 부서 3년 차 이상 선배(없으면 캡)가 쓰고, 그 선배와 관계가 오른다',
   '수정|승진 조건에서 나이(차장 31세 등)를 빼고 연차 기준으로 바꿨다. 23세에 입사하면 8년, 29세에 입사하면 2년을 기다리던 문제. 대신 필요 연차를 조금 늘렸다(★3 기준 차장 4년·부장 7년, ★5 차장 6년·부장 10년). 이직할 때 직급 대우도 연차로 정한다',
@@ -4342,7 +4358,7 @@ function tabBody(){
   if(t==='org'){const L=leaders(),rows=orgCounts();const per=roster();const tot=rows.reduce((a,r)=>a+r[1],0);
     return `<div class="kv"><div><span>사장(대표)</span><b style="font-size:15px">${esc(L.ceo)}</b></div><div><span>${isTV()?'보도국장':'편집국장'}</span><b style="font-size:15px">${esc(L.chief)}</b></div><div><span>기자</span><b>${tot}명</b></div><div><span>전체 임직원</span><b>${employees()}명</b></div></div><p class="hint" style="margin:6px 0 0">임직원에는 총무·광고·판매·제작·기술 인력이 포함된다. 아래는 편집국(보도국) 기자만 센 것이다.</p>
     <div class="sec">직급별 인원</div>${rows.map(([n,c,who])=>`<div class="statrow" style="grid-template-columns:96px minmax(0,1fr) 48px"><span>${n}</span>${bar(Math.min(100,c/Math.max(1,tot)*250),'var(--siren)')}<span class="num">${c}</span></div>${who?`<p class="hint" style="margin:-4px 0 6px 104px;font-size:11.5px">${esc(who)}</p>`:''}`).join('')}
-    <div class="sec">부서장</div>${Object.keys(per).filter(d=>dn(d)&&per[d].length).map(d=>{const h=per[d].find(m=>m.r>=2)||per[d].find(m=>m.acting)||per[d].find(m=>m.r===1);const isReg=isRegD(d);return `<p class="meta" style="margin:3px 0"><b style="color:var(--fg)">${dn(d)}</b> ${per[d].length}명 · ${isReg?`지역 ${new Set(per[d].map(m=>m.reg).filter(Boolean)).size}곳`:h?`${rTitle(h)} ${esc(h.name)}`:''}</p>`;}).join('')}
+    <div class="sec">부서장</div>${Object.keys(per).filter(d=>dn(d)&&per[d].length).map(d=>{const isReg=isRegD(d);const me=!S.founder&&S.rank===3&&d===S.dept;return `<p class="meta" style="margin:3px 0"><b style="color:var(--fg)">${dn(d)}</b> ${per[d].length+(me?1:0)}명 · ${isReg?`지역 ${new Set(per[d].map(m=>m.reg).filter(Boolean)).size}곳`:headLabel(per,d)}</p>`;}).join('')}
     <p class="hint">사장과 편집국장은 회사에 단 한 명. 일반 부서의 부서장은 부서마다 한 명이다. 작은 부서는 차장이 부장 직무대리를 맡기도 하고, 큰 부서엔 차장이 둘 이상일 수 있다.</p>`;}
   if(t==='log')return logTabHTML();
   return '';
@@ -5289,7 +5305,7 @@ const MISS_POOL=[['sasu','사쓰마와리',2,3],['report','정보보고',1,3],['
 function missNew(){const ids=rankActs();const pool=MISS_POOL.filter(m=>ids.includes(m[0]));const g=shuffle(pool).slice(0,3).map(([k,n,lo,hi])=>({k,n,need:S.simple?lo:R(lo,hi),c:0}));S.mission={t:S.turn,g};}
 function rankHook(id){if(S.phase!=='game')return;
   if(S.rank===0&&!S.founder){if(!S.mission)missNew();S.mission.g.forEach(x=>{if(x.k===id)x.c++;});}
-  if(S.rank>=1&&S.rank<=2&&!S.founder&&['beat','source','discover','write','invest','special','pitch'].includes(id)){S.beatM=S.beatM||{};const v=S.beatM[S.dept]||0;S.beatM[S.dept]=clamp(v+({beat:4,source:3,discover:2,write:3,invest:2,special:4,pitch:1}[id])*(S.simple?1.3:1)*.7*(1-v/130),0,100);}
+  if(S.rank>=1&&S.rank<=2&&!S.founder&&['beat','source','discover','write','invest','special','pitch'].includes(id)){S.beatM=S.beatM||{};const v=S.beatM[S.dept]||0;S.beatM[S.dept]=clamp(v+({beat:4,source:3,discover:2,write:3,invest:2,special:4,pitch:1}[id])*(S.simple?1.3:1)*.32*Math.max(0,1-v/112),0,100);}
   if(S.rank===6&&S.agenda&&['meeting','front','taskforce','direction','column'].includes(id))S.agenda.p=Math.min(100,S.agenda.p+({meeting:3,front:4,taskforce:8,direction:5,column:4}[id]));}
 function beatTier(){const v=(S.beatM||{})[S.dept]||0;return v>=75?3:v>=45?2:v>=20?1:0;}
 const BEAT_T=['낯선 얼굴','얼굴 아는 기자','출입처 터줏대감','출입처의 전설'];
@@ -5302,7 +5318,7 @@ function rankMonth(lines){if(S.founder)return;
      else{lines.push({c:'r',t:'캡의 이달 미션 0개 — 새벽 3시에 전화가 왔다.'});apply({eval:-1.5});if(cap)relUp(cap,-5,'미션 실패');}
      missNew();} else if(!S.mission)missNew();}
   // 출입처 장악도 혜택
-  if(S.rank>=1&&S.rank<=2){S.beatM=S.beatM||{};const t=beatTier();S.beatM[S.dept]=Math.max(0,(S.beatM[S.dept]||0)-1.2);
+  if(S.rank>=1&&S.rank<=2){S.beatM=S.beatM||{};const t=beatTier();S.beatM[S.dept]=Math.max(0,(S.beatM[S.dept]||0)-1.5);
     if(t>=3&&chance(.2)){const it=makeItem(S.dept,{excl:chance(.6),keyConf:true,mult:1.1});it.src='출입처';S.items.push(it);lines.push({c:'g',t:`출입처의 전설 — 기관 사람이 먼저 귀띔해 줬다 → 「${it.title}」`});}
     else if(t>=2&&chance(.14)){const it=makeItem(S.dept,{pre:1});S.items.push(it);lines.push({c:'g',t:`출입처 터줏대감 — 대변인실이 자료를 먼저 챙겨 줬다 → 「${it.title}」`});}}
   // 제자 키우기
@@ -5380,7 +5396,7 @@ const SCOOP_BANNER={단독:['단독','var(--siren)','우리가 먼저 썼다'],�
 function scoopBanner(g){const B=SCOOP_BANNER[g];if(!B)return '';return `<div class="sban" style="--c:${B[1]}"><b>${B[0]}</b><span>${B[2]}</span></div>`;}
 // 등급별 후속 효과: 직급 시스템·경쟁사·출입처와 맞물린다
 function scoopAfter(g,it,lines){if(!g)return;const o=OUT();if(g==='특종'||g==='대특종')S.tokjong=(S.tokjong||0)+1;
-  if(g!=='단독'){S.beatM=S.beatM||{};S.beatM[S.dept]=Math.min(100,(S.beatM[S.dept]||0)+(g==='대특종'?14:7));}
+  if(g!=='단독'){S.beatM=S.beatM||{};S.beatM[S.dept]=Math.min(100,(S.beatM[S.dept]||0)+(g==='대특종'?8:4));}
   if(S.comp)S.comp.forEach(c=>{c.aggro=clamp((c.aggro||0)+(g==='대특종'?8:g==='특종'?4:1),0,100);});
   if(S.agenda&&!S.agenda.done)S.agenda.p=Math.min(100,S.agenda.p+(g==='대특종'?12:g==='특종'?6:2));
   if(S.rank===0&&S.mission)S.mission.g.forEach(x=>{if(x.k==='write')x.c++;});
@@ -6112,7 +6128,7 @@ function misMake(){const r=S.rank,sim=!!S.simple,acts=rankActs();const can=id=>a
   else if(r===0){P(3,()=>add('sasu',sim?1:2,`사쓰마와리 ${sim?1:2}번 돌기`,{h:'사쓰마와리 (두 번째부터 "평소처럼 돌기")'}));P(2.5,()=>add('bigrep',1,'메모 2건 이상 모아 정보보고 1번',{b:S.bigRep||0}));P(2,()=>add('src',1,'새 취재원 1명 사귀기',{b:(S.sources||[]).length}));
     const cp=colBy('cap');if(cp&&(cp.rel||0)<70)P(1.5,()=>add('caprel',4,'캡과 관계 +4',{b:cp.rel||0}));}
   else if(r<=3){if(can('write')){P(3,()=>add('art',r===1&&!sim&&apBase()>=10?2:1,`기사 ${r===1&&!sim&&apBase()>=10?2:1}건 출고`));if(hasIt)P(1.8,()=>add('q60',1,'완성도 55 이상 기사 1건'));if(hasEx)P(2,()=>add('exw',1,'단독 기사 1건 출고'));if(hasIt&&!sim)P(1.2,()=>add('rb',1,'반론을 받은 기사 1건'));if(hasIt)P(1.2,()=>add('place',1,'온라인 단신이 아닌 지면에 기사 싣기'));}
-    if(can('pitch'))P(1.5,()=>add('slot',1,'아침 발제로 지면 배정 받기',{b:S.slotN||0}));P(1.6,()=>add('excl',1,'새 단독 아이템 1건 확보',{x:{ids:(S.items||[]).filter(i=>i.excl).map(i=>i.id)}}));if(acts.includes('beat')||acts.includes('source'))P(1.3,()=>add('beatm',5,'출입처 장악도 +5',{b:bmNow()}));
+    if(can('pitch'))P(1.5,()=>add('slot',1,'아침 발제로 지면 배정 받기',{b:S.slotN||0}));P(1.6,()=>add('excl',1,'새 단독 아이템 1건 확보',{x:{ids:(S.items||[]).filter(i=>i.excl).map(i=>i.id)}}));if((acts.includes('beat')||acts.includes('source'))&&!S.founder&&S.rank>=1&&S.rank<=2&&bmNow()<88)P(1.3,()=>add('beatm',bmNow()>=60?3:4,`출입처 장악도 +${bmNow()>=60?3:4}`,{b:bmNow()}));
     if((S.sources||[]).length){const tb={};S.sources.forEach(x=>tb[x.id]=x.trust||0);P(1.2,()=>add('trust',8,'취재원 1명과 신뢰 +8',{x:{tb}}));}
     if(hasEx&&!sim)P(1.2,()=>add('nolost',1,'이번 달 단독을 하나도 물먹지 않기',{b:S.lostN||0,rel:true}));
     if(r>=2&&can('desk'))P(1.6,()=>add('desk',1,'후배 기사 데스킹 1번',{h:'데스킹'}));}
@@ -6260,9 +6276,25 @@ function yearRecap(){const a=S.yr0;const b=yrSnap();S.yr0=b;if(!a||S.story)retur
 
 // ===== 사람 정보는 한 명단으로: 조직 탭·같은 부서·사내 관계가 같은 사람을 가리키게 =====
 // 회사 명단(roster)의 내 부서에서 부서장=사내 관계의 '부장', 차장급 한 명=캡, 고참 기자 한 명=선배로 이름을 맞춘다
+// 부서장은 한 함수로만 정한다 (조직 탭·사내 관계·같은 부서가 같은 사람을 본다). 내가 부장인 부서는 null → 나
+function deptHead(per,d){if(!S.founder&&S.rank===3&&d===S.dept)return null;const L=(per||{})[d]||[];const T=S.team||[];const nt=m=>!T.includes(m);
+  return L.find(m=>(m.r||0)>=2&&nt(m))||L.find(m=>m.desk&&nt(m))||L.find(m=>m.acting&&nt(m))||L.find(m=>m.r===1&&nt(m))||L.find(m=>(m.r||0)>=2)||null;}
+function headLabel(per,d){if(!S.founder&&S.rank===3&&d===S.dept)return `${rankName()} ${esc(S.name)}(나)`;const h=deptHead(per,d);return h?`${rTitle(h)} ${esc(h.name)}`:'';}
+// 내가(또는 회사가) 부서를 옮기면: 내 부서원은 새 부서 명단으로, 부서장 자리는 비지 않게, 사내 관계의 부장·캡·선배는 새 부서 사람으로
+function rosterMove(per){if(S.founder||!per)return;const cur=S.dept,prev=S.rosDept;S.rosDept=cur;const T=S.team||[];
+  const Ln=per[cur]=per[cur]||[];
+  if(S.rank>=2&&S.rank<=3&&!isRegD(cur)){let added=0;T.forEach(m=>{if(Ln.includes(m))return;Object.keys(per).forEach(d=>{if(d!==cur)per[d]=per[d].filter(x=>x!==m);});m.d=cur;Ln.push(m);added++;});
+    if(added){const names=new Set((S.cols||[]).map(c=>c.name));const spare=Ln.filter(m=>!T.includes(m)&&!(m.r>0)&&!m.acting&&!m.desk&&!names.has(m.name));spare.slice(0,Math.min(added,Math.max(0,Ln.length-T.length-3))).forEach(m=>{const i=Ln.indexOf(m);if(i>=0)Ln.splice(i,1);});}
+    T.forEach(m=>{const cap=Math.max(0,S.rank-2);if((m.r||0)>cap||m.acting){m.r=Math.min(m.r||0,cap);m.acting=0;}});}
+  if(prev==null||prev===cur)return;
+  const Lo=per[prev];const hasHead=L=>L&&L.some(m=>(m.r||0)>=2||m.acting||m.desk);
+  if(S.rank===3&&!isRegD(cur)){const h=Ln.find(m=>(m.r||0)>=2&&!T.includes(m));if(h){Ln.splice(Ln.indexOf(h),1);if(Lo&&!isRegD(prev)&&!hasHead(Lo)){h.d=prev;Lo.push(h);}else{h.r=1;h.acting=0;Ln.push(h);}}}
+  if(Lo&&!isRegD(prev)&&Lo.length>=2&&!hasHead(Lo)){const c=Lo.filter(m=>m.r===1&&!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0]||Lo.filter(m=>!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0];if(c){if(Lo.length<=7){c.r=1;c.acting=1;}else{c.r=2;c.acting=0;}}}
+  if(!isRegD(cur)&&S.rank<=2&&!hasHead(Ln.filter(m=>!T.includes(m)))){const c=Ln.filter(m=>!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0];if(c){if(Ln.length<=7){c.r=1;c.acting=1;}else{c.r=2;c.acting=0;}}}
+  ['boss','cap','senior'].forEach(r=>{const c=colBy(r);if(c&&(r==='boss'?S.rank<=2:S.rank<=1))c.fresh=1;});}
 function syncPeople(per){if(!S||S.founder||!S.cols||!per)return;const L=per[S.dept];if(!L||!L.length||isRegD(S.dept))return;
-  const used=new Set();const setName=(m,c)=>{if(!m||!c)return;if(m.name!==c.name){const dup=Object.values(per).flat().find(x=>x!==m&&x.name===c.name);if(dup)dup.name=rname();m.name=c.name;}used.add(m);if(c.yrs==null&&m.yrs!=null){c.yrs=myrs(m);c.t0=S.turn;}};
-  const head=L.find(m=>(m.r||0)>=2&&!S.team.includes(m))||L.find(m=>m.desk)||L.find(m=>m.acting)||Object.values(per).flat().find(m=>m.desk);
+  const used=new Set();const setName=(m,c)=>{if(!m||!c)return;if(c.fresh){c.name=m.name;c.rel=R(0,15);c.yrs=null;c.t0=S.turn;delete c.fresh;}if(m.name!==c.name){const dup=Object.values(per).flat().find(x=>x!==m&&x.name===c.name);if(dup)dup.name=rname();m.name=c.name;}used.add(m);if(c.yrs==null&&m.yrs!=null){c.yrs=myrs(m);c.t0=S.turn;}};
+  const head=deptHead(per,S.dept)||Object.values(per).flat().find(m=>m.desk);
   const b=colBy('boss');if(b&&head&&S.rank<=2){setName(head,b);b.ttl=rTitle(head);}
   if(b&&!(head&&S.rank<=2))b.ttl=null;const cp=colBy('cap');if(cp&&S.rank<=1){const c=L.filter(m=>!used.has(m)&&m.r===1&&!m.acting)[0]||L.filter(m=>!used.has(m)&&!S.team.includes(m)).sort((x,y)=>myrs(y)-myrs(x))[0];if(c)setName(c,cp);}
   const sn=colBy('senior');if(sn&&S.rank<=1){let c=L.filter(m=>!used.has(m)&&!(m.r>=2)&&!m.desk&&!S.team.includes(m)).sort((x,y)=>myrs(y)-myrs(x))[0];if(!c||myrs(c)<3){c=genMember(S.dept,40,65);c.r=0;c.yrs=R(5,9);c.t0=S.turn;fitSk(c);L.push(c);}setName(c,sn);}}
