@@ -666,6 +666,42 @@ b,strong{font-weight:600}
 @media (max-width:600px){.rcard{max-height:140px}}
 
 .misr span small{display:block;font-size:12px;color:var(--mute);line-height:1.4;margin-top:1px}
+
+/* ===== 5.6 모바일 화면 전환: 아래 탭바로 한 화면씩 ===== */
+#mnav{display:none}
+@media (max-width:600px){
+ body.mvon{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+ #mnav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--panel);border-top:1px solid var(--line);padding:4px 4px max(4px,env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.35)}
+ #mnav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:52px;background:none;border:0;border-radius:12px;color:var(--mute);font:inherit;font-size:11.5px;font-weight:600;padding:4px 0;cursor:pointer}
+ #mnav button i{font-style:normal;font-size:19px;line-height:1.1;filter:grayscale(.6);opacity:.8}
+ #mnav button[aria-pressed="true"]{color:var(--sodium);background:color-mix(in srgb,var(--sodium) 12%,transparent)}
+ #mnav button[aria-pressed="true"] i{filter:none;opacity:1}
+ #mnav em{position:absolute;top:3px;right:calc(50% - 22px);font-style:normal;font-size:10.5px;font-weight:700;min-width:17px;height:17px;line-height:17px;border-radius:9px;background:var(--sodium);color:#1b1206;text-align:center;padding:0 4px}
+ body.mvon #toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+ body.mv-act .next{position:fixed;left:14px;right:14px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:44;margin:0;width:auto;max-width:none;box-sizing:border-box;padding-block:12px;font-size:16px;box-shadow:0 10px 26px rgba(0,0,0,.5)}
+ body.mv-act .bx-act>.bb{padding-bottom:84px}
+ body.mvon:not(.mv-act) .next{display:none}
+ /* 머리글 한 줄로 */
+ body.mvon .mast{flex-direction:row;align-items:center;gap:8px}
+ body.mvon .brand{font-size:19px;flex:none}body.mvon .brand i{width:22px;height:22px}
+ body.mvon #hud{flex:1 1 auto;min-width:0}body.mvon #hud .chip{min-height:32px;font-size:12px}
+ /* 화면별로 보이는 구역 */
+ body.mv-act .stage,body.mv-act .dash,body.mv-act .bx-tab{display:none!important}
+ body.mv-dash .bx-act,body.mv-dash .bx-tab{display:none!important}
+ body.mv-tab .stage,body.mv-tab .dash,body.mv-tab .bx-act{display:none!important}
+ body.mv-tab .bx-tab nav.tabs.tg{display:none}
+ body.mv-dash .dash{display:grid!important;grid-template-columns:minmax(0,1fr);overflow:visible;scroll-snap-type:none}
+ body.mv-dash .dash>*{min-width:0!important;width:auto!important;flex:none!important}
+ body.mv-dash #scene{max-height:none}
+ /* 할 일: 두 줄 격자 */
+ body.mvon .acts{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+ body.mvon .act{padding:10px 10px 9px;min-height:66px}
+ body.mvon .act .an{font-size:14.5px;flex-wrap:wrap;row-gap:3px}
+ body.mvon .act .ad{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px;line-height:1.4;margin-top:3px;color:var(--mute)}
+ body.mvon .act .pips{margin-left:auto}
+ body.mvon .bx-act .bh h3{font-size:17px}
+}
+@media (max-width:360px){body.mvon .acts{grid-template-columns:minmax(0,1fr)}#mnav button{font-size:10.5px}}
 </style>
 
 <div class="wrap">
@@ -736,9 +772,11 @@ function mkO(id,n,type,lean,own,p,d,depts){
   const staff=(STF[type]||STF.daily)[Math.max(0,p-2)];
   const tr=Math.round({5:200,4:140,3:90,2:50}[p]*({online:1.8,local:.5,trade:.4,weekly:.6,sports:2}[type]||1));
   const subs=subsT[type][p],rate=rateT[type];
-  const ad=Math.max(.4,Math.round((staff*.09*1.03-subs*rate-tr*.01)*10)/10);
+  // 수입 구조: 기자 인건비를 기준으로 12% 남는 매출을 잡고, 그중 광고 비중을 매체 유형대로 나눈다 (구독·방문 수입이 나머지)
+  const R0=staff*.09*1.03*1.12,SH={daily:.62,econ:.64,local:.68,sports:.62,online:.72,tv:.55,jp:.6,ch:.6,wire:.32,weekly:.48,trade:.55,eng:.5}[type]||.6;
+  const ad=Math.max(.15,Math.round(R0*SH*100)/100);const rate0=rate;const subsNeed=R0*(1-SH)-tr*.01;const rate2=subs>0?clamp(subsNeed/subs,rate0*.15,rate0*1.2):rate0;
   const pay={5:330,4:290,3:250,2:210}[p]+({tv:20,jp:10,online:-20,local:-15,trade:-15,weekly:-5,sports:-10}[type]||0);
-  return{id,n,type,lean,own,p,pay,subs,rate,ad,tr,staff,depts:depts||deptsFor(type,p),d};
+  return{id,n,type,lean,own,p,pay,subs,rate:+rate2.toFixed(4),ad,tr,staff,depts:depts||deptsFor(type,p),d};
 }
 const ECO_D0=['eco','pol','soc','int'];
 const OUTLETS=[
@@ -2346,7 +2384,7 @@ function bribeEvent(it){
 // --- 기사 쓰기 ---
 RUN.write=function(){
   const its=writable();
-  openModal(`${actName('write')} · 아이템 선택`,'<p>확인된 사실이 1개 이상인 아이템만 쓸 수 있다.</p>',its.map(it=>({label:it.title,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?' · 단독 가능':''}${it.slot?` · ${SLOT[it.slot.g].n} 배정`:''}${it.rebut?'':' · 반론 없음'}`,fn:()=>{writeAngle({it});return false;}})).concat([{label:'취소',cls:'ghost'}]));
+  openModal(`${actName('write')} · 아이템 선택`,'<p>확인된 사실이 1개 이상인 아이템만 쓸 수 있다.</p>',its.map(it=>({label:it.title,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?' · 단독 가능':''}${it.slot?` · ${SLOT[it.slot.g].n} 배정`:''}${it.rebut?'':' · 반론 없음'}`,fn:()=>{adGate(it,o=>writeAngle(Object.assign({it},o)));return false;}})).concat([{label:'취소',cls:'ghost'}]));
 };
 function leanOf(it){const L=OUT().lean;if(L==='market')return it.d==='eco'?'cons':'neu';return L;}
 function writeSimple(W){const it=W.it,o=OUT();W.angle=it.ideo?(o.lean==='market'?'cons':o.lean):(yamaFeas(it,yamaOf(it))?yamaOf(it):it.facts.filter(fOK).length>=3?'iv':'st');
@@ -2468,7 +2506,7 @@ function writeFinish(W){
   q=clamp(Math.round(q),5,100);
   const slotM=it.slot&&it.slot.due>=S.turn?SLOT[it.slot.g].m:1;
   let imp=it.imp*(.4+ver.reduce((a,f)=>a+fw(f),0)/allW*.75+unv.length*.12)*(it.excl?1.45:1)*(.7+o.p*.1)*slotM*(W.yamaHit?1.08:1)*(W.angle==='li'&&LIFE_D.test((DEPTS[it.d]||{}).n||'')?1.05:1);
-  if(W.speed)imp*=1.08+S.st.spd/600;if(W.short)imp*=.8;imp=Math.round(clamp(imp,1,100));if(it.dud&&!it.dudShown){imp=Math.max(5,Math.round(imp*.4));notes.push('기사가 나갔는데 반응이 없다. 알고 보니 이미 해명된 일이었다.');}
+  if(W.speed)imp*=1.08+S.st.spd/600;if(W.short)imp*=.8;if(W.adTone==='soft'){imp*=.72;notes.push('광고주를 의식해 표현을 다듬었다. 기사가 무뎌졌다.');}imp=Math.round(clamp(imp,1,100));if(it.dud&&!it.dudShown){imp=Math.max(5,Math.round(imp*.4));notes.push('기사가 나갔는데 반응이 없다. 알고 보니 이미 해명된 일이었다.');}
   const mult=(W.head==='bait'?(o.type==='online'?2.2:1.5):W.head==='calm'?.8:({quote:1.2,num:1.1,ask:1.25}[W.head]||1))*(W.vm||1)*(1+S.st.hed/300);if(W.head!=='bait')q=Math.min(100,q+Math.round(S.st.hed/25));
   const views=Math.round(q*imp*(o.p+1)*mult*R(8,14)/10*portalMult());if(W.head==='bait')portalPen(1,'자극적 제목');
   const keySingle=inc.some(f=>f.key&&f.conf===1);
@@ -2771,7 +2809,7 @@ const TYPE_ENT={tv:[['kcc','방송통신위원회','gov',.008],['pr_kcc','방송
 const ID_ENT={jeonja:[['semi','반도체산업협회','corp',.15]],uiyak:[['pharma','제약바이오협회','corp',.15],['hospa','병원협회','corp',.08]],beopjeong:[['bar','변호사협회','corp',.15]],edujournal:[['kfta','교원단체총연합','corp',.06],['acad','대형 학원 그룹','corp',.12]],techreport:[['portal','누리포털','corp',.12]]};
 // 광고 금액 표시: 1억 미만은 만 원 단위로
 function adAmt(v){return v>=1?`${f1(v)}억`:`${Math.max(50,Math.round(v*10000/10)*10).toLocaleString('ko-KR')}만 원`;}
-function adLine(E){if(E.w){const p=entCad(E.id)||1;return `광고 ${AD_CAD[p]} ${adAmt(OUT().ad*E.w*p)} (연 ${adAmt(OUT().ad*E.w*12)} · 우리 광고의 ${(E.w*100).toFixed(E.w<.01?1:0)}%) · 다음 집행 ${entNextTxt(E.id)}`;}return {person:'개인 — 광고 없음',party:'선거 때만 광고',gov:'광고 집행 없음 (수사·사법·감독 기관)',corp:'광고 거래 없음'}[E.kind]||'광고 없음';}
+function adLine(E){if(E.w){const p=entCad(E.id)||1;const w=adShareOf(E.id),k=entAdK(E.id);return `광고 ${AD_CAD[p]} ${adAmt(OUT().ad*w*p*k)} (연 ${adAmt(OUT().ad*w*12*k)} · 우리 광고의 ${(w*100).toFixed(w<.01?1:0)}%)${k<.95?` · 관계·신규 거래로 ${Math.round(k*100)}%만 집행`:''} · 다음 집행 ${entNextTxt(E.id)}`;}return {person:'개인 — 광고 없음',party:'선거 때만 광고',gov:'광고 집행 없음 (수사·사법·감독 기관)',corp:'광고 거래 없음'}[E.kind]||'광고 없음';}
 function buildEnts(o){
   const cats=new Set(['pol']);o.depts.forEach(d=>catOf(d).forEach(c=>cats.add(c)));
   const out=[];const seen=new Set();const add=(e,c)=>{if(seen.has(e[0]))return;seen.add(e[0]);out.push([e[0],e[1],e[2],c,e[3]]);};
@@ -2849,10 +2887,10 @@ const corpId=name=>(ENTS.find(e=>e[2]==='corp'&&e[1]===name)||[])[0];
 // 보도 후 관계 변화
 function entHit(it,W,imp){
   const id=it.ent,e=S.net&&S.net[id];if(!e)return '';const E=ENT[id];
-  let d=imp/5*(it.excl?1.2:1)*(W.rb&&it.rebut==='got'?.6:1)*(W.head==='bait'?1.3:1)*(W.head==='calm'?.7:1);
+  let d=imp/5*(it.excl?1.2:1)*(W.rb&&it.rebut==='got'?.6:1)*(W.head==='bait'?1.3:1)*(W.head==='calm'?.7:1)*(W.adTone==='soft'?.4:W.adTone==='hard'?1.15:1);
   e.rel=clamp(e.rel-d,-100,100);const wasKnown=e.known;e.known=true;const out=[`${entName(id)}와의 관계 -${Math.round(d)}${wasKnown?'':' (이 일로 상대가 나를 알게 됐다)'}`];
   if(id==='c4')netUp('pr_chair',-d*.6);try{arcStart(id,d,W.headline);}catch(x){}
-  if(E.kind==='corp'&&e.rel<=-25&&!e.cut){e.cut=R(8,20);out.push(`${E.n} 홍보실이 광고 집행 중단을 통보했다 (${e.cut}주, 월 -${adAmt(OUT().ad*E.w)})`);log(`${E.n} 광고 중단 통보`);tick(`${E.n}, ${OUT().n}에 광고 집행 중단`);}
+  if(E.kind==='corp'&&e.rel<=-25&&!e.cut){e.cut=R(8,20);out.push(`${E.n} 홍보실이 광고 집행 중단을 통보했다 (${e.cut}주, 월 -${adAmt(OUT().ad*adShareOf(id))})`);log(`${E.n} 광고 중단 통보`);tick(`${E.n}, ${OUT().n}에 광고 집행 중단`);}
   if(E.kind==='gov'&&e.rel<=-45&&!e.block){e.block=R(4,8);out.push(`${E.n}가 우리 매체에 자료 제공을 거부하기 시작했다 (${e.block}주)`);log(`${E.n} 자료 제공 거부`);}
   if(E.kind==='gov'&&E.w>0&&e.rel<=-50&&!e.govcut){e.govcut=1;out.push(`${E.n} 정부 광고 배정이 줄었다`);}
   if((E.kind==='person'||entTrait(id).lit)&&e.rel<=-50&&chance(entTrait(id).lit?.6:.35))S.pending.push({type:'suit',ent:id,due:S.turn+R(2,5),title:W.headline});
@@ -3352,7 +3390,7 @@ function coMonth(){
   if(hasF('app'))c.bT+=.004;if(hasF('paywall'))c.bS+=.004;if(hasF('reader'))c.bS+=.002;
   const cp=S.portal&&S.portal.lv===3?c.tr*.004*(S.cpBoost||1):0;const fac=facUpkeep();const bz=bizMonth();
   let subsRev=c.subs*o.rate*(hasF('paywall')?1.25:1)*infl,trRev=c.tr*.01*portalMult()*infl;
-  if(!S.founder){if(c.rk==null){const r0=subsRev+trRev+ad+cp,c0=c.staff*.09*(S.payLv||1)*infl+fac;c.rk=r0>c0*1.18?+(c0*1.18/r0).toFixed(3):1;}subsRev*=c.rk;trRev*=c.rk;}const adK=S.founder?1:(c.rk||1);const fsup=S.founder?fSupport():0;const rev=subsRev+trRev+ad*adK+cp*adK+bz.rev+fsup+(S.founder?.04*o.p+.03:0),cost=bz.cost+(c.staff*(S.founder?.066:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
+  if(!S.founder){if(c.rk==null||c.rkV!==2){const r0=subsRev+trRev+o.ad*adF+cp,c0=c.staff*.09*(S.payLv||1)*infl+fac;c.rk=r0>0?+clamp(clamp(r0,c0*1.06,c0*1.18)/r0,.3,1.8).toFixed(3):1;c.rkV=2;}subsRev*=c.rk;trRev*=c.rk;}const adK=S.founder?1:(c.rk||1);const fsup=S.founder?fSupport():0;const rev=subsRev+trRev+ad*adK+cp*adK+bz.rev+fsup+(S.founder?.04*o.p+.03:0),cost=bz.cost+(c.staff*(S.founder?.066:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
   const costX=(S.founder?fEarlyCost():1)*cost*(S.costCut&&S.costCut.due>S.turn?1-S.costCut.r:1)*(S.payRaise?Math.pow(1+S.payRaise,(S.turn-(S.payRaiseT||S.turn))/YW):1)*(S.founder?1-(fs('biz')-40)/800:1)+(S.founder?rev*({2:.08,3:.22,4:.32,5:.38}[o.p]||.3):0);
   c.cash+=rev-costX;c.last={rev,cost:costX,profit:rev-costX,ad:ad*adK,adBase:am.base,adPay:am.pay,adList:am.list,cp,netLoss:na.loss,netGain:na.gain,subsRev,trRev,bizRev:bz.rev,biz:bz.list,fsup};c.hist.push(Math.round(c.cash*10)/10);if(c.hist.length>48)c.hist.shift();
   return c.last;
@@ -3623,7 +3661,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '조정|출입처 장악도가 너무 빨리 차던 것을 늦췄다(터줏대감 약 1년 반, 전설 3~4년). 장악도가 쌓일 수 없는 직급이거나 거의 다 찼을 때는 "장악도 올리기" 미션이 나오지 않는다.',
   '조정|수습이 끝나면 대개(8할) 회사가 부서를 배치한다. 정치·법조·탐사 같은 인기 부서는 신입에게 잘 돌아가지 않고, 희망을 받는 해에도 경쟁이 세다.',
   '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.',
-  '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(품질·편집력·기자 실력에 따라 단독도 터진다), 대표는 "기자에게 취재 맡기기"로 쥔 아이템을 기자에게 넘길 수 있다. 대표 기사도 구독·트래픽·회사 품질에 직접 반영된다','조정|창간 모드 취재 나가기 행동력 2→1. 막 생긴 회사엔 회사 규모에 맞는 아이템이 주로 들어온다','수정|기사 쓰기가 표시는 행동력 1인데 실제로는 2가 빠지던 문제','수정|창간 모드에서 광고·후원 영업이 실패해도 "1건 따내기" 미션이 달성되던 문제. 이제 계약이 성사돼야 센다(기자 광고·협찬 영업도 같다)','수정|온라인 매체 기사가 "1면"에 실리던 표기. 이제 홈페이지 메인 톱·섹션 톱으로 나온다','수정|"21천만 원" 같은 금액 표기를 "2억 1천만 원"으로','수정|광고 시장 점유율이 시간이 갈수록 밀리던 문제. 경쟁사의 영향력이 끝없이 불어나(10년 뒤 기준의 10배 이상) 내 점유율이 4분의 1로 줄던 것을 고쳤다. 경쟁사도 품질에 맞는 수준으로 돌아오고, 단가 인하·받아쓰기 공세의 광고 타격도 줄였다','조정|회사 경영진(AI)이 경쟁에 대응한다. 경쟁사 품질이 앞서거나 점유율이 밀리면 돈을 들여 보도 품질에 투자해 방어한다(내가 사장이면 직접 정한다)','조정|생활비를 현실에 맞게 올렸다(기자 월 150만 원 안팎부터). 큰 매체 기자도 저축이 빠르게 쌓이지 않는다','조정|기자 몇 명짜리 작은 매체가 매출의 절반 이상을 남기던 것을 줄였다. 입사 때 회사 이익률이 18%를 넘지 않는다','조정|신뢰도가 높을수록 오르는 폭이 줄어든다(75쯤부터 절반). 꼭대기에 붙어 의미가 없어지던 문제','수정|회사가 해마다 1월에 인력을 늘리거나 줄이는 처리가 한 번도 실행되지 않던 문제. 이제 적자가 쌓이면 구조조정(감원)을 하고, 흑자로 돈이 쌓이면 채용을 늘린다. 작은 회사도 1명 단위로 움직인다','조정|비판 보도 뒤 반응이 "화해"로 쏠리던 것을 고쳤다. 이제 광고 무마·화해·보복이 대체로 고르게 나오고, 상대 성향(언론 압박·소송 성향·개방적)과 보도 강도, 쫓는 후속 기사에 따라 기운다','수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
+  '주요|광고주 눈치: 우리 광고를 많이 내는 기업·기관을 비판하는 기사를 쓰려 하면 데스크(대표·사장이면 광고국)가 압박한다. 표현을 누그러뜨리면 광고는 지키지만 기사가 무뎌지고 신뢰가 깎이고, 그대로 쓰면 광고가 끊길 수 있다. 접을 수도 있다','조정|광고 수입 구조: 많은 매체가 광고 수입을 최저치(월 0.4억)로 받던 것을 매체 유형별 실제 비중(신문 60%대·온라인 70%·통신사 30% 등)으로 바꿨다. 관계망 광고주의 광고 단가도 1.5~3배 현실화하고, 화면에 보이는 금액을 실제 집행액과 맞췄다','주요|모바일 화면 개편: 모든 걸 한 줄로 길게 늘어놓던 화면을 아래 탭바(할 일 · 현황 · 나 · 취재 · 사람 · 회사)로 한 화면씩 나눴다. 할 일은 두 줄 격자로, 머리글은 한 줄로','대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(품질·편집력·기자 실력에 따라 단독도 터진다), 대표는 "기자에게 취재 맡기기"로 쥔 아이템을 기자에게 넘길 수 있다. 대표 기사도 구독·트래픽·회사 품질에 직접 반영된다','조정|창간 모드 취재 나가기 행동력 2→1. 막 생긴 회사엔 회사 규모에 맞는 아이템이 주로 들어온다','수정|기사 쓰기가 표시는 행동력 1인데 실제로는 2가 빠지던 문제','수정|창간 모드에서 광고·후원 영업이 실패해도 "1건 따내기" 미션이 달성되던 문제. 이제 계약이 성사돼야 센다(기자 광고·협찬 영업도 같다)','수정|온라인 매체 기사가 "1면"에 실리던 표기. 이제 홈페이지 메인 톱·섹션 톱으로 나온다','수정|"21천만 원" 같은 금액 표기를 "2억 1천만 원"으로','수정|광고 시장 점유율이 시간이 갈수록 밀리던 문제. 경쟁사의 영향력이 끝없이 불어나(10년 뒤 기준의 10배 이상) 내 점유율이 4분의 1로 줄던 것을 고쳤다. 경쟁사도 품질에 맞는 수준으로 돌아오고, 단가 인하·받아쓰기 공세의 광고 타격도 줄였다','조정|회사 경영진(AI)이 경쟁에 대응한다. 경쟁사 품질이 앞서거나 점유율이 밀리면 돈을 들여 보도 품질에 투자해 방어한다(내가 사장이면 직접 정한다)','조정|생활비를 현실에 맞게 올렸다(기자 월 150만 원 안팎부터). 큰 매체 기자도 저축이 빠르게 쌓이지 않는다','조정|기자 몇 명짜리 작은 매체가 매출의 절반 이상을 남기던 것을 줄였다. 입사 때 회사 이익률이 6~18% 안에서 시작한다(적자로 시작하던 지역지도 바로잡음)','조정|신뢰도가 높을수록 오르는 폭이 줄어든다(75쯤부터 절반). 꼭대기에 붙어 의미가 없어지던 문제','수정|회사가 해마다 1월에 인력을 늘리거나 줄이는 처리가 한 번도 실행되지 않던 문제. 이제 적자가 쌓이면 구조조정(감원)을 하고, 흑자로 돈이 쌓이면 채용을 늘린다. 작은 회사도 1명 단위로 움직인다','조정|비판 보도 뒤 반응이 "화해"로 쏠리던 것을 고쳤다. 이제 광고 무마·화해·보복이 대체로 고르게 나오고, 상대 성향(언론 압박·소송 성향·개방적)과 보도 강도, 쫓는 후속 기사에 따라 기운다','수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
  ['5.5','커리어가 움직인다',[
   '주요|불쾌함 줄이기: 할 일 맨 위 경고 상자(곧 물먹을 단독·마감·컨디션·평가·신뢰·자금·다음 달 인사), 물먹기·오보·정정·권고사직 뒤 "다음엔" 팁, 큰 악재 뒤 두 달은 위기·오보 발각이 쉬어 간다, 권고사직이어도 재취업 길은 항상 하나 이상. 결과 카드는 최대 2장만 작게 떠서 화면을 가리지 않는다',
   '주요|자동 저장 3개(최근 3달)를 저장 메뉴에서 불러와 실수를 되돌릴 수 있다. 12월 결산 뒤엔 1년 결산(출고·단독·1면·평가·평판·통장·올해의 기사)',
@@ -4201,7 +4239,7 @@ function render(){try{if(S&&S.phase==='game')ensureDeptEnts();}catch(e){}
   else if(S.phase==='apply')app.innerHTML=applyHTML();
   else if(S.phase==='game')app.innerHTML=''+gameHTML();
   else if(S.phase==='end')app.innerHTML=endHTML();
-  bind();drawScene();
+  bind();drawScene();try{mobileNav();}catch(e){}
 }
 function renderTicker(){
   const el=$('#tickr');const items=(S&&S.ticker&&S.ticker.length)?S.ticker:[{t:'바이라인 — 수습기자의 첫 새벽부터 사장실까지'},{t:'통신사·방송·신문·온라인·잡지·전문지 50개 매체가 당신을 기다린다'}];
@@ -5830,10 +5868,25 @@ function entDue(id,t){const p=entCad(id);if(!p)return false;const m=Math.floor((
 function entAdK(id){const e=S.net&&S.net[id];if(!e)return 1;if(e.cut>0)return 0;return (e.rel<=-50?.6:e.rel>=60?1.35:1)*(.4+.6*entRamp(id))*(e.boost&&e.boostT>S.turn?e.boost:1);}
 function entNextTxt(id){const p=entCad(id);if(!p)return '';for(let k=0;k<12;k++){if(entDue(id,S.turn+k*4))return k===0?'이번 달':`${k}개월 뒤`;}return '';}
 // 이번 달 광고: 이름 없는 광고(중소 광고주·지역 상인·온라인 광고망)는 매달, 기관·기업 광고는 주기대로
-function adMonth(o,F){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);const nk=named>.35?.35/named:1;const base=o.ad*F*(1-named*nk);let pay=0;const L=[];
+function adNk(){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);return named>0?clamp(.55/named,.5,1.6):1;}
+function adShareOf(id){const E=ENT[id];return E&&E.w?E.w*adNk():0;}
+function adMonth(o,F){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);const nk=adNk();const base=o.ad*F*(1-named*nk);let pay=0;const L=[];
   ENTS.forEach(e=>{const w=e[4]*nk;if(!w)return;const id=e[0];if(!entDue(id))return;const p=entCad(id);const v=adVar(id);const a=o.ad*F*w*p*entAdK(id)*v[0];if(a<=0)return;pay+=a;L.push([e[1],a,p,v[1]]);});
   L.sort((a,b)=>b[1]-a[1]);return {base,pay,list:L.slice(0,6),n:L.length};}
 
+// ===== 광고주 눈치: 큰 광고주를 비판하는 기사를 쓰려 하면 데스크(또는 광고국)가 압박한다 =====
+const jo=(w,a,b)=>{const c=String(w).slice(-1).charCodeAt(0);return w+((c>=44032&&c<=55203&&(c-44032)%28)?a:b);};
+const CRIT_RE=/의혹|비리|부실|갑질|유출|담합|특혜|횡령|논란|피해|사고|불법|은폐|착취|리콜|결함|하자|과징금|적발|폭리|꼼수|편법|산재|위반|누락|사적|막말|대출|부당|비위|독점|로비|떠넘|외면|방치/;
+function adGate(it,go){const id=it.ent,E=ENT[id],e=S.net&&S.net[id];const sh=adShareOf(id);
+  if(S.story||!E||!e||!sh||!(E.kind==='corp'||E.kind==='gov')||e.cut>0||!CRIT_RE.test(it.title)||sh<(S.simple?.02:.008))return go({});
+  const me=S.founder||S.rank>=6;const yr=OUT().ad*sh*12;const bs=colBy('boss');const who=me?'광고국장':S.rank<=3?`${bs?bs.name+' ':''}부장`:'사장';
+  const heavy=sh>=.025;const line=me?`"대표님, ${jo(E.n,'은','는')} 우리 광고의 ${(sh*100).toFixed(1)}%입니다. 이번 분기 매출이 흔들릴 수 있어요."`:S.rank<=3?`"${jo(E.n,'은','는')} 우리 큰 광고주야. 사실만 딱 쓰고 표현은 좀 누그러뜨리자. 광고국에서 벌써 전화 왔어."`:`"${E.n} 건, 광고국이 걱정이 많아. 편집국이 알아서 판단하되 회사 사정도 생각해 줘."`;
+  S.adGateN=(S.adGateN||0)+1;
+  openModal('광고주 눈치',`<p class="lede">「${esc(it.title)}」은 <b>${esc(E.n)}</b> 이야기다. ${esc(jo(E.n,'은','는'))} 우리 광고의 <b>${(sh*100).toFixed(1)}%</b>(연 ${adAmt(yr)})를 내는 광고주다.</p><p>${esc(who)}: ${esc(line)}</p><p class="hint">톤을 낮추면 광고는 지키지만 기사 파급력이 줄고, 쌓이면 신뢰가 깎인다. 그대로 쓰면 광고가 끊길 수 있다.</p>`,[
+    {label:'표현을 누그러뜨린다',sub:`파급력 약 30%↓ · ${esc(E.n)} 반발 크게 줄어듦 · 신뢰 조금↓${me?'':' · 데스크 관계↑'}`,fn:()=>{S.adSoftN=(S.adSoftN||0)+1;apply({trust:-.5-(S.adSoftN>=4?.5:0)});if(!me&&bs)relUp(bs,2,'광고주 배려');if(S.adSoftN===4)toast('"요즘 그 매체, 광고주 기사는 순하더라" — 업계에 말이 돈다');go({adTone:'soft'});return false;}},
+    {label:'그대로 쓴다',rec:!heavy,sub:`신뢰↑ · ${esc(E.n)} 광고 중단 위험${heavy?' (큰손이라 회사 매출 타격이 크다)':''}${me?'':' · 데스크 관계↓'}`,fn:()=>{apply({trust:.6});if(!me&&bs)relUp(bs,-3,'광고주 기사 강행');S.resist=(S.resist||0)+1;go({adTone:'hard'});return false;}},
+    {label:'이번엔 기사를 접는다',risk:true,sub:`광고 지킴 · 아이템을 버린다 · 신뢰↓ · 들키면 더 크게`,fn:()=>{S.items=S.items.filter(x=>x!==it);netUp(id,5);apply({trust:-1.5});log(`${E.n} 광고를 의식해 「${it.title}」 기사를 접었다`);if(chance(.15*(DF().risk||1)))S.pending.push({type:'err',title:`${E.n} 광고 의식해 기사 누락 의혹`,due:S.turn+R(8,24)});toast('기사를 접었다');}},
+    {label:'← 다른 아이템',cls:'ghost',fn:()=>{RUN.write();return false;}}]);}
 // ===== 비판 보도 뒤 광고주·기관과의 줄다리기 =====
 // 기사가 나가면 처음엔 관계가 틀어진다. 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 광고를 늘리거나 ③ 보복(광고 장기 중단·협찬 철회·자료 거부·소송)한다.
 function arcStart(id,d,head){const E=ENT[id];if(!E||!(E.kind==='corp'||E.kind==='gov'&&E.w>0)||d<4)return;S.arc=S.arc||{};if(S.arc[id]){S.arc[id].d+=d*.5;return;}S.arc[id]={t:S.turn,d,head:head||''};}
@@ -6347,6 +6400,17 @@ function fNewsroom(lines){const c=S.co,o=OUT();const rep=Math.max(0,c.staff-1);i
   if(ex){const who=pick(R1).name;const it=makeItem(pick(OUT().depts||[S.dept]),{excl:true});const cl=fStaffClip(it.title,c.q+R(-8,10),it.imp,true,who,it);first=` · 「${cl.h}」(${who} 기자)`;S.fNewsX+=Math.max(0,ex-1);}
   let err='';if(c.q<46&&chance((46-c.q)/50)){apply({trust:-.8});c.q=clamp(c.q-1,10,100);err=' · 정정보도 1건 (품질이 낮다)';}
   S.fNewsN=n;lines.push({c:ex?'g':'',t:`편집국 기사 ${n}건 출고${ex?` · 단독 ${ex}건${first}`:''}${err}`});}
+// ===== 모바일: 한 화면에 하나씩 (할 일 · 현황 · 나 · 취재 · 사람 · 회사) =====
+const MNAV_IC={act:'📝',dash:'📊',me:'🙂',work:'🔎',people:'👥',company:'🏢'};
+function mobileNav(){let nav=$('#mnav');const on=!!(S&&S.phase==='game');document.body.classList.toggle('mvon',on);
+  if(!on){if(nav)nav.remove();['mv-act','mv-dash','mv-tab'].forEach(c=>document.body.classList.remove(c));return;}
+  if(window.__mvTurn!==S.turn){window.__mvTurn=S.turn;window.__MV='act';}
+  const tg=window.__TG||[];const curG=((tg.find(x=>x[2].some(t=>t[0]===S.tab))||tg[0]||[''])[0]);const mv=window.__MV||'act';
+  ['mv-act','mv-dash','mv-tab'].forEach(c=>document.body.classList.toggle(c,c==='mv-'+mv));
+  if(!nav){nav=document.createElement('nav');nav.id='mnav';nav.setAttribute('aria-label','화면 전환');document.body.appendChild(nav);}
+  const items=[['act','할 일',S.ap>0?S.ap:''],['dash','현황',''],...tg.map(g=>['tab:'+g[0],g[1],''])];
+  nav.innerHTML=items.map(([k,n,b])=>{const key=k.split(':')[1]||k;const sel=k==='act'?mv==='act':k==='dash'?mv==='dash':(mv==='tab'&&key===curG);return `<button data-mv="${k}" aria-pressed="${sel}"><i aria-hidden="true">${MNAV_IC[key]||'•'}</i><span>${n}</span>${b!==''?`<em>${b}</em>`:''}</button>`;}).join('');
+  nav.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const k=b.dataset.mv;if(k.startsWith('tab:')){window.__MV='tab';const g=tg.find(x=>x[0]===k.slice(4));if(g){const last=S.tabLast&&S.tabLast[g[0]];S.tab=g[2].some(t=>t[0]===last)?last:g[2][0][0];}}else window.__MV=k;render();try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}});}
 // ================= 로딩 화면 =================
 const LD_STEPS=['윤전기 예열하는 중…','전국 언론사 명단 불러오는 중…','취재원 수첩 넘기는 중…','오늘 자 1면 짜는 중…','편집국 불 켜는 중…'];
 const LD_TIPS=['핵심 사실은 두 출처로 확인해야 기사가 된다.','반론 없는 기사는 소송의 지름길이다.','취재원 관계는 한 번 깨지면 다시 쌓기 어렵다.','수습 때는 사쓰마와리로 경찰서를 돌며 정보를 모은다.','단독은 늦으면 물먹는다. 그렇다고 서두르면 오보가 난다.','데스크가 되면 남의 기사를 고치고 책임도 진다.','창간 모드에선 돈이 떨어지면 끝이다.','소리 설정은 위쪽 ♪ 버튼에서 바꿀 수 있다.'];
