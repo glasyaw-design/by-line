@@ -669,7 +669,7 @@ b,strong{font-weight:600}
 
 /* ===== 5.6 모바일 화면 전환: 아래 탭바로 한 화면씩 ===== */
 #mnav{display:none}
-@media (max-width:600px){
+@media (max-width:840px){
  body.mvon{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
  #mnav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--panel);border-top:1px solid var(--line);padding:4px 4px max(4px,env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.35)}
  #mnav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:52px;background:none;border:0;border-radius:12px;color:var(--mute);font:inherit;font-size:11.5px;font-weight:600;padding:4px 0;cursor:pointer}
@@ -678,13 +678,14 @@ b,strong{font-weight:600}
  #mnav button[aria-pressed="true"] i{filter:none;opacity:1}
  #mnav em{position:absolute;top:3px;right:calc(50% - 22px);font-style:normal;font-size:10.5px;font-weight:700;min-width:17px;height:17px;line-height:17px;border-radius:9px;background:var(--sodium);color:#1b1206;text-align:center;padding:0 4px}
  body.mvon #toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+ body.mv-act #toast{bottom:calc(136px + env(safe-area-inset-bottom,0px))}
  body.mv-act .next{position:fixed;left:14px;right:14px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:44;margin:0;width:auto;max-width:none;box-sizing:border-box;padding-block:12px;font-size:16px;box-shadow:0 10px 26px rgba(0,0,0,.5)}
  body.mv-act .bx-act>.bb{padding-bottom:84px}
  body.mvon:not(.mv-act) .next{display:none}
  /* 머리글 한 줄로 */
  body.mvon .mast{flex-direction:row;align-items:center;gap:8px}
  body.mvon .brand{font-size:19px;flex:none}body.mvon .brand i{width:22px;height:22px}
- body.mvon #hud{flex:1 1 auto;min-width:0}body.mvon #hud .chip{min-height:32px;font-size:12px}
+ body.mvon #hud{flex:1 1 auto;min-width:0;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:none}body.mvon #hud::-webkit-scrollbar{display:none}body.mvon #hud .chip{flex:none}body.mvon .brand small{display:none}body.mvon #hud .chip{min-height:32px;font-size:12px}
  /* 화면별로 보이는 구역 */
  body.mv-act .stage,body.mv-act .dash,body.mv-act .bx-tab{display:none!important}
  body.mv-dash .bx-act,body.mv-dash .bx-tab{display:none!important}
@@ -702,6 +703,10 @@ b,strong{font-weight:600}
  body.mvon .bx-act .bh h3{font-size:17px}
 }
 @media (max-width:360px){body.mvon .acts{grid-template-columns:minmax(0,1fr)}#mnav button{font-size:10.5px}}
+@media (min-width:601px) and (max-width:840px){body.mvon .acts{grid-template-columns:repeat(3,minmax(0,1fr))}#mnav{left:50%;right:auto;transform:translateX(-50%);width:min(640px,100%);border-radius:16px 16px 0 0}}
+
+/* 스토리 모드는 당분간 닫아 둔다 (개발자 콘솔에서만) */
+[data-pm="story"],[data-smode="story"]{display:none!important}
 </style>
 
 <div class="wrap">
@@ -775,7 +780,7 @@ function mkO(id,n,type,lean,own,p,d,depts){
   // 수입 구조: 기자 인건비를 기준으로 12% 남는 매출을 잡고, 그중 광고 비중을 매체 유형대로 나눈다 (구독·방문 수입이 나머지)
   const R0=staff*.09*1.03*1.12,SH={daily:.62,econ:.64,local:.68,sports:.62,online:.72,tv:.55,jp:.6,ch:.6,wire:.32,weekly:.48,trade:.55,eng:.5}[type]||.6;
   const ad=Math.max(.15,Math.round(R0*SH*100)/100);const rate0=rate;const subsNeed=R0*(1-SH)-tr*.01;const rate2=subs>0?clamp(subsNeed/subs,rate0*.15,rate0*1.2):rate0;
-  const pay={5:330,4:290,3:250,2:210}[p]+({tv:20,jp:10,online:-20,local:-15,trade:-15,weekly:-5,sports:-10}[type]||0);
+  const pay={5:300,4:255,3:215,2:185}[p]+({tv:15,jp:5,online:-15,local:-20,trade:-15,weekly:-10,sports:-10}[type]||0);
   return{id,n,type,lean,own,p,pay,subs,rate:+rate2.toFixed(4),ad,tr,staff,depts:depts||deptsFor(type,p),d};
 }
 const ECO_D0=['eco','pol','soc','int'];
@@ -1564,7 +1569,7 @@ function loadGame(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.par
 const SAVESLOT=i=>'byline-slot-'+i;
 function slotInfo(i){try{const v=localStorage.getItem(SAVESLOT(i));return v?JSON.parse(v):null;}catch(e){return null;}}
 function saveSlot(i){try{localStorage.setItem(SAVESLOT(i),JSON.stringify({t:Date.now(),label:`${S.name} · ${OUT().n} ${rankName()} · ${years()}년 차 ${dateStr()}`,S}));toast(`슬롯 ${i}에 저장했다`);return true;}catch(e){toast('저장 공간이 없다 (브라우저 저장소가 막혀 있다)');return false;}}
-function loadInto(data){const dv=S&&S.dev;flashLoad('저장 파일 펼치는 중…',700);S=migrate(data);S.dev=S.dev||dv;S.scene=baseScene();saveGame();render();toast('불러왔다');}
+function loadInto(data){const dv=S&&S.dev;flashLoad('저장 파일 펼치는 중…',700);S=migrate(data);S.dev=S.dev||dv;knowFix();S.scene=baseScene();saveGame();render();toast('불러왔다');}
 function saveCode(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))));}
 function saveMenu(){const inGame=S&&S.phase==='game';const rows=[1,2,3].map(i=>{const d=slotInfo(i);return{i,d};});
   openModal('저장 · 불러오기',`<p>${inGame?'자동 저장과 별개로 슬롯 3개에 따로 저장할 수 있다. ':''}저장은 이 브라우저에만 남는다. 다른 기기로 옮기려면 저장 파일(코드)을 내보내 가져오면 된다.</p>${rows.map(r=>`<div class="card"><div class="t">슬롯 ${r.i}</div><div class="meta"><span>${r.d?esc(r.d.label)+' · '+new Date(r.d.t).toLocaleString('ko-KR'):'비어 있음'}</span></div></div>`).join('')}`,
@@ -1722,10 +1727,10 @@ function actCost(id){const a=ACT[id]?ACT[id].ap:0;if(id==='invest'&&freeInv())re
 function glut(){const n=(S.items||[]).length;const few=n===0?1.1:n===1?1.03:1;return clamp(.88*few*(1-.12*Math.max(0,n-2))*(S.outlet?otr('item'):1)*(S.rank===0?.85:1),.35,1.3);}
 function spend(a,h){try{if(a>0&&S&&S.items&&S.items.length&&S.phase==='game'){const k=a*4/Math.max(4,apBase());S.items.forEach(i=>{if((i.burnM||0)>=4)return;i.hf=(i.hf||0)+k;while(i.hf>=1&&(i.burnM||0)<4){i.hf-=1;i.heat--;i.burnM=(i.burnM||0)+1;}});}}catch(e){}if(S._curAct&&!S._mc){S._mc=true;try{misCount(S._curAct);}catch(e){}}if(S._curAct&&!S._sur&&a>0){a+=surOf(S._curAct);S._sur=true;try{rankHook(S._curAct);}catch(e){}}S.ap=Math.max(0,S.ap-a);if(h>0)h*=(1-clamp((S.st.men||40)-40,0,55)/180)*(S.outlet?otr('hp'):1);S.hp=clamp(S.hp-h,0,100);}
 function ach(k){if(S.ach[k])return;S.ach[k]=dateShort();log('업적 — '+ACH[k][0]);setTimeout(()=>toast('업적 달성: '+ACH[k][0]),400);}
-const RANKM=[.95,1,1.35,1.55,1.7,1.85,2,3];
-function payOf(o,rank=S.rank){return Math.round((S.payK||1)*o.pay*otr('pay',o)*RANKM[rank]*(1+.02*Math.floor(S.turn/YW))*DF().pay/5)*5;}
+const RANKM=[.92,1,1.25,1.42,1.55,1.68,1.8,2.6];
+function payOf(o,rank=S.rank){return Math.round((S.payK||1)*o.pay*otr('pay',o)*RANKM[rank]*(1+.015*Math.floor(S.turn/YW))*DF().pay/5)*5;}
 // 한 달 생활비(만 원): 월세·식비·교통·통신 등. 직급이 오르면 조금씩 늘고 물가는 해마다 2%씩 오른다
-function living(){return Math.round((S.rank===0?125:140+S.rank*10)*Math.pow(1.02,Math.floor(S.turn/YW)));}
+function living(){let pk=1;try{if(S.outlet&&!S.founder)pk=clamp(.85+.15*payOf(OUT())/250,.85,1.15);}catch(e){}return Math.round((S.rank===0?115:125+S.rank*8)*pk*Math.pow(1.02,Math.floor(S.turn/YW)));}
 const CROLE={
  cofound:{n:'공동창업자 · 편집장',perk:'친하면 기사 품질↑ · 나쁘면 결별 위기',d:'같이 회사를 나와 창간한 오랜 동료'},
  fstaff:{n:'창간 멤버 기자',perk:'친하면 박봉에도 버틴다 · 나쁘면 이탈',d:'창간 때부터 함께한 1기 기자'},
@@ -1972,7 +1977,7 @@ const UNLOCK={
  desk:{rw:0},adsell:{rw:4,why:'차장 두 달째부터 (광고국과 첫 미팅 뒤)'},plan:{rw:2,why:'부장 첫 달부터'},recruit:{rw:6,why:'부임 두 달째부터'},
  meeting:{rw:0},front:{rw:1,why:'부임 첫 달부터'},tour:{rw:2,why:'부임 첫 달부터'},taskforce:{rw:8,why:'부임 세 달째부터'},column:{rw:3,why:'부임 첫 달부터'},
  breaking:{rw:0},direction:{rw:4,why:'부임 두 달째부터'},campaign:{rw:4,why:'부임 두 달째부터'},
- adsales:{rw:0},portal:{rw:2,why:'부임 첫 달부터'},facility:{rw:0},found:{rw:12,why:'국장 부임 넉 달째부터'},paypol:{rw:4,why:'취임 두 달째부터'},newdept:{rw:6,why:'취임 두 달째부터'},special:{rw:0},life:{w:4,why:'첫 월급 뒤부터'},personnel:{rw:0},network:{rw:4,why:'발령 두 달째부터 (출입처에 얼굴이 익으면)'},digital:{rw:4,why:'취임 두 달째부터'},hire:{rw:8,why:'취임 세 달째부터'},cut:{rw:8,why:'취임 세 달째부터'},event:{rw:2,why:'취임 첫 달부터'}
+ adsales:{rw:0},portal:{rw:2,why:'부임 첫 달부터'},facility:{rw:0},found:{rw:12,why:'국장 부임 넉 달째부터'},paypol:{rw:4,why:'취임 두 달째부터'},newdept:{rw:6,why:'취임 두 달째부터'},special:{rw:0},life:{w:4,why:'첫 월급 뒤부터'},personnel:{rw:0},network:{w:0},digital:{rw:4,why:'취임 두 달째부터'},hire:{rw:8,why:'취임 세 달째부터'},cut:{rw:8,why:'취임 세 달째부터'},event:{rw:2,why:'취임 첫 달부터'}
 };
 // ===== 아이템 넘기기 =====
 function handoffTargets(it){const L=[];const add=(name,skill,rel,kind,ref)=>{if(name&&name!==S.name&&!L.some(x=>x.name===name))L.push({name,skill:Math.round(skill),rel:Math.round(rel||0),kind,ref});};
@@ -2077,7 +2082,7 @@ function cdLeft(id){const c=S.cdUse&&S.cdUse[id+':'+S.turn];const cd=ACT[id].cd;
 const RUN={};
 function quickClip(title,q,imp,extra){
   const o=OUT();q=clamp(Math.round(q),10,95);imp=clamp(Math.round(imp),5,60);const views=Math.round(q*imp*(o.p+1)*R(6,10)/10);
-  const clip={h:title,o:o.n,d:cat1(S.dept),q,imp,excl:false,date:dateShort(),turn:S.turn,views,lead:extra||title+'.',by:S.name,place:imp>=30?(isTV()?'메인뉴스':'종합면'):'온라인',portal:clamp(Math.round(32-views/1800),1,30)};
+  const clip={h:title,o:o.n,d:cat1(S.dept),q,imp,excl:false,date:dateShort(),turn:S.turn,views,lead:extra||title+'.',by:S.name,place:imp>=30?(isTV()?'메인뉴스':'종합면'):'온라인 단신',portal:clamp(Math.round(32-views/1800),1,30)};
   S.clips.unshift(clip);if(S.clips.length>60)S.clips.pop();S.weekArticles++;S.monthQ.push(q);S.totalArticles=(S.totalArticles||0)+1;ach('first');if(S.totalArticles>=100)ach('hundred');
   tick(`[${o.n}] ${title}`,1);return apply({eval:q/45,fame:imp/90,wri:.3,spd:.3});
 }
@@ -2210,8 +2215,8 @@ RUN.pitch=function(){
     const rivalry=R(0,14)+(o5.p-3)*4+recentFront*8+recentTop*6+(S.rank===1&&years()<3?5:0);const val=guess+R(-8,8)-rivalry;
     let g,txt;
     if(cr===0&&chance(.6)){g=null;txt=pick([`"아직 확인된 게 하나도 없잖아. 더 파 와." 그대로 돌려받았다.`,`"그건 소문이지 기사가 아니야." ${bn}이 다음 사람을 불렀다.`,`"반론은? 문건은? 아무것도 없네. 더 확인해서 다시 가져와."`]);apply({eval:-.5});}
-    else if(val>=78&&(it.excl||it.imp>=60)&&S.turn-(S.frontSlotT??-99)>=12){g='front';txt=pick([`"이거 ${tv?'메인뉴스 첫 꼭지':'1면 톱'}으로 간다. 다음 달 말까지 완성해." 회의실이 잠깐 조용해졌다.`,`${bn}이 펜으로 화이트보드 맨 위에 「${esc(it.title)}」를 적었다. "${tv?'첫 꼭지':'1면'} 비워 둔다. 다음 달 말까지."`,`"좋다. 이건 크게 가자. ${tv?'메인뉴스 톱':'1면'} 잡아 둘 테니 핵심 사실은 두 군데서 확인해 와."`]);}
-    else if(val>=58&&S.turn-(S.topSlotT??-99)>=4){g='top';txt=pick([`"면 톱으로 하자. 반론 꼭 받아. 다음 달 말까지."`,`"괜찮네. ${tv?'중간 꼭지':'면 톱'} 정도. 숫자 하나만 더 확인해서 다음 달 안에 내."`,`"방향은 좋은데 아직 1면은 아니다. 면 톱으로 가고, 더 나오면 키우자."`]);}
+    else if(val>=72&&(it.excl||it.imp>=55)&&S.turn-(S.frontSlotT??-99)>=12){g='front';txt=pick([`"이거 ${tv?'메인뉴스 첫 꼭지':'1면 톱'}으로 간다. 다음 달 말까지 완성해." 회의실이 잠깐 조용해졌다.`,`${bn}이 펜으로 화이트보드 맨 위에 「${esc(it.title)}」를 적었다. "${tv?'첫 꼭지':'1면'} 비워 둔다. 다음 달 말까지."`,`"좋다. 이건 크게 가자. ${tv?'메인뉴스 톱':'1면'} 잡아 둘 테니 핵심 사실은 두 군데서 확인해 와."`]);}
+    else if((val>=52||it.excl&&val>=46)&&S.turn-(S.topSlotT??-99)>=3){g='top';txt=pick([`"면 톱으로 하자. 반론 꼭 받아. 다음 달 말까지."`,`"괜찮네. ${tv?'중간 꼭지':'면 톱'} 정도. 숫자 하나만 더 확인해서 다음 달 안에 내."`,`"방향은 좋은데 아직 1면은 아니다. 면 톱으로 가고, 더 나오면 키우자."`]);}
     else{g='brief';txt=pick([`"단신으로 처리해. 이번 달 안에."`,`"짧게 가자. 이번 달 안에 ${tv?'단신 리포트':'단신'} 한 꼭지."`,`"이건 작다. 단신으로 털고 다음 거 찾아."`]);}
     // 데스크의 여러 반응
     if(g&&chance(.35)){const r=Math.random();
@@ -2256,6 +2261,7 @@ RUN.beat=function(){gain('int',.2);
   openModal(`${DEPTS[d].brief} · ${sit.t}`,`<p class="lede">${DEPTS[d].beat}. ${sit.d} 질문 기회는 한 번이다.</p>${repHint('beat')}`,keys.map(k=>O[k]));
 };
 // --- 취재원 ---
+function srcFameK(){const mo=Math.floor(S.turn/4);if(!S.srcMo||S.srcMo.m!==mo)S.srcMo={m:mo,n:0};S.srcMo.n++;return S.srcMo.n<=2?1:S.srcMo.n<=4?.35:0;}
 RUN.source=function(pg=0){
   const mc=catOf(S.dept);const all=S.sources.slice().sort((a,b)=>((b.fresh??-99)>=S.turn-4)-((a.fresh??-99)>=S.turn-4)||mc.includes(b.d)-mc.includes(a.d)||b.trust-a.trust);const PER=6;const pages=Math.max(1,Math.ceil(all.length/PER));pg=((pg%pages)+pages)%pages;const l=all.slice(pg*PER,pg*PER+PER);
   const ch=l.map(s=>({label:`${s.name} · ${s.role}${(s.fresh??-99)>=S.turn-4?' <span class="tg new">NEW</span>':''}`,sub:`${DEPTS[s.d].n} · 신뢰 ${Math.round(s.trust)} · ${PERS[s.pers].n}${s.last>=S.turn-1?' · 최근에 만났다':''}`,fn:()=>{
@@ -2263,12 +2269,12 @@ RUN.source=function(pg=0){
     const g=(again?3:8)+S.st.net/12+S.st.cha/30-(s.pers==='strict'?3:0);s.trust=clamp(s.trust+g,0,100);gain('net',.5);
     let body=`<p class="lede">${s.name} ${s.role}과 저녁. ${cost>=3?`취재비 한도를 넘겨 ${cost}만 원은 내 돈으로 냈다.`:cost?`밥값은 법인카드, 커피값 ${cost}만 원만 내 돈.`:'밥값은 법인카드로 처리했다.'}${again?' "또 보네요?" 상대가 조금 귀찮아했다.':''}</p>`;
     const th=s.pers==='careful'?50:38;const tp=((.16+s.trust/330)+(s.pers==='talk'?.1:0))*glut()*repK('source');
-    if(s.trust>=th&&chance(tp)&&S.rank>=4){S.co.q+=1.5;body+=`<p>"이건 아직 아무도 몰라요." 받은 정보를 해당 부서에 넘겼다. 편집국 단독으로 이어질 것이다.</p>`;apply({fame:.8,eval:.6});}
+    if(s.trust>=th&&chance(tp)&&S.rank>=4){S.co.q+=1.5;body+=`<p>"이건 아직 아무도 몰라요." 받은 정보를 해당 부서에 넘겼다. 편집국 단독으로 이어질 것이다.</p>`;apply({fame:.8*srcFameK(),eval:.6});}
     else if(s.trust>=th&&chance(tp)){const dd=S.rank>=4?s.d:(mc.includes(s.d)?s.d:S.dept);const it=makeItem(dd,{excl:true,mult:1.15,keyConf:s.trust>=55||s.pers==='strict',hoax:s.pers==='talk'&&chance(.25),src:s.name});S.items.push(it);
       body+=`<p>헤어지기 직전 한마디: "이거 아직 아무도 몰라요." → 「${esc(it.title)}」${it.facts.find(f=>f.key).conf?' (핵심 사실 1차 확인)':''}</p>`;log(`취재원 ${s.name}에게서 「${it.title}」 제보`);
       if(s.pers==='ambit'&&chance(.5))S.flags.favor=s.id;}
     else body+=`<p>${pick(['오늘은 서로 근황만.','회사 욕을 한참 들어줬다.','"요즘 위에서 분위기가 이상해요." 그 이상은 말하지 않았다.','자녀 입시 이야기로 두 시간이 갔다.'])} (신뢰 ${Math.round(s.trust)})</p>`;
-    if(S.rank>=4)apply({fame:.6});
+    if(S.rank>=4){const k=srcFameK();if(k)apply({fame:.6*k});}
     if(S.net&&chance(.15)){const u=ENTS.filter(e=>e[3]===s.d&&S.net[e[0]]&&!S.net[e[0]].known&&e[2]!=='person');if(u.length){const e0=pick(u);S.net[e0[0]].known=true;body+=`<p class="fx">${s.name} 덕분에 ${e0[1]} 쪽에 연줄이 생겼다.</p>`;}}
     openModal('취재원과 식사',body);return false;}}));
   ch.push({label:'새 취재원 뚫기',sub:`${S.rank>=4?'고위급':DEPTS[S.dept].n} 인맥을 새로 만든다`,fn:()=>{spend(1,5);S.money-=3;
@@ -2291,6 +2297,7 @@ RUN.discover=function(){
 
 // --- 취재 세션 ---
 RUN.invest=function(){
+  if(S.items.length===1){const it=S.items[0];toast(`${freeInv()?'이번 달 첫 취재는 행동력 0 · ':''}「${it.title}」 취재`);return coordThen(it,()=>session(it));}
   openModal('어떤 아이템을 취재할까',`${freeInv()?'<p class="fx"><b>이번 달 첫 취재는 행동력 0</b> — 출입처 정기 취재로 처리된다.</p>':''}<p>취재 한 번에 시간 ${3+(S.st.sta>=60?1:0)+(S.rank>=2?1:0)+(S.rank>=4?1:0)}칸(직급이 오를수록 요령이 늘어 칸이 는다). S·A급 아이템은 확인이 더 어렵고 상대가 빨리 눈치채며, S급은 핵심 사실을 세 경로로 확인해야 한다. 핵심 사실은 서로 다른 두 출처로 교차 확인해야 한다.</p>`,S.items.map(it=>({label:`[${gradeOf(it)}] ${it.title}`,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?` · 단독 · 타사 추격까지 ${heatTxt(it.heat)}`:''}${it.slot?` · ${SLOT[it.slot.g].n} 마감 ${heatTxt(it.slot.due-S.turn)}`:''}`,fn:()=>{coordThen(it,()=>session(it));return false;}})).concat([{label:'취소',cls:'ghost'}]));
 };
 function target(it,m){const un=it.facts.filter(f=>!fOK(f));if(!un.length)return null;const M=METH[m];const mt=un.filter(f=>M.k.includes(f.k));const pool=mt.length?mt:un;return pool.find(f=>f.key)||pool[0];}
@@ -2383,7 +2390,7 @@ function bribeEvent(it){
 
 // --- 기사 쓰기 ---
 RUN.write=function(){
-  const its=writable();
+  const its=writable();if(its.length===1){const it=its[0];toast(`「${it.title}」 기사 쓰기`);return adGate(it,o=>writeAngle(Object.assign({it},o)));}
   openModal(`${actName('write')} · 아이템 선택`,'<p>확인된 사실이 1개 이상인 아이템만 쓸 수 있다.</p>',its.map(it=>({label:it.title,sub:`${DEPTS[it.d].n} · 확인 ${it.facts.filter(fOK).length}/${it.facts.length}${it.excl?' · 단독 가능':''}${it.slot?` · ${SLOT[it.slot.g].n} 배정`:''}${it.rebut?'':' · 반론 없음'}`,fn:()=>{adGate(it,o=>writeAngle(Object.assign({it},o)));return false;}})).concat([{label:'취소',cls:'ghost'}]));
 };
 function leanOf(it){const L=OUT().lean;if(L==='market')return it.d==='eco'?'cons':'neu';return L;}
@@ -2415,7 +2422,7 @@ function writeAngle(W){if(S.simple)return writeSimple(W);
     const tags=[...new Set([best,'st',...shuffle(pool).slice(0,2)])].slice(0,4);opts=shuffle(tags).map(t=>yamaOpt(it,t));rec=best;}
   const sense=(S.st.kno||40)*.6+(S.st.wri||40)*.3+S.rank*4+(it.d===S.dept?6:0);const showRec=it.ideo||sense>=58||chance(clamp(sense/100,.1,.6));
   openModal('1단계 · 야마 잡기',`<p class="lede">「${esc(it.title)}」</p><p>${o.n}의 논조: <b>${LEAN[o.lean]}</b>${it.ideo?' — 논조가 갈리는 아이템이다. 데스크가 지켜본다.':''}</p>${it.ideo?'':`<p class="hint">기사마다 맞는 야마가 다르다. ${showRec?'감으로는 「추천」이 이 기사의 야마다.':'이번엔 감이 잘 안 온다. 확인한 사실을 보고 고르자.'}</p>`}`,
-    opts.map(x=>({label:x.l,sub:x.s,rec:showRec&&x.tag===rec,risk:!it.ideo&&!yamaFeas(it,x.tag),fn:()=>{W.angle=x.tag;W.angleL=x.l;writeLead(W);return false;}})).concat([{label:'추천대로 쓰기 — 단계 건너뛰기',sub:'야마·리드·팩트·반론을 감에 맞게 자동으로 · 제목만 고른다 · 완성도 조금↓',fn:()=>{W.mq=(W.mq||0)-3;W.auto=1;writeSimple(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{RUN.write();return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
+    opts.map(x=>({label:x.l,sub:x.s,rec:showRec&&x.tag===rec,risk:!it.ideo&&!yamaFeas(it,x.tag),fn:()=>{W.angle=x.tag;W.angleL=x.l;writeLead(W);return false;}})).concat([{label:'추천대로 쓰기 — 단계 건너뛰기',sub:'야마·리드·팩트·반론을 감에 맞게 자동으로 · 제목만 고른다 · 완성도 조금↓',fn:()=>{W.mq=(W.mq||0)-2;W.auto=1;writeSimple(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{RUN.write();return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
 function writeLead(W){
   const it=W.it;const ok=k=>it.facts.find(f=>f.k===k&&fOK(f));const key=it.facts.find(f=>f.key);
@@ -2463,14 +2470,15 @@ function writeMedium(W){
 }
 const it2=(c,s)=>c?s:'녹취가 없다';
 // 지면: 아침 발제 배정이 있으면 그 배정을 따른다(완성도가 너무 낮으면 데스크가 한 단계 내린다). 배정 없이 쓴 기사는 1면 톱에 오르기 아주 어렵다
-function secTop(d){const n=(DEPTS[d]||{}).n||'';const b=n.replace(/(부|팀|국)$/,'');return ({사건:'사회',법조:'사회',전국:'전국',시군:'지역',자치행정:'지역',탐사보도:'기획',탐사:'기획'}[b]||b||'종합')+'면 톱';}
-function placeOf(q,imp,it){const v=q*imp/100;const tv=isTV();const P=(S&&S.outlet)?OUT().p:3;const rf=S&&S.clips?S.clips.filter(c=>c.turn>S.turn-12&&/1면|첫 꼭지/.test(c.place||'')).length:0;const fT=44+P*3+rf*8,oT=30+P*2+rf*4;
+function secTop(d){const n=(DEPTS[d]||{}).n||'';if(/주재/.test(n))return '지역면 톱';const b=n.replace(/(부|팀|국)$/,'');return ({사건:'사회',법조:'사회',전국:'전국',시군:'지역',자치행정:'지역',탐사보도:'기획',탐사:'기획'}[b]||b||'종합')+'면 톱';}
+function placeOf(q,imp,it){const v=q*imp/100;const tv=isTV();const P=(S&&S.outlet)?OUT().p:3;const rf=S&&S.clips?S.clips.filter(c=>c.turn>S.turn-12&&/1면|첫 꼭지/.test(c.place||'')).length:0;const fT=40+P*2.5+rf*8,oT=28+P*2+rf*4;
   const web=!tv&&S&&S.outlet&&OUT().type==='online';const FR={k:'front',n:tv?'메인뉴스 첫 꼭지':web?'홈페이지 메인 톱':'1면 톱'},ONE={k:'one',n:tv?'메인뉴스':web?'홈페이지 메인':'1면'},TOP={k:'top',n:tv?'메인뉴스 리포트':web?secTop(it&&it.d||S.dept).replace('면 톱',' 섹션 톱'):secTop(it&&it.d||S.dept)},SEC={k:'sec',n:tv?'아침뉴스':web?'섹션 기사':'종합면'},BR={k:'brief',n:tv?'단신 리포트':'단신'},WEB={k:'web',n:'온라인 단신'};
   const sl=it&&it.slot&&it.slot.due>=S.turn?it.slot.g:null;
   if(sl==='front')return q>=45?FR:q>=32?ONE:TOP;
-  if(sl==='top')return q>=40?TOP:SEC;
-  if(sl==='brief')return BR;
-  if(it&&it.excl&&v>=fT+8)return FR;if(v>=oT+6)return ONE;if(v>=oT-4)return TOP;if(v>=13)return SEC;return WEB;}
+  const ex=!!(it&&it.excl);
+  if(sl==='top')return ex&&v>=fT-2&&q>=55?ONE:q>=40?TOP:SEC;
+  if(sl==='brief')return (v>=oT-8||(ex&&v>=oT-18&&q>=45))?TOP:v>=20?SEC:BR;
+  if(ex&&v>=fT)return FR;if(v>=oT+2)return ONE;if(v>=oT-8||(ex&&v>=oT-16&&q>=45))return TOP;if(v>=12)return SEC;return WEB;}
 function comments(q,W,risky){
   const G=['이런 게 기자지','끝까지 추적해 주세요','후속 기대합니다','기레기 소리 듣는 와중에 이런 기사 고맙다','관계 당국은 답하라','이거 우리 동네 얘기네','기자 이름 기억해 둔다'];
   const B=['제목 낚시 그만','제목 보고 들어왔는데 내용이 없네','어그로 그만 끄세요'];
@@ -2488,7 +2496,7 @@ function writeFinish(W){
   const o=OUT(),it=W.it,st=S.st;
   const inc=W.sel.map(i=>it.facts[i]),ver=inc.filter(fOK),unv=inc.filter(f=>!fOK(f));
   const allW=it.facts.reduce((a,f)=>a+fw(f),0);
-  let q=st.wri*.5+st.inv*.15+ver.length*6+R(-6,6)+(W.mq||0)+(W.ex?5:0)+(W.rb&&it.rebut==='got'?4:0)+(it.tape?4:0)+(isTV()?(st.brd-40)/6:0);
+  let q=6+st.wri*.5+st.inv*.15+ver.length*6+R(-6,6)+(W.mq||0)+(W.ex?5:0)+(W.rb&&it.rebut==='got'?4:0)+(it.tape?4:0)+(isTV()?(st.brd-40)/6:0);
   q+=W.leadOK?5:-2;if(W.lead==='key'&&!W.leadOK)q-=3;if(S.peerRev){q+=S.peerRev.b;log(`${S.peerRev.n}가 원고를 봐 줬다 (완성도 +${S.peerRev.b})`);S.peerRev=null;}
   const notes=[];
   if(it.ideo){const L=leanOf(it);
@@ -2510,7 +2518,7 @@ function writeFinish(W){
   const mult=(W.head==='bait'?(o.type==='online'?2.2:1.5):W.head==='calm'?.8:({quote:1.2,num:1.1,ask:1.25}[W.head]||1))*(W.vm||1)*(1+S.st.hed/300);if(W.head!=='bait')q=Math.min(100,q+Math.round(S.st.hed/25));
   const views=Math.round(q*imp*(o.p+1)*mult*R(8,14)/10*portalMult());if(W.head==='bait')portalPen(1,'자극적 제목');
   const keySingle=inc.some(f=>f.key&&f.conf===1);
-  let risk=(hasF('fact')?.8:1)*(1-S.st.ver/250)*(unv.reduce((a,f)=>a+fw(f)*(f.conf?.5:1),0)*.11+(keySingle?.06:0)+(!W.rb?.07:0)+(W.lead==='key'&&!W.leadOK?.05:0)+(it.hoax?.5:0))*DF().risk;
+  let risk=(hasF('fact')?.8:1)*(1-S.st.ver/250)*(unv.reduce((a,f)=>a+fw(f)*(f.conf?.5:1),0)*.11+(keySingle?.04:0)+(!W.rb?.035:0)+(W.lead==='key'&&!W.leadOK?.04:0)+(it.hoax?.5:0))*DF().risk;
   const ph=colBy('photo'),ed=colBy('editor');if(ph&&ph.rel>=40){q=Math.min(100,q+3);notes.push(`${ph.name} ${colRole(ph)}가 좋은 ${isTV()?'그림':'컷'}을 건졌다.`);}if(ed&&ed.rel>=40&&!isTV()){q=Math.min(100,q+2);notes.push(`편집기자 ${ed.name}가 제목을 살려 줬다.`);}
   const place=placeOf(q,imp,it);
   gain('hed',.3);gain('spd',.2);if(isTV())gain('brd',.2);
@@ -2849,15 +2857,19 @@ function entInfo(id){return ENT_INFO[id]||[ENT[id]?`${ENT[id].n}`:'', '신중함
 function entTrait(id){const t=entInfo(id)[1];return{closed:/폐쇄/.test(t),very:/매우 폐쇄/.test(t),open:/개방|친화/.test(t),lit:/소송/.test(t),press:/압박/.test(t)};}
 function knowInit(){const mc=catOf(S.dept);ENTS.forEach(([id,n,kind,c])=>{const e=S.net[id];if(!e)return;e.known=false;
   if(kind==='gov'&&mc.includes(c))e.known=true;
-  if(S.rank>=2&&(kind==='corp')&&mc.includes(c)&&chance(.5))e.known=true;
+  if(S.rank>=1&&kind==='corp'&&mc.includes(c)&&chance(S.rank>=2?.85:.55))e.known=true;
+  if(S.rank>=1&&kind==='person'&&mc.includes(c)&&chance(.5))e.known=true;
+  if(S.rank>=1&&kind==='party'&&(mc.includes('pol')||mc.includes('loc')))e.known=true;
   if(S.rank>=3&&mc.includes(c)&&kind!=='person')e.known=true;
   if(S.rank>=4&&(kind==='gov'||kind==='party'))e.known=true;
   if(S.rank>=5&&kind==='corp'&&ENT[id].w>=.04)e.known=true;
   if(S.rank>=6)e.known=true;});
+  // 광고국을 통해 회사 큰 광고주 두세 곳은 안다
+  if(S.rank>=1){ENTS.filter(e=>e[2]==='corp'&&e[4]).sort((a,b)=>b[4]-a[4]).slice(0,S.rank>=2?3:2).forEach(e=>{if(S.net[e[0]])S.net[e[0]].known=true;});}
   const k=ENTS.filter(e=>S.net[e[0]].known);if(!k.length&&ENTS.length){const g=catDefault(mc[0]);if(S.net[g])S.net[g].known=true;}}
 function knowMore(){const mc=catOf(S.dept);let n=0;ENTS.forEach(([id,nm,kind,c])=>{const e=S.net[id];if(!e||e.known)return;let ok=false;
-  if(kind==='gov'&&mc.includes(c))ok=true;if(S.rank>=3&&mc.includes(c)&&kind!=='person')ok=true;if(S.rank>=4&&(kind==='gov'||kind==='party'))ok=true;if(S.rank>=5&&kind==='corp'&&ENT[id].w>=.04)ok=true;if(S.rank>=6)ok=true;
-  if(ok){e.known=true;n++;}});return n;}
+  if(kind==='gov'&&mc.includes(c))ok=true;if(S.rank>=1&&kind==='party'&&(mc.includes('pol')||mc.includes('loc')))ok=true;if(S.rank>=1&&(kind==='corp'||kind==='person')&&mc.includes(c)&&(S.rank>=2&&kind==='corp'||hashId(id,5)%100<55))ok=true;if(S.rank>=3&&mc.includes(c)&&kind!=='person')ok=true;if(S.rank>=4&&(kind==='gov'||kind==='party'))ok=true;if(S.rank>=5&&kind==='corp'&&ENT[id].w>=.04)ok=true;if(S.rank>=6)ok=true;
+  if(ok){e.known=true;n++;}});if(S.rank>=1)ENTS.filter(e=>e[2]==='corp'&&e[4]).sort((a,b)=>b[4]-a[4]).slice(0,S.rank>=2?3:2).forEach(e=>{const x=S.net[e[0]];if(x&&!x.known){x.known=true;n++;}});return n;}
 function knownList(){return ENTS.filter(e=>S.net&&S.net[e[0]]&&S.net[e[0]].known).map(e=>e[0]);}
 function meetChance(id){const E=ENT[id],tr=entTrait(id);let p=E.kind==='gov'?.45:E.kind==='party'?.4:E.kind==='corp'?.35:.12;
   p+=S.st.net/250+S.st.cha/400+S.rank*.03;if(E.kind==='person'){const inst=ENTS.find(x=>x[3]===E.c&&x[2]!=='person'&&S.net[x[0]]&&S.net[x[0]].known&&S.net[x[0]].rel>=40);if(inst)p+=.2;if(S.rank>=4)p+=.15;}
@@ -3460,7 +3472,7 @@ function endWeek(){
   if(S.turn%YW===0&&S.turn>0){['inv','ver','int','wri','hed','spd','net','kno'].forEach(k=>gain(k,.6));if(S.rival)S.rival.skill=Math.min(90,S.rival.skill+1);lines.push({c:'g',t:`${years()}년 차가 됐다. 연차만큼 감이 늘었다 (주요 능력치 +0.6). 물가가 올라 생활비도 늘었다.`});}
   S.ap=apBase();S.scene=baseScene();if(OUT().p<=2)S.hp=clamp(S.hp-3,0,100);
   worldTick();
-  Q.length=0;CQ.forEach(f=>Q.push(f));
+  Q.length=0;CQ.forEach(f=>Q.push(f));(window.__wq||[]).forEach(f=>Q.push(f));window.__wq=[];
   if(S._bw!=null&&!monthEnd){S._ml.push(...lines);lines.length=0;}else if(S._bw!=null){lines.unshift(...S._ml);S._ml=[];}
   if(monthEnd)Q.push(()=>openModal(`${month(t)}월 결산`,`${misSum()}${lines.length?`<ul class="feed">${lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>`:''}<div class="kv"><div><span>월급(실수령)</span><b>${fin_pay.pay}만</b></div><div><span>생활비·월세</span><b>-${fin_pay.live}만</b></div>${fin_pay.bonus?`<div><span>연말 성과급</span><b>+${fin_pay.bonus}만</b></div>`:''}<div><span>${TYPES[o.type].sub}</span><b>${f1(S.co.subs)}${TYPES[o.type].unit}</b></div><div><span>회사 월 손익</span><b style="color:${fin.profit>=0?'var(--good)':'var(--red)'}">${fin.profit>=0?'+':''}${f1(fin.profit)}억</b></div>${perf!==null?`<div><span>${S.rank>=4?'편집국':'부서'} 성과</span><b>${Math.round(perf)}</b></div>`:''}<div><span>${evalName()}</span><b>${Math.round(S.eval)}</b></div><div><span>업계 평판</span><b>${Math.round(S.fame)}</b></div></div>`));
   if(monthEnd&&month(t)===12&&!S.story)Q.push(()=>{try{if(S.yr0)return yearRecap();S.yr0=yrSnap();}catch(e){console.error(e);}closeModal();});
@@ -3563,10 +3575,10 @@ function doRotate(nd){const from=S.dept;deptHistAdd(from);deptHistAdd(nd);S.dept
 function npcReshuffle(){if(S.founder&&!Object.keys(S.posts||{}).length)return '';const o=OUT();const per=roster();const regD=o.depts.find(x=>isRegD(x));const C=corrs();
   const hq=Object.keys(per).filter(d=>DEPTS[d]&&!isRegD(d));const movable=d=>per[d].filter(m=>!S.team.includes(m)&&!(m.r>=2)&&!m.acting&&!m.desk);
   let toReg=0,fromReg=0,swap=0;const regs=C.length?[...new Set(C.map(m=>m.reg))]:[];
-  if(regD&&C.length&&!S.founder){const n=Math.max(1,Math.round(C.length*.12));for(let i=0;i<n;i++){const d=pick(hq);const cand=movable(d).filter(m=>!m.r);const back=C.filter(m=>!m.r&&!S.team.includes(m));if(!cand.length||!back.length)continue;
+  if(regD&&C.length&&!S.founder){const n=Math.max(chance(.25)?0:1,Math.round(C.length*R(6,18)/100));for(let i=0;i<n;i++){const d=pick(hq);const cand=movable(d).filter(m=>!m.r);const back=C.filter(m=>!m.r&&!S.team.includes(m));if(!cand.length||!back.length)continue;
     const a=pick(cand),b=pick(back);per[d]=per[d].filter(x=>x!==a);a.d=regD;a.reg=b.reg;a.role='주재기자';a.r=0;S.corr.push(a);per[regD].push(a);
     S.corr=S.corr.filter(x=>x!==b);per[regD]=per[regD].filter(x=>x!==b);b.reg=null;b.role=null;b.d=d;per[d].push(b);toReg++;fromReg++;}}
-  const k=Math.max(1,Math.round(o.staff*.05));for(let i=0;i<k&&hq.length>1;i++){const d1=pick(hq),d2=pick(hq.filter(x=>x!==d1));const a=pick(movable(d1)),b=pick(movable(d2));if(!a||!b)continue;
+  const k=Math.max(chance(.2)?0:1,Math.round(o.staff*R(2,8)/100));for(let i=0;i<k&&hq.length>1;i++){const d1=pick(hq),d2=pick(hq.filter(x=>x!==d1));const a=pick(movable(d1)),b=pick(movable(d2));if(!a||!b)continue;
     per[d1]=per[d1].filter(x=>x!==a);per[d2]=per[d2].filter(x=>x!==b);a.d=d2;b.d=d1;per[d2].push(a);per[d1].push(b);swap++;}
   Object.keys(per).forEach(d=>fixDept(per[d],d));S.mates=null;
   let mine='';if(S.rank>=2&&S.rank<=3&&S.team.length>2&&chance(.4)){const out=pick(S.team);const inn=genMember(S.dept,35,68);inn.yrs=R(3,9);S.team=S.team.filter(x=>x!==out);S.team.push(inn);mine=` 우리 부서에서는 ${out.name} 기자가 나가고 ${inn.name} 기자가 들어왔다.`;}
@@ -3656,12 +3668,19 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['5.6','균형 맞추기',[
-  '수정|아침 발제로 "면 톱"을 배정받았는데 "1면 톱"으로 나가던 문제. 이제 지면은 발제 배정을 따르고(완성도가 낮으면 한 단계 내려간다), 사회면 톱·경제면 톱 같은 "면 톱" 단계가 생겼다. 1면 톱 배정은 단독이거나 파급력이 큰 기사만 3달에 한 번까지, 면 톱은 한 달에 한 번까지. 배정 없이 쓴 기사가 1면 톱에 오르기는 훨씬 어려워졌다',
-  '조정|아이템이 너무 쉽게, 너무 좋게 들어오던 것을 줄였다. 발굴·브리핑 성공률↓, 단독 비율↓, 같은 아이템도 파급력에 편차가 생기고 "알고 보니 기사가 안 되는" 아이템이 조금 늘었다.',
-  '조정|출입처 장악도가 너무 빨리 차던 것을 늦췄다(터줏대감 약 1년 반, 전설 3~4년). 장악도가 쌓일 수 없는 직급이거나 거의 다 찼을 때는 "장악도 올리기" 미션이 나오지 않는다.',
-  '조정|수습이 끝나면 대개(8할) 회사가 부서를 배치한다. 정치·법조·탐사 같은 인기 부서는 신입에게 잘 돌아가지 않고, 희망을 받는 해에도 경쟁이 세다.',
-  '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.',
-  '주요|광고주 눈치: 우리 광고를 많이 내는 기업·기관을 비판하는 기사를 쓰려 하면 데스크(대표·사장이면 광고국)가 압박한다. 표현을 누그러뜨리면 광고는 지키지만 기사가 무뎌지고 신뢰가 깎이고, 그대로 쓰면 광고가 끊길 수 있다. 접을 수도 있다','조정|광고 수입 구조: 많은 매체가 광고 수입을 최저치(월 0.4억)로 받던 것을 매체 유형별 실제 비중(신문 60%대·온라인 70%·통신사 30% 등)으로 바꿨다. 관계망 광고주의 광고 단가도 1.5~3배 현실화하고, 화면에 보이는 금액을 실제 집행액과 맞췄다','주요|모바일 화면 개편: 모든 걸 한 줄로 길게 늘어놓던 화면을 아래 탭바(할 일 · 현황 · 나 · 취재 · 사람 · 회사)로 한 화면씩 나눴다. 할 일은 두 줄 격자로, 머리글은 한 줄로','대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(품질·편집력·기자 실력에 따라 단독도 터진다), 대표는 "기자에게 취재 맡기기"로 쥔 아이템을 기자에게 넘길 수 있다. 대표 기사도 구독·트래픽·회사 품질에 직접 반영된다','조정|창간 모드 취재 나가기 행동력 2→1. 막 생긴 회사엔 회사 규모에 맞는 아이템이 주로 들어온다','수정|기사 쓰기가 표시는 행동력 1인데 실제로는 2가 빠지던 문제','수정|창간 모드에서 광고·후원 영업이 실패해도 "1건 따내기" 미션이 달성되던 문제. 이제 계약이 성사돼야 센다(기자 광고·협찬 영업도 같다)','수정|온라인 매체 기사가 "1면"에 실리던 표기. 이제 홈페이지 메인 톱·섹션 톱으로 나온다','수정|"21천만 원" 같은 금액 표기를 "2억 1천만 원"으로','수정|광고 시장 점유율이 시간이 갈수록 밀리던 문제. 경쟁사의 영향력이 끝없이 불어나(10년 뒤 기준의 10배 이상) 내 점유율이 4분의 1로 줄던 것을 고쳤다. 경쟁사도 품질에 맞는 수준으로 돌아오고, 단가 인하·받아쓰기 공세의 광고 타격도 줄였다','조정|회사 경영진(AI)이 경쟁에 대응한다. 경쟁사 품질이 앞서거나 점유율이 밀리면 돈을 들여 보도 품질에 투자해 방어한다(내가 사장이면 직접 정한다)','조정|생활비를 현실에 맞게 올렸다(기자 월 150만 원 안팎부터). 큰 매체 기자도 저축이 빠르게 쌓이지 않는다','조정|기자 몇 명짜리 작은 매체가 매출의 절반 이상을 남기던 것을 줄였다. 입사 때 회사 이익률이 6~18% 안에서 시작한다(적자로 시작하던 지역지도 바로잡음)','조정|신뢰도가 높을수록 오르는 폭이 줄어든다(75쯤부터 절반). 꼭대기에 붙어 의미가 없어지던 문제','수정|회사가 해마다 1월에 인력을 늘리거나 줄이는 처리가 한 번도 실행되지 않던 문제. 이제 적자가 쌓이면 구조조정(감원)을 하고, 흑자로 돈이 쌓이면 채용을 늘린다. 작은 회사도 1명 단위로 움직인다','조정|비판 보도 뒤 반응이 "화해"로 쏠리던 것을 고쳤다. 이제 광고 무마·화해·보복이 대체로 고르게 나오고, 상대 성향(언론 압박·소송 성향·개방적)과 보도 강도, 쫓는 후속 기사에 따라 기운다','수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
+  '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(단독도 터진다), 대표는 "기자에게 취재 맡기기"로 아이템을 넘길 수 있다. 대표 기사도 구독·트래픽에 바로 반영',
+  '주요|모바일·태블릿 화면 개편: 아래 탭바(할 일·현황·나·취재·사람·회사)로 한 화면씩. 할 일은 격자로, "다음 달로"는 늘 보이게',
+  '주요|광고주 눈치: 큰 광고주를 비판하는 기사를 쓰려 하면 데스크(대표·사장이면 광고국)가 압박한다. 누그러뜨리기·그대로·접기 중 선택',
+  '주요|경제 현실화: 월급(대형사 신입 실수령 300만 안팎, 지역·인터넷 170만~200만대)·생활비·광고 비중(신문 60%대)·광고주별 단가를 현실에 맞췄다. 작은 매체의 과한 이익도 정리',
+  '주요|회사가 살아 움직인다: 해마다 인력을 늘리거나 줄이고(적자면 구조조정), 경영진이 경쟁사에 맞서 품질에 투자한다. 경쟁사가 끝없이 커져 점유율이 밀리던 문제 수정',
+  '조정|아이템: 덜 자주·덜 좋게 들어오고, 능력치·연차가 높을수록 질이 오른다. 막 생긴 회사엔 규모에 맞는 아이템',
+  '조정|지면: 면 톱 배정이 1면으로 나가던 버그 수정. 단독은 면 톱까지 자주, 1면은 1년에 한두 번. 온라인 매체는 홈페이지 메인·섹션 톱으로 표기',
+  '조정|행동력: 기사 쓰기 1(표시만 1이고 실제 2가 빠지던 문제 수정), 창간 모드 취재 나가기 1',
+  '조정|수습 뒤 부서는 대개 회사가 배치(인기 부서는 어렵다). 출입처 장악도는 천천히 오르고, 신뢰도는 높을수록 덜 오른다',
+  '조정|보도 뒤 반응(광고 무마·화해·보복)이 화해로 쏠리던 것을 고르게',
+  '수정|미션: 광고 영업이 실패해도 "따내기" 미션이 달성되던 문제, 장악도가 다 찼는데 장악도 미션이 나오던 문제. 추천 목록은 미션에 맞는 일을 먼저',
+  '수정|부서를 옮겨도 조직 탭 부서장·부원이 그대로이던 문제. 금액 표기("21천만 원" → "2억 1천만 원")',
+  '수정|관계망(대외 관계)에 정부 기관만 뜨고 광고주·정당·인물이 0곳이던 문제. 이제 출입처 분야의 기업·인물, 정치·지역 담당이면 정당, 회사 큰 광고주 두세 곳은 처음부터 안다. "대외 관계"가 발령 직후 한 달 잠기던 것도 풀었다','수정|전국부·지역 부서에서 사내 관계의 부장·캡·선배가 조직 명단에 없던 문제. 본사 데스크가 명단 맨 앞에 보인다','조정|오보 위험을 낮췄다(반론 없음·핵심 사실 한 출처만일 때). 평기자 승진의 오보 조건은 1년 2건 이하로. 간부의 취재원 만나기로 평판이 끝없이 오르던 것도 한 달 두 번까지로. 정기 인사 문구가 매번 똑같던 것 수정','조정|기사 기본 완성도를 조금 올렸다(추천대로 쓰기 감점도 줄임). 창간 모드는 돈이 쌓이는데 편집국이 작으면 공동창업자가 채용을 권한다','조정|팝업 줄이기: 아이템이 하나면 고르는 창을 건너뛴다. 스토리 모드는 손보는 동안 닫아 둔다(진행 중이던 스토리 저장은 정리됨)'],'2026.10.18',['창간 편집국','모바일 탭바','광고주 눈치','경제 현실화','살아 있는 회사']],
  ['5.5','커리어가 움직인다',[
   '주요|불쾌함 줄이기: 할 일 맨 위 경고 상자(곧 물먹을 단독·마감·컨디션·평가·신뢰·자금·다음 달 인사), 물먹기·오보·정정·권고사직 뒤 "다음엔" 팁, 큰 악재 뒤 두 달은 위기·오보 발각이 쉬어 간다, 권고사직이어도 재취업 길은 항상 하나 이상. 결과 카드는 최대 2장만 작게 떠서 화면을 가리지 않는다',
   '주요|자동 저장 3개(최근 3달)를 저장 메뉴에서 불러와 실수를 되돌릴 수 있다. 12월 결산 뒤엔 1년 결산(출고·단독·1면·평가·평판·통장·올해의 기사)',
@@ -3964,6 +3983,7 @@ function finishCreate(){
   S.name=nm.slice(0,8);flashLoad(S.smode==='story'?'시나리오 불러오는 중…':S.smode==='found'?'창간 서류 접수 중…':'지원서 접수하는 중…',650);const b=bonusOf();for(const k in b)gain(k,b[k]);
   S.money=DF().start;S.apply=[];if(S.smode!=='story'){if(S.age0==null)S.age0=S.smode==='found'?40:26;S.ageT0=0;try{ageStart();}catch(e){}}
   if(S.smode==='smb'){smbOffers();return;}
+  if(S.smode==='story'&&!S.devUnlock&&!window.__devTest)S.smode='exam';
   if(S.smode==='story'){openModal('스토리 고르기','<p>각 스토리는 매체·직급·부서가 정해져 있고, 제한 시간 안에 목표를 이루면 클리어다.</p>',STORIES.map(st=>({label:st.n,sub:st.d,fn:()=>{S.story=st.id;storySetup();return false;}})).concat([{label:'뒤로',cls:'ghost'}]));return;}
   if(S.smode==='found'){for(const k in S.st)gain(k,14);S.fame=22+Math.max(0,((S.age0||40)-35)*.3);S.money=Math.max(S.money,15000);founderSetup({age:S.age0,st:{...S.st},fame:S.fame||22,trust:52,sources:[],name:S.name,major:S.major,spec:S.spec,diff:S.diff,money:S.money,dev:S.dev,turn:0,awards:0,scoops:0,history:[]});return;}
   S.phase='apply';render();
@@ -4285,7 +4305,7 @@ function createHTML(){
   return `<div class="box"><div class="bh"><h3>지원자 프로필</h3><span class="num" style="color:var(--mute);font-size:12px">STEP 1/2</span></div><div class="bb">
   <div class="group"><div class="namecard" style="max-width:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0"><span style="color:var(--mute);font-size:13px">기자 이름</span><b style="font-size:20px;font-family:var(--f-display);font-weight:400">${esc(S.name)} 기자</b><button class="btn sm" data-go="title" style="margin-left:auto">메인에서 바꾸기</button></div></div>
   <div class="group qstart"><button class="next" data-go="quick" style="margin:0">바로 시작하기 — 수습기자로 입사 (추천)</button><p class="hint" style="margin:6px 2px 0">처음이라면 이걸로. 시험 없이 추천 매체 3곳 중 하나를 골라 바로 시작한다. 전공·스펙은 지금 고른 그대로(기본값) 들어간다.</p></div>
-  <div class="group"><h4>시작 방식<small>언론고시 · 중소 매체 · 스토리 · 창간</small></h4><div class="opts"><button class="opt" data-smode="exam" aria-pressed="${!S.smode||S.smode==='exam'}"><b>언론고시 · 4곳 지망</b><span>원하는 매체 4곳에 직접 지원해 서류·필기·면접을 본다. 대형 매체도 노릴 수 있다.</span></button><button class="opt" data-smode="smb" aria-pressed="${S.smode==='smb'}"><b>중소·중견 매체에서 시작</b><span>수시 채용으로 바로 입사한다. 작은 곳에서 경력을 쌓아 큰 매체로 이직하는 길.</span></button><button class="opt" data-smode="story" aria-pressed="${S.smode==='story'}"><b>스토리 모드 · 5편</b><span>정해진 상황과 목표, 제한 시간이 있는 시나리오. 물먹은 수습부터 적자 매체 살리기까지.</span></button><button class="opt" data-smode="found" aria-pressed="${S.smode==='found'}"><b>창간 모드 · 타이쿤</b><span>10년 차 기자 출신 발행인으로 내 언론사를 세워 메이저로 키운다. 경영·편집·인사를 모두 쥔다.</span></button></div></div>
+  <div class="group"><h4>시작 방식<small>언론고시 · 중소 매체 · 창간</small></h4><div class="opts"><button class="opt" data-smode="exam" aria-pressed="${!S.smode||S.smode==='exam'}"><b>언론고시 · 4곳 지망</b><span>원하는 매체 4곳에 직접 지원해 서류·필기·면접을 본다. 대형 매체도 노릴 수 있다.</span></button><button class="opt" data-smode="smb" aria-pressed="${S.smode==='smb'}"><b>중소·중견 매체에서 시작</b><span>수시 채용으로 바로 입사한다. 작은 곳에서 경력을 쌓아 큰 매체로 이직하는 길.</span></button><button class="opt" data-smode="story" aria-pressed="${S.smode==='story'}"><b>스토리 모드 · 5편</b><span>정해진 상황과 목표, 제한 시간이 있는 시나리오. 물먹은 수습부터 적자 매체 살리기까지.</span></button><button class="opt" data-smode="found" aria-pressed="${S.smode==='found'}"><b>창간 모드 · 타이쿤</b><span>10년 차 기자 출신 발행인으로 내 언론사를 세워 메이저로 키운다. 경영·편집·인사를 모두 쥔다.</span></button></div></div>
   <div class="group"><h4>플레이 방식<small>시작하면 2년(게임 시간)이 지나야 메뉴에서 바꿀 수 있다</small></h4><div class="opts"><button class="opt" data-simple="0" aria-pressed="${!S.simple}"><b>정통 모드</b><span>모든 기능과 콘텐츠. 사실 교차 확인, 기사 5단계, 관계망·동료·생활까지.</span></button><button class="opt" data-simple="1" aria-pressed="${!!S.simple}"><b>간소화 모드</b><span>핵심만 빠르게. 기사는 제목만 고르면 끝, 확인은 한 번씩, 승진은 두 배 빠르게, 이벤트·탭·행동은 꼭 필요한 것만.</span></button></div></div>
   <details class="more adv"><summary>자세히 설정 — 나이 · 난이도 · 전공 · 스펙</summary>
   ${ageGroupHTML()}
@@ -4313,7 +4333,7 @@ function gameHTML(){
   // 편집국장·사장(창간 제외)은 취재 현장에 나가지 않는다: 현장 분야를 없애고 지휘·사람 분야로 옮긴다
   const exec=S.rank>=6&&!S.founder;const moveTo={breaking:'기사와 지면',tour:'사람과 관계',source:'사람과 관계'};
   const groups=ACT_GROUPS.filter(g=>!(exec&&g[0]==='취재 현장')).map(([g,c,list])=>[g,c,ids.filter(id=>list.includes(id)||(exec&&moveTo[id]===g))]).filter(x=>x[2].length);const rest=ids.filter(id=>!ACT_GROUPS.some(g=>g[2].includes(id)));if(rest.length)groups.push(['기타','var(--mute)',rest]);
-  const pri=[];try{if(writable().length)pri.push('write');else if(S.items.length)pri.push('invest');if(S.founder&&S.items.length>=2)pri.push('fassign');}catch(e){}const recL=[...new Set([...pri.filter(id=>ids.includes(id)&&live(id)),...(ids.includes(recId)&&live(recId)?[recId]:[]),...groups.flatMap(g=>g[2].filter(live).slice(0,2))])].slice(0,6);
+  const pri=[];try{ids.filter(id=>misTag(id)).slice(0,3).forEach(id=>pri.push(id));if(writable().length)pri.push('write');else if(S.items.length)pri.push('invest');if(S.founder&&S.items.length>=2)pri.push('fassign');}catch(e){}const recL=[...new Set([...pri.filter(id=>ids.includes(id)&&live(id)),...(ids.includes(recId)&&live(recId)?[recId]:[]),...groups.flatMap(g=>g[2].filter(live).slice(0,2))])].slice(0,6);
   if(S.actCat!=='rec'&&!groups.some(g=>g[0]===S.actCat))S.actCat='rec';const cat=S.actCat||'rec';
   const chips=`<div class="acat">${[['rec','추천','var(--sodium)',recL.length]].concat(groups.map(([g,c,l])=>[g,g,c,l.filter(live).length])).map(([k,n,c,cnt])=>`<button class="achip" data-ac="${k}" aria-pressed="${cat===k}" style="--c:${c}">${n}<small>${cnt}</small></button>`).join('')}</div>`;
   const body=cat==='rec'?`<div class="acts">${recL.map(btn).join('')||'<p class="empty">지금 할 수 있는 일이 없다. 다음 달로 넘기자.</p>'}</div><p class="hint" style="margin:8px 0 0">위 칸에서 분야를 고르면 그 분야의 일을 모두 볼 수 있다.</p>`:(()=>{const l=groups.find(g=>g[0]===cat)[2];const on=l.filter(live),off=l.filter(id=>!live(id));return `<div class="acts">${on.map(btn).join('')}</div>${off.length?`<details class="more"><summary>아직 못 하는 일 ${off.length}개</summary><div class="acts" style="margin-top:8px">${off.map(btn).join('')}</div></details>`:''}`;})();
@@ -4396,7 +4416,7 @@ function tabBody(){
   if(t==='team')fixTeam();
   if(t==='team'&&S.rank>=6){const per=roster();const MRn=MR;return `<p class="hint" style="margin:0 0 10px">편집국 전체 ${S.co.staff}명을 부서별로 본다. 부서를 누르면 명단이 펼쳐진다. 실력은 겉으로 본 추정치.</p>`+Object.keys(per).filter(d=>dn(d)&&per[d].length).map(d=>{const L=per[d].slice().sort((a,b)=>(b.r||0)-(a.r||0)||b.skill-a.skill);const av=Math.round(L.reduce((a,m)=>a+m.skill,0)/L.length);const head=L.find(m=>(m.r||0)>=2)||L.find(m=>m.acting)||L[0];return `<details class="card"><summary style="cursor:pointer"><b>${dn(d)}</b> <span class="meta" style="display:inline-flex"><span>${L.length}명</span><span>평균 실력 ${av}</span><span>${head.acting?'부장 직무대리':['기자','차장','부장','부국장'][Math.min(3,head.r||0)]} ${esc(head.name)}</span>${L.some(m=>S.team.includes(m))?'<span class="tag so">직속</span>':''}</span></summary>${bar(av,'var(--siren)')}<ul class="loglist" style="margin-top:8px">${L.map(m=>`<li><span>${m.reg?'주재':rTitle(m)}</span>${esc(m.name)}${m.reg?` · ${esc(m.reg)}`:''} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)} · 실력 ${estRange(m.skill,30,m.name.length*7,'sk')}</li>`).join('')}</ul></details>`;}).join('');}
   if(t==='team')return deptBox()+(S.team.length?S.team.slice().sort((a,b)=>(b.r||0)-(a.r||0)||b.skill-a.skill).map(m=>`<div class="card"><div class="t">${esc(m.name)} ${MR[m.r||0]} <span style="font-weight:400;color:var(--mute)">· ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div><div class="meta"><span class="tag bl">${DEPTS[m.d]?DEPTS[m.d].n:''}</span><span>종합 실력 ${Math.round(m.skill)}</span>${m.st?`<span>추정 ${['inv','wri','ver','net'].map(k=>`${STN[k]} ${estRange(m.st[k],S.rank>=2?40:10,m.name.length*7,k)}`).join(' · ')}</span>`:''}</div>${bar(m.skill,'var(--siren)')}</div>`).join(''):'<p class="empty">부서원이 없다.</p>');
-  if(t==='mates'&&['nat','loc','sigun'].includes(S.dept)&&corrs().length){const C=corrs();const regs=[...new Set(C.map(m=>m.reg))];const M=deptMates().slice(0,2);return `<p class="hint" style="margin:0 0 10px">${DEPTS[S.dept].n}는 본사 데스크 몇 명과 지역마다 1~3명씩 흩어진 주재기자로 이뤄진다. 나는 <b>${esc(S.region||'')}</b>. 전체 ${C.length+M.length}명.</p><div class="sec">본사 데스크</div>`+M.map(m=>`<div class="card"><div class="t">${esc(m.name)} <span style="font-weight:400;color:var(--mute)">· ${m.role} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div></div>`).join('')+regs.map(r=>`<div class="sec">${esc(r)}${S.region&&S.region.includes(r.split(' ').pop())?' · 내 주재지':''}</div>`+C.filter(m=>m.reg===r).map(m=>`<div class="card"><div class="t">${esc(m.name)} <span style="font-weight:400;color:var(--mute)">· ${m.role} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div><div class="meta"><span>추정 ${['inv','net'].map(k=>`${STN[k]} ${estRange(m.st[k],(m.rel||0)+20,m.name.length*7,k)}`).join(' · ')}</span><span>관계 ${Math.round(m.rel||0)}</span></div></div>`).join('')).join('');}
+  if(t==='mates'&&['nat','loc','sigun'].includes(S.dept)&&corrs().length){const C=corrs();const regs=[...new Set(C.map(m=>m.reg))];const M0=deptMates();const M=(M0.filter(m=>m.hq).length?M0.filter(m=>m.hq):M0).slice(0,3);return `<p class="hint" style="margin:0 0 10px">${DEPTS[S.dept].n}는 본사 데스크 몇 명과 지역마다 1~3명씩 흩어진 주재기자로 이뤄진다. 나는 <b>${esc(S.region||'')}</b>. 전체 ${C.length+M.length}명.</p><div class="sec">본사 데스크</div>`+M.map(m=>`<div class="card"><div class="t">${esc(m.name)} <span style="font-weight:400;color:var(--mute)">· ${m.role} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div></div>`).join('')+regs.map(r=>`<div class="sec">${esc(r)}${S.region&&S.region.includes(r.split(' ').pop())?' · 내 주재지':''}</div>`+C.filter(m=>m.reg===r).map(m=>`<div class="card"><div class="t">${esc(m.name)} <span style="font-weight:400;color:var(--mute)">· ${m.role} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div><div class="meta"><span>추정 ${['inv','net'].map(k=>`${STN[k]} ${estRange(m.st[k],(m.rel||0)+20,m.name.length*7,k)}`).join(' · ')}</span><span>관계 ${Math.round(m.rel||0)}</span></div></div>`).join('')).join('');}
   if(t==='mates'){const M=deptMates();return deptBox()+`<p class="hint" style="margin:0 0 10px">${esc(OUT().n)} ${DEPTS[S.dept].n} 사람들. 능력치는 겉으로 본 추정치라 범위로 보인다 — 오래 같이 일할수록 좁아진다.</p>`+M.map(m=>`<div class="card"><div class="t">${esc(m.name)} <span style="font-weight:400;color:var(--mute)">· ${m.role} · ${yrsTxt(m)} · ${npcAge(m)}세 · ${payTxt(m)}</span></div><div class="meta"><span>추정 ${['inv','wri','ver','net'].map(k=>`${STN[k]} ${estRange(m.st[k],(m.rel||0)+Math.min(40,S.inRank),m.name.length*7,k)}`).join(' · ')}</span></div>${bar(clamp(m.skill+((m.name.length*13)%15-7),5,99),'var(--siren)')}</div>`).join('');}
   if(t==='org'){const L=leaders(),rows=orgCounts();const per=roster();const tot=rows.reduce((a,r)=>a+r[1],0);
     return `<div class="kv"><div><span>사장(대표)</span><b style="font-size:15px">${esc(L.ceo)}</b></div><div><span>${isTV()?'보도국장':'편집국장'}</span><b style="font-size:15px">${esc(L.chief)}</b></div><div><span>기자</span><b>${tot}명</b></div><div><span>전체 임직원</span><b>${employees()}명</b></div></div><p class="hint" style="margin:6px 0 0">임직원에는 총무·광고·판매·제작·기술 인력이 포함된다. 아래는 편집국(보도국) 기자만 센 것이다.</p>
@@ -5684,7 +5704,7 @@ function wageMonth(lines){if(!S.co||!(S.founder||S.rank>=6))return;const c=S.co;
 function promoSz(){return ({1:.5,2:.6,3:.8,4:1,5:1.2}[OUT().p]||1);}
 function rankArts(){const t0=S.turn-(S.inRank||0);return (S.clips||[]).filter(c=>c.turn>=t0).length;}
 function promoReqs(r){if(S.story||S.founder)return [];const z=promoSz(),n=x=>Math.max(1,Math.round(x*z*(S.simple?.5:1)));const L=[];const errN=y=>(S.errT||[]).filter(t=>t>S.turn-YW*y).length;const bm=Math.max(0,...Object.values(S.beatM||{0:0}));
-  if(r===1){L.push({t:`이번 직급 기사 ${rankArts()}/${n(14)}`,ok:rankArts()>=n(14)});L.push({t:`최근 1년 오보 ${errN(1)}/1건 이하`,ok:errN(1)<=1});}
+  if(r===1){L.push({t:`이번 직급 기사 ${rankArts()}/${n(14)}`,ok:rankArts()>=n(14)});L.push({t:`최근 1년 오보 ${errN(1)}/2건 이하`,ok:errN(1)<=2});}
   if(r===2){L.push({t:`단독 ${S.scoops||0}/${n(2)}`,ok:(S.scoops||0)>=n(2)});L.push({t:`출입처 장악도 40 또는 제자`,ok:bm>=40||!!S.protege});L.push({t:`신뢰 ${Math.round(S.trust)}/45`,ok:S.trust>=45});}
   if(r===3){L.push({t:`부서 성적 2위 이내 ${S.deptTop||0}/${n(3)}회`,ok:(S.deptTop||0)>=n(3)});L.push({t:'특종 이상 1건 또는 기자상',ok:(S.tokjong||0)>=1||(S.awards||0)>=1});L.push({t:`신뢰 ${Math.round(S.trust)}/50`,ok:S.trust>=50});}
   if(r===4){L.push({t:`1면 대결 ${S.fwWins||0}/${n(3)}승 또는 특종 ${S.tokjong||0}/2`,ok:(S.fwWins||0)>=n(3)||(S.tokjong||0)>=2});L.push({t:`신뢰 ${Math.round(S.trust)}/52`,ok:S.trust>=52});}
@@ -5878,7 +5898,7 @@ function adMonth(o,F){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);const nk=adN
 const jo=(w,a,b)=>{const c=String(w).slice(-1).charCodeAt(0);return w+((c>=44032&&c<=55203&&(c-44032)%28)?a:b);};
 const CRIT_RE=/의혹|비리|부실|갑질|유출|담합|특혜|횡령|논란|피해|사고|불법|은폐|착취|리콜|결함|하자|과징금|적발|폭리|꼼수|편법|산재|위반|누락|사적|막말|대출|부당|비위|독점|로비|떠넘|외면|방치/;
 function adGate(it,go){const id=it.ent,E=ENT[id],e=S.net&&S.net[id];const sh=adShareOf(id);
-  if(S.story||!E||!e||!sh||!(E.kind==='corp'||E.kind==='gov')||e.cut>0||!CRIT_RE.test(it.title)||sh<(S.simple?.02:.008))return go({});
+  const thr=S.simple?.03:(S.founder||OUT().p<=2)?.025:.012;if(S.story||!E||!e||!sh||!(E.kind==='corp'||E.kind==='gov')||e.cut>0||!CRIT_RE.test(it.title)||sh<thr||S.turn-(e.gateT??-99)<24||S.turn-(S.gateT??-99)<6)return go({});e.gateT=S.turn;S.gateT=S.turn;
   const me=S.founder||S.rank>=6;const yr=OUT().ad*sh*12;const bs=colBy('boss');const who=me?'광고국장':S.rank<=3?`${bs?bs.name+' ':''}부장`:'사장';
   const heavy=sh>=.025;const line=me?`"대표님, ${jo(E.n,'은','는')} 우리 광고의 ${(sh*100).toFixed(1)}%입니다. 이번 분기 매출이 흔들릴 수 있어요."`:S.rank<=3?`"${jo(E.n,'은','는')} 우리 큰 광고주야. 사실만 딱 쓰고 표현은 좀 누그러뜨리자. 광고국에서 벌써 전화 왔어."`:`"${E.n} 건, 광고국이 걱정이 많아. 편집국이 알아서 판단하되 회사 사정도 생각해 줘."`;
   S.adGateN=(S.adGateN||0)+1;
@@ -6365,7 +6385,13 @@ function rosterMove(per){if(S.founder||!per)return;const cur=S.dept,prev=S.rosDe
   if(Lo&&!isRegD(prev)&&Lo.length>=2&&!hasHead(Lo)){const c=Lo.filter(m=>m.r===1&&!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0]||Lo.filter(m=>!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0];if(c){if(Lo.length<=7){c.r=1;c.acting=1;}else{c.r=2;c.acting=0;}}}
   if(!isRegD(cur)&&S.rank<=2&&!hasHead(Ln.filter(m=>!T.includes(m)))){const c=Ln.filter(m=>!T.includes(m)).sort((a,b)=>myrs(b)-myrs(a))[0];if(c){if(Ln.length<=7){c.r=1;c.acting=1;}else{c.r=2;c.acting=0;}}}
   ['boss','cap','senior'].forEach(r=>{const c=colBy(r);if(c&&(r==='boss'?S.rank<=2:S.rank<=1))c.fresh=1;});}
-function syncPeople(per){if(!S||S.founder||!S.cols||!per)return;const L=per[S.dept];if(!L||!L.length||isRegD(S.dept))return;
+function syncPeople(per){if(!S||S.founder||!S.cols||!per)return;const L=per[S.dept];if(!L||!L.length)return;
+  // 전국부·지역 부서: 명단이 주재기자뿐이라 사내 관계의 부장·캡이 명단에 없었다 → 본사 데스크(부장·차장)를 명단 맨 앞에 둔다
+  if(isRegD(S.dept)){const T=S.team||[];let d=L.find(m=>m.hq===1);if(!d){d=genMember(S.dept,50,70);d.r=2;d.hq=1;d.yrs=R(18,26);d.t0=S.turn;fitSk(d);L.unshift(d);}
+    const b=colBy('boss');if(b&&S.rank<=2){d.name=b.name;b.ttl=rTitle(d);}else if(b)b.ttl=null;
+    const cp=colBy('cap');if(cp&&S.rank<=1){let c2=L.find(m=>m.hq===2);if(!c2){c2=genMember(S.dept,45,62);c2.r=1;c2.hq=2;c2.yrs=R(10,16);c2.t0=S.turn;fitSk(c2);L.splice(1,0,c2);}c2.name=cp.name;}
+    const sn=colBy('senior');if(sn&&S.rank<=1){let c3=L.find(m=>m.hq===3)||L.find(m=>!m.hq&&!(m.r>=1)&&!T.includes(m)&&myrs(m)>=3);if(!c3){c3=genMember(S.dept,40,60);c3.r=0;c3.hq=3;c3.yrs=R(5,9);c3.t0=S.turn;fitSk(c3);L.push(c3);}c3.hq=c3.hq||3;c3.name=sn.name;}
+    return;}
   const used=new Set();const setName=(m,c)=>{if(!m||!c)return;if(c.fresh){c.name=m.name;c.rel=R(0,15);c.yrs=null;c.t0=S.turn;delete c.fresh;}if(m.name!==c.name){const dup=Object.values(per).flat().find(x=>x!==m&&x.name===c.name);if(dup)dup.name=rname();m.name=c.name;}used.add(m);if(c.yrs==null&&m.yrs!=null){c.yrs=myrs(m);c.t0=S.turn;}};
   const head=deptHead(per,S.dept)||Object.values(per).flat().find(m=>m.desk);
   const b=colBy('boss');if(b&&head&&S.rank<=2){setName(head,b);b.ttl=rTitle(head);}
@@ -6399,6 +6425,12 @@ function fNewsroom(lines){const c=S.co,o=OUT();const rep=Math.max(0,c.staff-1);i
   c.bS+=n*.00004;c.bT+=n*.00008;let first='';
   if(ex){const who=pick(R1).name;const it=makeItem(pick(OUT().depts||[S.dept]),{excl:true});const cl=fStaffClip(it.title,c.q+R(-8,10),it.imp,true,who,it);first=` · 「${cl.h}」(${who} 기자)`;S.fNewsX+=Math.max(0,ex-1);}
   let err='';if(c.q<46&&chance((46-c.q)/50)){apply({trust:-.8});c.q=clamp(c.q-1,10,100);err=' · 정정보도 1건 (품질이 낮다)';}
+  // 돈은 쌓이는데 편집국이 작으면 공동창업자가 채용을 권한다
+  const yrC=c.staff*.066*12;const want=6+o.p*3;if(c.staff<want&&c.cash>yrC*1.2+3&&S.turn-(S.fHireAskT??-99)>=24){S.fHireAskT=S.turn;const cf=colBy('cofound');const nm=cf?cf.name:'편집장';
+    (window.__wq=window.__wq||[]).push(()=>openModal('편집국이 너무 작다',`<p class="lede">${esc(nm)}: "통장에 돈은 쌓이는데 기자가 ${c.staff}명뿐이야. 이대로면 기사가 안 나와. 사람 좀 뽑자."</p><p class="hint">기자가 늘면 편집국 기사·단독이 늘고 맡길 수 있는 취재도 늘어난다. 인건비는 1명당 월 약 ${f1(.066*(S.payLv||1))}억.</p>`,[
+      {label:'경력 기자 2명 영입',sub:`자금 -${f1(.4)}억(영입비) · 기자 +2 · 품질↑`,fn:()=>{c.cash-=.4;c.staff+=2;for(let i=0;i<2;i++){const m=genMember(S.dept,48,66);m.yrs=R(4,10);(S.team=S.team||[]).push(m);}c.q=clamp(c.q+1.5,10,100);toast('경력 기자 2명이 합류했다');log('경력 기자 2명 영입');}},
+      {label:'수습 공채 3명',sub:'싸다 · 기자 +3 · 한동안 품질 조금↓',fn:()=>{c.staff+=3;for(let i=0;i<3;i++){const m=genMember(S.dept,28,42);m.yrs=0;(S.team=S.team||[]).push(m);}c.q=clamp(c.q-1,10,100);toast('수습기자 3명을 뽑았다');log('수습 공채 3명');}},
+      {label:'아직은 버틴다',cls:'ghost',fn:()=>{if(cf)relUp(cf,-2,'채용 미룸');}}]));}
   S.fNewsN=n;lines.push({c:ex?'g':'',t:`편집국 기사 ${n}건 출고${ex?` · 단독 ${ex}건${first}`:''}${err}`});}
 // ===== 모바일: 한 화면에 하나씩 (할 일 · 현황 · 나 · 취재 · 사람 · 회사) =====
 const MNAV_IC={act:'📝',dash:'📊',me:'🙂',work:'🔎',people:'👥',company:'🏢'};
@@ -6422,11 +6454,15 @@ function flashLoad(msg,ms){loaderRun(msg);loaderDone(ms||750);}
 
 // ================= 시작 =================
 function migrate(s){if(!s)return s;try{(s.npcOut||[]).forEach(o=>{if(!OUTLETS.some(x=>x.id===o.id))OUTLETS.push(o);});(s.closedOut||[]).forEach(id=>{const o=OUTLETS.find(x=>x.id===id);if(o)o.closed=1;});}catch(e){}if((s.ver4||0)<2){s.mates=null;s.ros=null;s.corr=null;s.ver4=2;}if(s.custom){const i=OUTLETS.findIndex(x=>x.id==='mine');if(i>=0)OUTLETS.splice(i,1);OUTLETS.push(s.custom);}try{oReset();oModApply(s);}catch(e){}if(s.phase==='game'&&!s.cols){const k=S;S=s;initColleagues(true);S=k;}if(s.phase==='game'&&!s.portal){const k=S;S=s;initPortal(OUT());initComp();S=k;}if(s.phase==='game'&&(!s.net||!s.ents)){const k=S;S=s;initNet(s.net||null);S=k;}if(s.ents){const bw={};[...Object.values(ENT_BASE).flat(),...Object.values(TYPE_ENT).flat(),...Object.values(ID_ENT).flat()].forEach(e=>{if(e[3]>0&&!(e[0] in bw))bw[e[0]]=e[3];});s.ents.forEach(e=>{if(!e[4]&&bw[e[0]])e[4]=bw[e[0]];});normEnts(s.ents,OUTLETS.find(x=>x.id===s.outlet));setEnts(s.ents);}for(const k in ST0)if(s.st&&s.st[k]==null)s.st[k]=ST0[k];(s.items||[]).forEach(i=>{if(!i.ent)i.ent=findEnt(i.title,i.subj||'',i.d);});s.cd=s.cd||{};s.ach=s.ach||{};s.ticker=s.ticker||[];s.flags=s.flags||{};s.items=(s.items||[]).filter(i=>i.facts&&i.facts[0]&&'conf' in i.facts[0]);return s;}
+// 스토리 모드를 닫았다: 진행 중이던 스토리 저장(이어하기·슬롯·자동 저장)을 지운다
+function purgeStory(){try{const keys=[SAVE_KEY,...[1,2,3,4,5,6].map(SAVESLOT),...[0,1,2,3,4].map(AUTOKEY)];let n=0;keys.forEach(k=>{const v=localStorage.getItem(k);if(!v)return;let o=null;try{o=JSON.parse(v);}catch(e){return;}const st=o&&(o.S||o);if(st&&st.story){localStorage.removeItem(k);n++;}});return n;}catch(e){return 0;}}
+function knowFix(){try{if(S&&S.phase==='game'&&S.net&&!S.know2&&!S.founder){S.know2=1;knowMore();if(S.rank>=1)ENTS.filter(e=>e[2]==='corp'&&e[4]).sort((a,b)=>b[4]-a[4]).slice(0,S.rank>=2?3:2).forEach(e=>{if(S.net[e[0]])S.net[e[0]].known=true;});}}catch(e){}}
 function start(data){
+  let purged=0;if(!window.__devTest){purged=purgeStory();if(data&&data.S&&data.S.story)data={};}
   let dev=false;try{dev=localStorage.getItem('byline-dev')==='1';}catch(e){}
   S=(data&&data.S)?migrate(data.S):newState();S.dev=devOK()&&(S.dev||dev);
   if(S.phase!=='game'&&S.phase!=='end'){S.phase='title';}
-  S.scene=baseScene();render();presenceStart();loaderDone(1300);
+  knowFix();S.scene=baseScene();render();presenceStart();loaderDone(1300);if(purged)setTimeout(()=>{try{toast('스토리 모드를 손보는 동안 닫았다 · 진행 중이던 스토리 저장을 정리했다');}catch(e){}},1600);
 }
 try{window.claude?.hot?.snapshot?.(()=>({S}));}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
