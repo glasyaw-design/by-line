@@ -3417,6 +3417,12 @@ function endWeek(){
   if(Q.length){Q.shift()();}else{toast(`${dateStr()} — 새로운 한 주`);render();saveGame();}
 }
 // 한 턴 = 한 달: 안에서는 4주를 차례로 흘려보내고, 결과는 한 번에 보여 준다
+// 행동력이 남았는데 다음 달로 넘기려 하면 한 번 확인한다 (메뉴 없이도 '다음부터 묻지 않기'로 끌 수 있다)
+function tryEndMonth(){try{if(S&&S.phase==='game'&&S.ap>0&&S.warnNext!==false){const can=rankActs().filter(id=>ACT[id]&&!why(id)&&actCost(id)<=S.ap&&actCost(id)>0&&!['life','rest','job','deptreq','gad'].includes(id));
+    if(can.length){const left=(S.mis&&S.mis.list||[]).filter(x=>!x.done);
+      openModal('행동력이 남았다',`<p class="lede">이번 달 행동력이 <b class="num" style="color:var(--sodium)">${S.ap}</b> 남았다. 남은 행동력은 다음 달로 넘어가지 않는다.</p>${left.length?`<p class="hint">아직 못 한 이달의 미션: ${left.map(x=>esc(x.t)).join(' · ')}${S.mis&&!S.mis.all?' — 다 하면 다음 달 행동력 +1':''}</p>`:''}<p class="hint">지금 할 수 있는 일: ${can.slice(0,5).map(id=>actName(id)).join(' · ')}${can.length>5?` 외 ${can.length-5}개`:''}</p>`,
+        [{label:'돌아가서 더 한다',sub:'행동력을 마저 쓴다',rec:true},{label:'그래도 다음 달로 넘긴다',sub:`행동력 ${S.ap} 버림`,fn:()=>{setTimeout(endMonth,0);}},{label:'다음부터 묻지 않기',cls:'ghost',fn:()=>{S.warnNext=false;setTimeout(endMonth,0);}}]);return;}}}catch(e){console.error(e);}
+  endMonth();}
 function endMonth(){if(!$('#modal').hidden)return;ACT_SNAP=null;sfx('page');S._curAct=null;S._sur=false;S._mq=[];S._ml=[];let k=0;
   do{S._bw=S.turn%4;endWeek();k++;if(S.phase!=='game')break;}while(S.turn%4!==0&&k<4);
   S._bw=null;try{misCheck();}catch(e){}if(S.misAP)S.misAPm=Math.floor(S.turn/4);S.ap=apBase()+(S.misAP||0);S.misAP=0;try{misEnd();}catch(e){}
@@ -3577,6 +3583,8 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '주요|시작 간소화: "바로 시작하기"(시험 없이 추천 매체 3곳 중 입사), 언론고시 상식 5문제·면접 3문항, 불합격 땐 수시 채용 제안, 나이·난이도·전공·스펙은 "자세히 설정"으로. 첫 안내는 3쪽짜리로',
   '주요|성취감: 내 기사가 1면·첫 꼭지에 실리면 내일 자 지면(방송은 메인뉴스 화면)으로 보여 준다. 수첩 탭 "진행 중인 이야기"(쫓기는 단독·후속·분쟁·광고주·라이벌 전적). 수습은 굵직한 정보보고가 선배 기사로 이어지면 공동 바이라인',
   '주요|행동력 재조정: 거의 모두 12로 같던 행동력을 "기본 6 + 항목마다 ±1"로 바꿨다. 직급·매체·부서에 따라 8~10(간소화 7~9, 창간 10~11). 보너스가 실제 차이를 만들고, 한 달이 덜 늘어진다. 미션 보너스는 행동력 옆에 따로 표시',
+  '주요|행동력이 남았는데 "다음 달로 넘기기"를 누르면 한 번 묻는다. 남은 행동력·못 한 미션·지금 할 수 있는 일을 보여 주고, "다음부터 묻지 않기"로 끄고 메뉴 → 설정에서 다시 켤 수 있다',
+  '수정|코인 투자: 매달 평균 +5%로 오래 묵히면 무조건 벌던 문제. 이제 평소엔 ±20% 안팎(평균 +1% 정도), 가끔 폭락(-50~-80%)·폭등(+60~+120%)이 있다',
   '주요|가독성 개선: 본문 글꼴을 손글씨체에서 읽기 쉬운 고딕(IBM Plex Sans KR)으로 바꾸고, 글자 크기·줄간격·흐린 글씨 대비를 올렸다. 한글이 단어 중간에서 끊기지 않고, 모바일 할 일 카드는 한 줄씩 넓게',
   '주요|기록 탭 개편: 달별로 묶고, 성과·사건·기사·취재·인사·돈·사람으로 분류해 골라 볼 수 있다. 결과 카드도 여기서 다시 본다. 긴 글도 줄이 맞는다',
   '주요|그래픽: 팝업의 SVG 그림을 신문 섹션 라벨(사건·단독·광고 등)로 바꾸고, 타이틀 화면을 정리했다(빈 카드 정리·3단계 안내)'],'2026.10.17',['이달의 미션','팝업 35% 감소·결과 카드','사쓰마와리·기사 빠르게','바로 시작하기','1면 지면 연출']],
@@ -3692,6 +3700,7 @@ function gameMenu(){
 function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
   openModal('설정',`<p class="hint">켜고 끄는 설정은 바로 저장된다.</p>`,[
     {label:S.simple?'정통 모드로':'간소화 모드로',disabled:lock,sub:lock?`${Math.ceil((96-(S.turn-(S.modeT||0)))/4)}개월 뒤 바꿀 수 있다`:(S.simple?'모든 기능과 콘텐츠':'핵심만 빠르게'),fn:()=>{S.modeT=S.turn;S.simple=!S.simple;toast(S.simple?'간소화 모드':'정통 모드');saveGame();render();}},
+    {label:`행동력 남김 경고: ${S.warnNext===false?'끔':'켬'}`,sub:'행동력이 남았을 때 다음 달로 넘기기 전에 묻기',fn:()=>{S.warnNext=S.warnNext===false?true:false;toast(S.warnNext===false?'경고를 껐다':'경고를 켰다');settingsMenu();return false;}},
     {label:`결과 창: ${S.resPop===false?'끔':S.simple&&S.resPop!==true?'알림만':'켬'}`,sub:'할 일 결과를 창으로',fn:()=>{S.resPop=S.resPop===false?true:S.resPop===true?false:(S.simple?true:false);toast(S.resPop===false?'결과 창을 껐다':'결과 창을 켰다');settingsMenu();return false;}},
     {label:`처음 하는 일 팁: ${S.tipsOn===false?'끔':'켬'}`,sub:'할 일마다 나오는 설명',fn:()=>{S.tipsOn=S.tipsOn===false;toast(`팁 ${S.tipsOn?'켜짐':'꺼짐'}`);settingsMenu();return false;}},
     {label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
@@ -4314,7 +4323,7 @@ function bind(){
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const g=b.dataset.go;
     if(g==='new'){if(!startCreate())return;const pm=b.dataset.pm;if(pm==='simple'){S.simple=true;S.smode='smb';render();}else if(pm){S.smode=pm;render();}}else if(g==='cont'){const dv=S.dev;S=migrate(loadGame());S.dev=S.dev||dv;flashLoad('편집국으로 돌아가는 중…',700);render();}
     else if(g==='create')finishCreate();else if(g==='quick')quickStart();else if(g==='exam'){if(S.apply.length)startExam();}
-    else if(g==='week')endMonth();
+    else if(g==='week')tryEndMonth();
     else if(g==='title'){const dv=S.dev;S=newState();S.dev=dv;render();}
     else if(g==='menu')gameMenu();
     else if(g==='sound')soundMenu();
@@ -5197,8 +5206,10 @@ function lifeSelf(){const it=S.items.find(i=>i.facts.some(f=>!fOK(f)));const m=S
    {label:'반려동물 입양 · 50만 (월 10만)',sub:'멘탈·컨디션 회복↑',disabled:P(50,!S.pet),fn:()=>{buy(50,()=>{S.pet={t:S.turn};gain('men',1);},'반려동물을 들였다');}},
    {label:'코인 투자',sub:'크게 벌거나 크게 잃는다',fn:()=>{lifeCoin();return false;}},
    {label:'뒤로',cls:'ghost',fn:()=>{RUN.life();return false;}}]);}
-function lifeCoin(){openModal('코인 투자',`<p>지금 코인 ${(S.coin||0).toLocaleString('ko-KR')}만 원. 매달 -30%~+40% 사이로 출렁인다.</p>`,[[100,'100만'],[500,'500만'],[1000,'1000만']].map(([v,n])=>({label:`${n} 넣기`,disabled:S.money<v,fn:()=>{S.money-=v;S.coin=(S.coin||0)+v;toast(`코인 ${n} 매수`);}})).concat([{label:'전부 판다',disabled:!S.coin,fn:()=>{S.money+=S.coin;toast(`코인 ${S.coin.toLocaleString('ko-KR')}만 원 매도`);S.coin=0;}},{label:'뒤로',cls:'ghost',fn:()=>{lifeSelf();return false;}}]));}
-function selfMonth(lines){if(S.coin){const d=Math.round(S.coin*R(-30,40)/100);S.coin=Math.max(0,S.coin+d);lines.push({c:d>=0?'g':'r',t:`코인 ${d>=0?'+':''}${d.toLocaleString('ko-KR')}만 원 (평가 ${S.coin.toLocaleString('ko-KR')}만)`});}
+function lifeCoin(){openModal('코인 투자',`<p>지금 코인 ${(S.coin||0).toLocaleString('ko-KR')}만 원. 평소엔 매달 ±20% 안팎으로 출렁이고, 가끔 반토막 이상 폭락하거나 두 배 가까이 폭등한다. 길게 보면 거의 제자리다.</p>`,[[100,'100만'],[500,'500만'],[1000,'1000만']].map(([v,n])=>({label:`${n} 넣기`,disabled:S.money<v,fn:()=>{S.money-=v;S.coin=(S.coin||0)+v;toast(`코인 ${n} 매수`);}})).concat([{label:'전부 판다',disabled:!S.coin,fn:()=>{S.money+=S.coin;toast(`코인 ${S.coin.toLocaleString('ko-KR')}만 원 매도`);S.coin=0;}},{label:'뒤로',cls:'ghost',fn:()=>{lifeSelf();return false;}}]));}
+// 코인: 평소엔 ±20% 안팎으로 출렁이고(평균 +1% 정도), 가끔 폭락(-50~-80%)·폭등(+60~+120%)
+function coinPct(){const x=Math.random();return x<.04?-R(50,80):x<.07?R(60,120):R(-20,22);}
+function selfMonth(lines){if(S.coin){const d=Math.round(S.coin*coinPct()/100);S.coin=Math.max(0,S.coin+d);lines.push({c:d>=0?'g':'r',t:`코인 ${d>=0?'+':''}${d.toLocaleString('ko-KR')}만 원 (평가 ${S.coin.toLocaleString('ko-KR')}만)`});}
   if(S.pet){S.money-=10;S.hp=clamp(S.hp+3,0,100);}
   if(S.sideNL){const g=R(10,30)+Math.round(S.fame/2);S.money+=g;if(chance(.04)){S.sideNL=null;lines.push({c:'r',t:'회사가 개인 뉴스레터를 겸직 위반으로 문제 삼았다. 접기로 했다.'});apply({eval:-2});}}
   if(S.book&&S.turn>=S.book.due){S.money+=S.book.royalty;lines.push({c:'g',t:`책 인세 ${S.book.royalty}만 원 입금`});if(S.book.royalty>=400)apply({fame:1.5});S.book=null;}}
@@ -5449,7 +5460,7 @@ F_EVENTS.push(
    {label:'비용 절감안을 낸다',sub:'회사 자금↑ · 보도 품질↓',fn:()=>{S.co.cash+=.05*OUT().p;S.co.q=clamp(S.co.q-2,10,100);toast('절감안이 통과됐다');}},
    {label:'신사업 계획을 설득한다',sub:'평가는 성과로 증명해야',fn:()=>toast(apply({eval:chance(.5)?1:-1}))}])},
  // --- 내 돈 ---
- {w:2,c:()=>(S.coin||0)>0,run:()=>{const up=chance(.5);const v=Math.round(S.coin*(up?R(20,60):-R(20,50))/100);openModal(up?'코인 급등':'코인 급락',`<p class="lede">새벽에 알림이 울렸다. 넣어 둔 코인이 ${up?'폭등':'폭락'}했다. 평가액 ${(S.coin+v).toLocaleString('ko-KR')}만 원.</p>`,[
+ {w:2,c:()=>(S.coin||0)>0,run:()=>{const up=chance(.5);const v=Math.round(S.coin*(up?R(20,50):-R(20,55))/100);openModal(up?'코인 급등':'코인 급락',`<p class="lede">새벽에 알림이 울렸다. 넣어 둔 코인이 ${up?'폭등':'폭락'}했다. 평가액 ${(S.coin+v).toLocaleString('ko-KR')}만 원.</p>`,[
    {label:'전부 판다',fn:()=>{const t=Math.max(0,S.coin+v);S.coin=0;toast(apply({money:t}));}},
    {label:'계속 들고 간다',fn:()=>{S.coin=Math.max(0,S.coin+v);toast('계속 들고 가기로 했다');}}]);}},
  {w:2,c:()=>!!S.book,run:()=>openModal('북토크 초청',`<p class="lede">동네 서점에서 출간 예정인 책 북토크를 열자고 한다.</p>`,[
