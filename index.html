@@ -1666,7 +1666,7 @@ function gain(k,v){if(v>0&&S.phase==='game'){v*=growCurve(S.st[k])*(S.outlet?otr
 const FXN={eval:'평가',fame:'평판',trust:'신뢰도'};
 // 평가·평판·신뢰는 오르기 어렵게 (깎이는 쪽은 그대로)
 const GAINK={eval:[.78,.84],fame:[.86,.9],trust:[.75,.6]};
-function apply(o){const out=[];for(const k in o){let v=o[k];if(v>0&&S&&GAINK[k]){v*=(S.founder&&k==='trust')?.9:GAINK[k][S.simple?1:0];if(S.outlet)v*=otr(k);if(k==='eval')v*=clamp(1-((S.eval||0)-45)/90,.35,1);}if(v<0&&S&&(k==='fame'||k==='trust'))v*=(DF().pen||1);if(k==='eval'&&v<0)v*=DF().harsh*(1-(S.st.men||0)/400);v=Math.round(v*10)/10;if(!v)continue;const s=(v>0?'+':'')+v;
+function apply(o){const out=[];for(const k in o){let v=o[k];if(v>0&&S&&GAINK[k]){v*=(S.founder&&k==='trust')?.9:GAINK[k][S.simple?1:0];if(S.outlet)v*=otr(k);if(k==='eval')v*=clamp(1-((S.eval||0)-45)/90,.35,1);if(k==='trust')v*=clamp((100-(S.trust??50))/45,.15,1);}if(v<0&&S&&(k==='fame'||k==='trust'))v*=(DF().pen||1);if(k==='eval'&&v<0)v*=DF().harsh*(1-(S.st.men||0)/400);v=Math.round(v*10)/10;if(!v)continue;const s=(v>0?'+':'')+v;
   if(k in STN){gain(k,v);out.push(`${STN[k]} ${s}`);}
   else if(k==='money'){S.money=Math.round(S.money+v);out.push(`통장 ${s}만 원`);}
   else if(k==='hp'){S.hp=clamp(S.hp+v,0,100);out.push(`컨디션 ${s}`);}
@@ -1687,7 +1687,7 @@ function ach(k){if(S.ach[k])return;S.ach[k]=dateShort();log('업적 — '+ACH[k]
 const RANKM=[.95,1,1.35,1.55,1.7,1.85,2,3];
 function payOf(o,rank=S.rank){return Math.round((S.payK||1)*o.pay*otr('pay',o)*RANKM[rank]*(1+.02*Math.floor(S.turn/YW))*DF().pay/5)*5;}
 // 한 달 생활비(만 원): 월세·식비·교통·통신 등. 직급이 오르면 조금씩 늘고 물가는 해마다 2%씩 오른다
-function living(){return Math.round((S.rank===0?92:105+S.rank*8)*Math.pow(1.02,Math.floor(S.turn/YW)));}
+function living(){return Math.round((S.rank===0?125:140+S.rank*10)*Math.pow(1.02,Math.floor(S.turn/YW)));}
 const CROLE={
  cofound:{n:'공동창업자 · 편집장',perk:'친하면 기사 품질↑ · 나쁘면 결별 위기',d:'같이 회사를 나와 창간한 오랜 동료'},
  fstaff:{n:'창간 멤버 기자',perk:'친하면 박봉에도 버틴다 · 나쁘면 이탈',d:'창간 때부터 함께한 1기 기자'},
@@ -3280,13 +3280,13 @@ function compMonth(lines){if(!S.comp)initComp();S.comp=S.comp.map(compFix);const
     if(k==='scoop'){if(chance(.25+c.q/250)){c.pw*=1.07;c.buzz=3;news.push([c,`[${n}] 대형 단독으로 포털 1위`,1]);if(S.items.some(i=>i.excl))S.items.filter(i=>i.excl).slice(0,1).forEach(i=>i.heat-=1);}else c.q+=1;}
     if(k==='abuse'){c.pw*=1.04;c.pen+=1;c.q-=1;if(c.pen>=4&&chance(.5)){c.pw*=.8;c.pen=0;news.push([c,`${n}, 포털 제휴 등급 강등`,0]);}}
     if(k==='lgebid'){const e=(S.lge||[]).find(x=>!x.done&&!x.rv);if(e){e.rv=c.id;e.fees=(e.fees||1)*.9;e.spons=(e.spons||1)*.92;news.push([c,`${n}, 우리 「${e.n}」와 같은 시기에 맞불 행사`,1]);}}
-    if(k==='pricecut'){const tgt=ENTS.find(e=>e[2]==='corp'&&S.net&&S.net[e[0]]&&(S.net[e[0]].cut>0||(S.arc&&S.arc[e[0]])));if(tgt&&chance(.5)){S.net[tgt[0]].cut=(S.net[tgt[0]].cut||0)+6;netUp(tgt[0],-4);news.push([c,`${n}, 우리와 틀어진 ${tgt[1]} 광고를 낚아챘다`,2]);}c.pw*=1.05;S.cHit=Math.min(.15,(S.cHit||0)+.03*(1+Math.max(0,(S.adRate||1)-1)*2));news.push([c,`${n}, 광고 단가 30% 인하 공세`,1]);c.aggro+=4;}
+    if(k==='pricecut'){const tgt=ENTS.find(e=>e[2]==='corp'&&S.net&&S.net[e[0]]&&(S.net[e[0]].cut>0||(S.arc&&S.arc[e[0]])));if(tgt&&chance(.5)){S.net[tgt[0]].cut=(S.net[tgt[0]].cut||0)+6;netUp(tgt[0],-4);news.push([c,`${n}, 우리와 틀어진 ${tgt[1]} 광고를 낚아챘다`,2]);}c.pw*=1.05;S.cHit=Math.min(.08,(S.cHit||0)+.008*(1+Math.max(0,(S.adRate||1)-1)*2));news.push([c,`${n}, 광고 단가 30% 인하 공세`,1]);c.aggro+=4;}
     if(k==='digital'){c.dig++;c.pw*=1.03;if(c.dig===3)news.push([c,`${n}, 디지털 구독 전환 성공`,0]);}
     if(k==='poach'){c.q+=2;if(S.team&&S.team.length>4&&S.rank>=2&&chance(clamp(.35*(1+(60-(S.wMood??60))/80)*clamp((c.pay||1)/(S.payLv||1),.7,1.4),.08,.8))){const t=poachPick();S.team=S.team.filter(x=>x!==t);if(S.co)S.co.staff=Math.max(1,S.co.staff-1);S.co.q-=1;news.push([c,`${n}, 우리 ${t.name} 기자 영입`,2]);log(`${t.name} 기자, ${n}로 이적`);}else news.push([c,`${n}, 경력기자 대거 영입`,0]);}
-    if(k==='follow'&&myScoop){c.pw*=1.02;S.cHit=Math.min(.12,(S.cHit||0)+.015);news.push([c,`${n}, 우리 단독 받아쓰기 + 후속 공세`,1]);}
+    if(k==='follow'&&myScoop){c.pw*=1.02;S.cHit=Math.min(.06,(S.cHit||0)+.006);news.push([c,`${n}, 우리 단독 받아쓰기 + 후속 공세`,1]);}
     if(k==='editorial'){c.aggro+=6;const caught=(S.corrLog||[]).some(x=>x.caught&&x.t>S.turn-YW);if(chance(caught?.7:.4)){S.trust=Math.max(0,S.trust-(caught?1.2:.6));news.push([c,caught?`${n}, 우리 「몰래 수정」 논란을 사설로 저격`:`${n} 사설, 우리 보도를 정면 비판`,2]);}}
     if(k==='cut'){c.q-=4;c.pw*=.94;news.push([c,`${n}, 희망퇴직 단행`,0]);}
-    c.q=clamp(c.q+R(-2,2),30,90);c.pw=Math.max(5,c.pw*(1+(c.q-55)/700)+R(-1,1));{const xo=OUTLETS.find(y=>y.id===c.id);if(xo)c.pw+=(Math.max(1,xo.p)*12-c.pw)*.07;}if(c.buzz>0){c.buzz--;}
+    c.q=clamp(c.q+R(-2,2)+(55-c.q)*.04,30,90);c.pw=Math.max(5,c.pw*(1+(c.q-55)/700)+R(-1,1));{const xo=OUTLETS.find(y=>y.id===c.id);if(xo){const T0=Math.max(1,xo.p)*12,T=T0*(.7+c.q/170)*.78;c.pw+=(T-c.pw)*.15;c.pw=clamp(c.pw,T0*.5,T0*1.6);}}if(c.buzz>0){c.buzz--;}
     // 수입: 점유율만큼 돈이 들어온다
     if(month()===1&&S.turn%4===0&&c.rkY!==S.turn){c.rkY=S.turn;c.rk=R(1,3)+(c.strat==='talent'?2:0);c.q-=1;c.rkT=S.turn+16;}if(c.rkT&&S.turn>=c.rkT){const stay=Math.round((c.rk||0)*.6);c.q+=Math.min(3,stay)*.6;if((c.rk||0)-stay>0&&chance(.3))news.push([c,`${n} 수습 ${(c.rk||0)-stay}명 중도 퇴사`,0]);c.rkT=null;}
     c.pay=clamp((c.pay||1)+(c.strat==='talent'?.004:0)+(c.cash<0?-.01:c.cash>8?.004:0)+R(-1,1)/400,.8,1.4);
@@ -3347,9 +3347,10 @@ function coMonth(){
   const na=netAdAdj();const adF=(.6+.25*c.subs/o.subs+.15*c.tr/o.tr)*(1+c.adB)*shareMult()*infl*(S.erp?1.04:1)*([.88,1,1.05,1.1][S.portal?S.portal.lv:1]||1)*(S.adRate||1)*adDemand();const am=adMonth(o,adF);const ad=Math.max(o.ad*.2,am.base+am.pay);
   if(hasF('app'))c.bT+=.004;if(hasF('paywall'))c.bS+=.004;if(hasF('reader'))c.bS+=.002;
   const cp=S.portal&&S.portal.lv===3?c.tr*.004*(S.cpBoost||1):0;const fac=facUpkeep();const bz=bizMonth();
-  const subsRev=c.subs*o.rate*(hasF('paywall')?1.25:1)*infl,trRev=c.tr*.01*portalMult()*infl;const fsup=S.founder?fSupport():0;const rev=subsRev+trRev+ad+cp+bz.rev+fsup+(S.founder?.04*o.p+.03:0),cost=bz.cost+(c.staff*(S.founder?.066:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
+  let subsRev=c.subs*o.rate*(hasF('paywall')?1.25:1)*infl,trRev=c.tr*.01*portalMult()*infl;
+  if(!S.founder){if(c.rk==null){const r0=subsRev+trRev+ad+cp,c0=c.staff*.09*(S.payLv||1)*infl+fac;c.rk=r0>c0*1.18?+(c0*1.18/r0).toFixed(3):1;}subsRev*=c.rk;trRev*=c.rk;}const adK=S.founder?1:(c.rk||1);const fsup=S.founder?fSupport():0;const rev=subsRev+trRev+ad*adK+cp*adK+bz.rev+fsup+(S.founder?.04*o.p+.03:0),cost=bz.cost+(c.staff*(S.founder?.066:.09)*(S.payLv||1))*infl+c.extra+fac-(hasF('press')?.3*facSize():0);c.extra=0;
   const costX=(S.founder?fEarlyCost():1)*cost*(S.costCut&&S.costCut.due>S.turn?1-S.costCut.r:1)*(S.payRaise?Math.pow(1+S.payRaise,(S.turn-(S.payRaiseT||S.turn))/YW):1)*(S.founder?1-(fs('biz')-40)/800:1)+(S.founder?rev*({2:.08,3:.22,4:.32,5:.38}[o.p]||.3):0);
-  c.cash+=rev-costX;c.last={rev,cost:costX,profit:rev-costX,ad,adBase:am.base,adPay:am.pay,adList:am.list,cp,netLoss:na.loss,netGain:na.gain,subsRev,trRev,bizRev:bz.rev,biz:bz.list,fsup};c.hist.push(Math.round(c.cash*10)/10);if(c.hist.length>48)c.hist.shift();
+  c.cash+=rev-costX;c.last={rev,cost:costX,profit:rev-costX,ad:ad*adK,adBase:am.base,adPay:am.pay,adList:am.list,cp,netLoss:na.loss,netGain:na.gain,subsRev,trRev,bizRev:bz.rev,biz:bz.list,fsup};c.hist.push(Math.round(c.cash*10)/10);if(c.hist.length>48)c.hist.shift();
   return c.last;
 }
 const Q2=[];
@@ -3618,7 +3619,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '조정|출입처 장악도가 너무 빨리 차던 것을 늦췄다(터줏대감 약 1년 반, 전설 3~4년). 장악도가 쌓일 수 없는 직급이거나 거의 다 찼을 때는 "장악도 올리기" 미션이 나오지 않는다.',
   '조정|수습이 끝나면 대개(8할) 회사가 부서를 배치한다. 정치·법조·탐사 같은 인기 부서는 신입에게 잘 돌아가지 않고, 희망을 받는 해에도 경쟁이 세다.',
   '조정|능력치·연차가 아이템 질에 반영된다. 취재력·인맥이 높을수록 파급력이 낮게 나오는 일이 줄고 단독 확률이 오른다. 검증력이 높으면 기사가 안 되는 아이템을 덜 잡고, 연차가 쌓이면 출입처에서 확인된 사실이 붙어 오는 일이 잦아진다.',
-  '수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
+  '수정|광고 시장 점유율이 시간이 갈수록 밀리던 문제. 경쟁사의 영향력이 끝없이 불어나(10년 뒤 기준의 10배 이상) 내 점유율이 4분의 1로 줄던 것을 고쳤다. 경쟁사도 품질에 맞는 수준으로 돌아오고, 단가 인하·받아쓰기 공세의 광고 타격도 줄였다','조정|회사 경영진(AI)이 경쟁에 대응한다. 경쟁사 품질이 앞서거나 점유율이 밀리면 돈을 들여 보도 품질에 투자해 방어한다(내가 사장이면 직접 정한다)','조정|생활비를 현실에 맞게 올렸다(기자 월 150만 원 안팎부터). 큰 매체 기자도 저축이 빠르게 쌓이지 않는다','조정|기자 몇 명짜리 작은 매체가 매출의 절반 이상을 남기던 것을 줄였다. 입사 때 회사 이익률이 18%를 넘지 않는다','조정|신뢰도가 높을수록 오르는 폭이 줄어든다(75쯤부터 절반). 꼭대기에 붙어 의미가 없어지던 문제','수정|회사가 해마다 1월에 인력을 늘리거나 줄이는 처리가 한 번도 실행되지 않던 문제. 이제 적자가 쌓이면 구조조정(감원)을 하고, 흑자로 돈이 쌓이면 채용을 늘린다. 작은 회사도 1명 단위로 움직인다','조정|비판 보도 뒤 반응이 "화해"로 쏠리던 것을 고쳤다. 이제 광고 무마·화해·보복이 대체로 고르게 나오고, 상대 성향(언론 압박·소송 성향·개방적)과 보도 강도, 쫓는 후속 기사에 따라 기운다','수정|내가 옮기거나 회사가 부서를 옮겼을 때 조직 탭 부서장이 그대로이던 문제. 이제 새 부서의 부서장·부원이 반영되고(내가 부장이면 나), 비게 된 옛 부서장 자리는 다른 사람이 채운다. 사내 관계의 부장·캡·선배도 새 부서 사람으로 바뀐다','조정|기사 쓰기 행동력을 2→1로 낮췄다(창간 모드 포함). 아이템을 모으는 데 힘을 더 쓰고, 쓰는 건 가볍게.'],'2026.10.18',['면톱·1면 정상화','아이템 희소화','기사 쓰기 1AP','부서 자동 배치','장악도 속도']],
  ['5.5','커리어가 움직인다',[
   '주요|불쾌함 줄이기: 할 일 맨 위 경고 상자(곧 물먹을 단독·마감·컨디션·평가·신뢰·자금·다음 달 인사), 물먹기·오보·정정·권고사직 뒤 "다음엔" 팁, 큰 악재 뒤 두 달은 위기·오보 발각이 쉬어 간다, 권고사직이어도 재취업 길은 항상 하나 이상. 결과 카드는 최대 2장만 작게 떠서 화면을 가리지 않는다',
   '주요|자동 저장 3개(최근 3달)를 저장 메뉴에서 불러와 실수를 되돌릴 수 있다. 12월 결산 뒤엔 1년 결산(출고·단독·1면·평가·평판·통장·올해의 기사)',
@@ -5833,9 +5834,11 @@ function adMonth(o,F){const named=ENTS.reduce((a,e)=>a+(e[4]||0),0);const nk=nam
 // 기사가 나가면 처음엔 관계가 틀어진다. 몇 달 뒤 ① 광고로 후속 보도를 무마하려 하거나 ② 화해하고 광고를 늘리거나 ③ 보복(광고 장기 중단·협찬 철회·자료 거부·소송)한다.
 function arcStart(id,d,head){const E=ENT[id];if(!E||!(E.kind==='corp'||E.kind==='gov'&&E.w>0)||d<4)return;S.arc=S.arc||{};if(S.arc[id]){S.arc[id].d+=d*.5;return;}S.arc[id]={t:S.turn,d,head:head||''};}
 function arcTick(Qx){if(!S.arc)return;const D=DF();for(const id in S.arc){const a=S.arc[id];const e=S.net&&S.net[id],E=ENT[id];if(!e||!E){delete S.arc[id];continue;}const age=S.turn-a.t;if(age<6)continue;if(age>60){delete S.arc[id];continue;}if(!chance(S.simple?.18:.3))continue;
-  const tr=entTrait(id);const fol=(S.items||[]).find(i=>i.ent===id);const w={pay:(fol?3:0)+(tr.press?1.5:0)+(E.kind==='corp'?1:0),make:1.2+(tr.open?1.5:0)+(e.rel>-40?1:0)+(age>24?1:0),hit:.8+(tr.press?1:0)+(tr.lit?1.2:0)+(a.d>12?1:0)};
+  const tr=entTrait(id);const fol=(S.items||[]).find(i=>i.ent===id);const w=arcW(E,tr,e,a,age,fol);
   w.hit*=D===DIFF.hard?1.4:D===DIFF.easy?.7:1;w.make*=D===DIFF.easy?1.3:1;if(E.kind==='gov')w.pay*=.4;
   let t=(w.pay+w.make+w.hit)*Math.random();const k=(t-=w.pay)<0?'pay':(t-=w.make)<0?'make':'hit';delete S.arc[id];Qx.push(()=>arcEvent(id,k,fol,a));return;}}
+// 보도 후 반응 가중치: 무마·화해·보복이 대체로 3분의 1씩. 성향·관계·보도 강도·후속 여부로 기운다
+function arcW(E,tr,e,a,age,fol){return {pay:1.1+(fol?1.8:0)+(tr.press?.9:0)+(E.kind==='corp'?.7:0),make:.65+(tr.open?.8:0)+(e.rel>-15?.45:0)+(age>24?.35:0)+(a.d<8?.3:0),hit:.95+(tr.press?.7:0)+(tr.lit?.9:0)+(a.d>12?.8:0)+(e.rel<-40?.5:0)};}
 function arcAmt(id,mul){const o=OUT();return +Math.max(.005,o.ad*(ENT[id].w||.01)*mul*(S.adRate||1)).toFixed(3);}
 function arcEvent(id,k,fol,a){const E=ENT[id],e=S.net[id];const nm=entName(id);const me=S.founder||S.rank>=4;const via=me?'':'광고국장이 데스크를 통해 전해 왔다. ';const head=a.head?`「${esc(a.head)}」 이후 `:'';
   if(k==='pay'){const amt=arcAmt(id,R(6,12));openModal('광고로 무마 제안',`<p class="lede">${head}${via}${esc(nm)} 쪽에서 "올해 광고를 ${adAmt(amt)} 더 집행하겠다"고 한다. ${fol?`조건은 후속 「${esc(fol.title)}」을 접어 달라는 것.`:'조건은 "앞으로 잘 부탁한다"는 것.'}</p><p class="hint">실제 업계에서 흔한 방식이다. 돈은 되지만 들키면 신뢰가 크게 다친다.</p>`,[
@@ -6021,12 +6024,21 @@ function standMonth(lines){if(S.story||!S.co||S.phase!=='game')return;const o=OU
   if(S.oMomId!==o.id){S.oMomId=o.id;S.oMom=0;S.myShare00=null;}if(S.myShare00==null&&S.myShare)S.myShare00=S.myShare;
   if(S.founder){oModSave(o);return;}
   const pr=l&&l.rev?clamp(l.profit/l.rev,-.5,.5):0;
+  // 경영진(AI)도 경쟁에 대응한다: 경쟁사 품질이 앞서거나 점유율이 밀리면 취재비·인력·디지털에 투자해 품질을 지킨다 (내가 사장이면 내가 정한다)
+  if(S.rank<7&&S.comp&&S.comp.length&&l&&l.rev){const cq=S.comp.reduce((a,x)=>a+(x.q||50),0)/S.comp.length;const gap=cq-c.q;const slip=S.myShare00?(S.myShare00-(S.myShare||S.myShare00))/S.myShare00:0;
+    const need=clamp(gap/6+slip*3+(c.q<52?.5:0),0,1.5);const room=c.cash>l.rev*2&&pr>-.15;
+    if(need>.15&&room){const k=Math.min(need,c.cash>l.rev*8?1.5:1);c.q=Math.min(90,c.q+.35+.35*k+Math.max(0,gap+2)*.2*Math.min(1,k));c.extra+=l.rev*.035*k;if(slip>.08)c.bT+=.002*k;S.coInvN=(S.coInvN||0)+1;
+      if(lines&&S.coInvN%4===1)lines.push({c:'',t:`경영진이 경쟁사에 맞서 보도 품질에 투자했다 (취재비·인력 보강 · 회사 품질 ${Math.round(c.q)}, 경쟁사 평균 ${Math.round(cq)})`});}}
   const g=clamp(.5*(o.subs>0?c.subs/o.subs-1:0)+.35*(o.tr>0?c.tr/o.tr-1:0)+pr*.8+(S.myShare00?clamp(S.myShare/S.myShare00-1,-.5,.5)*.25:0)+(c.q-55)/110+((S.trust??50)-55)/220,-1,1);
   S.oMom=(S.oMom||0)*.88+g*.12;
   if(o.subs>0)o.subs=Math.max(b.subs*.35,o.subs+(c.subs-o.subs)*.03);if(o.tr>0)o.tr=Math.max(b.tr*.35,o.tr+(c.tr-o.tr)*.03);
   o.ad=+clamp(o.ad*(1+S.oMom*.008),b.ad*.4,b.ad*3.2).toFixed(3);
   // 경영권 밖이면 회사가 알아서 뽑고 줄인다 (해마다 1월)
-  if(S.rank<6&&month()===1&&S.turn%4===0&&S.oStaffY!==S.turn){S.oStaffY=S.turn;c.staff=Math.round(clamp(c.staff*(1+clamp(S.oMom*.25,-.06,.06)),b.staff*.5,b.staff*2.4));}
+  const yk=Math.floor(S.turn/YW);if(S.rank<6&&month()===1&&S.oStaffY!==yk){S.oStaffY=yk;const yrRev=(l&&l.rev||0)*12;
+    // 적자가 이어져 현금이 바닥나면 구조조정, 돈을 쌓아 두기만 하면 채용을 늘린다
+    const rich=c.cash>yrRev*.8&&pr>=0;let k=clamp(S.oMom*.25,rich?-.02:-.06,.06)+(c.cash<0?-.07:c.cash<yrRev*.25&&pr<0?-.035:0)+(pr>.15&&c.cash>yrRev*1.5?.05:0);k=clamp(k,-.12,.1);
+    let n=Math.round(c.staff*(1+k));if(n===c.staff&&Math.abs(k)>=.02)n+=Math.sign(k);n=Math.round(clamp(n,Math.max(2,b.staff*.5),b.staff*2.4));
+    if(n!==c.staff&&lines){const dn=c.staff-n;lines.push({c:dn>0?'r':'g',t:dn>0?`회사가 ${c.cash<0?'적자 누적으로 구조조정을 했다':'인력을 줄였다'} — 기자 ${dn}명 감원 (${n}명)`:`회사가 기자 ${-dn}명을 새로 뽑았다 (${n}명)`});}c.staff=n;}
   o.staff=Math.max(1,Math.round(o.staff+(c.staff-o.staff)*.05));oModSave(o);}
 function standYear(lines){if(S.story||!S.co)return;const yk=Math.floor(S.turn/YW);if(S.oYk==null)S.oYk=yk;if(yk===S.oYk)return;S.oYk=yk;const o=OUT();if(!o)return;const b=oBase(o);
   const rt=(x,y)=>y>0&&x>0?x/y:1;const ix=Math.pow(rt(o.ad,b.ad)*rt(S.co.subs,b.subs)*rt(S.co.tr,b.tr),1/3);S.oIx=ix;
