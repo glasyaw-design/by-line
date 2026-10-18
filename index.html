@@ -3741,6 +3741,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['5.7','승진의 순간',[
+  '수정|정기 인사 때 주재지가 비어 있던 주재기자가 "null 주재 차장"으로 발령되던 문제를 고쳤다. 이제 사람이 가장 적은 지역으로 옮겨 배치된다',
   '주요|승진하면 화려한 발령장: 새 직급과 계급별 한 줄, 입사 동기 중 몇 번째인지, 이번 직급 성적표(출고·단독·특종·평판)와 대표작, 상사·동기·후배·라이벌의 반응, 승진 축하금','주요|수첩에 커리어 연대기: 수습 수료부터 직급마다 날짜·연차·회사·성적이 쌓인다. 최소 기간 안에 오르면 "고속 승진" 업적','조정|단독이 너무 자주 나오던 것을 줄였다. 아이템 발굴·브리핑·취재원·후속 기사의 단독 확률을 낮추고, 단독인 줄 알았던 제보도 다섯 중 하나쯤은 타사가 이미 쥐고 있다(아이템에 "타사도 안다" 표시)','조정|기사 보상 차등: 아이템 급(B·A·S)이 클수록 평가·평판 보너스가 붙고(단독이면 1.3배), 확인한 사실 비중만큼 보상이 달라진다. 큰 기사의 파급력 상한도 올려 A급과 S급이 같은 보상을 받던 문제를 고쳤다','주요|아이템 등급에 따라 알아야 할 사실 수가 다르다: C급 2~3개(핵심도 한 출처면 된다) · B급 3~4개 · A급 5개 · S급 6개(핵심 사실은 세 경로). 큰 아이템은 취재 한 번에 시간 칸이 1~2칸 더 주어지고, 작은 아이템은 확인이 조금 쉽다','수정|정치·경제·사회 같은 핵심 부서 인원이 적던 문제. 지역 취재망(주재기자)이 편집국의 큰 몫을 가져가 본사 부서가 2~3명뿐이던 매체(통신사·지역지 등)를 바로잡았다. 주재기자는 매체 유형별 비율 안에서, 핵심 부서는 편집국 규모에 맞는 최소 인원을 둔다','수정|수습 건너뛰기 뒤 이달의 미션이 수습용(사쓰마와리·정보보고)으로 남고 행동력·쿨타임이 정리되지 않던 문제. 이제 새 달 첫 주에 정식 기자로 깨끗하게 시작한다','수정|캡이 명단에서 빠지거나 평기자로 나오던 문제. 캡은 부서의 차장급(아주 작은 부서는 선임 기자)이 맡고, 같은 부서 탭에 "캡"으로 표시된다. 차장이 된 뒤에는 사내 관계에 "옛 캡"으로 남는다','대규모|스토리라인 30편: 평소처럼 일하다 보면 직급·부서·경력에 맞는 이야기가 찾아와 몇 달에 걸쳐 이어진다(제보자를 지켜라·무죄의 기록·특파원의 꿈·대특종의 밤·첫 유료 독자 1,000명 등). 선택에 따라 일찍 끝나기도 하고, 끝까지 가면 칭호가 수첩에 남는다','주요|새 업적: 고속 승진 · 부서장 · 편집국 간부 · 국장'],'2026.10.18',['발령장','커리어 연대기','스토리라인 30편']],
  ['5.6','균형 맞추기',[
   '대규모|창간 모드 취재 개편: 편집국 기자들이 매달 기사를 내고(단독도 터진다), 대표는 "기자에게 취재 맡기기"로 아이템을 넘길 수 있다. 대표 기사도 구독·트래픽에 바로 반영',
@@ -4278,7 +4279,7 @@ function devQuick(cfg){const nm=(S&&S.name)||lastName()||'개발기자';S=newSta
   if(cfg.mode==='story'){S.smode='story';S.story=cfg.story;storySetup();return;}
   if(cfg.mode==='found'){const ft=FOUND_TYPES.find(f=>f[0]===cfg.ftype)||FOUND_TYPES[0];S.founder=1;S.phase='create';for(const k in S.st)S.st[k]=clamp(S.st[k]+14,0,95);S.fame=22;S.money=15000;S.fTraits=shuffle(Object.keys(FOTR)).slice(0,2);founderLaunch(ft[0],ft[1],ft[3].split(','),'개발일보','neu',15,0);return;}
   const o=OUTLETS.find(x=>x.id===cfg.outlet)||pick(OUTLETS.filter(x=>!x.custom));S.smode='smb';join(o);Q.length=0;
-  const r=fitRank(+cfg.rank||0,o);if(r>0){S.rank=r;S.inRank=0;S.eval=60;S.fame=Math.max(S.fame,r*8);if(r>=2)S.team=genTeam();if(r>=2&&!colBy('junior'))S.cols.push(mkCol('junior',20));}
+  const r=fitRank(+cfg.rank||0,o);if(r>0){S.rank=r;S.inRank=0;S.eval=60;{const pool=o.depts.filter(x=>x!==S.dept&&!isRegD(x)&&DEPTS[x]&&!(typeof SUPPORT!=='undefined'&&SUPPORT[x]));const n=r>=4?2:r>=2?1:0;S.deptHist=[...new Set([...(S.deptHist||[]),...pool.sort(()=>Math.random()-.5).slice(0,n)])];}S.fame=Math.max(S.fame,r*8);if(r>=2)S.team=genTeam();if(r>=2&&!colBy('junior'))S.cols.push(mkCol('junior',20));}
   const y=+cfg.yrs||0;if(y){S.turn=y*YW;S.atOutlet=y*YW;const up=skillYrs(y)-skillYrs(0);for(const k in S.st)S.st[k]=clamp(Math.round(S.st[k]+up+R(-5,5)),5,90);S.ros=null;S.mates=null;}S.scene=baseScene();S.ap=apBase();try{checkUnlocks();}catch(e){}
   $('#modal').hidden=true;mTok++;render();saveGame();toast(`${o.n} ${rankName()}로 시작`);}
 function devAct(k,arg){const T={
@@ -6143,9 +6144,11 @@ function corrVacant(rk){if(S.founder||!Array.isArray(S.corr))return null;const o
 // 본사에서 승진이 막힌 기자를 지역 책임자로 승진 발령한다 (본사 적체 해소)
 function corrPromoteIn(m,rk,r,d){const o=OUT();const L=S.corr.filter(x=>x.reg===r);const back=L.filter(x=>!x.r).sort((a,b)=>myrs(b)-myrs(a))[0];
   if(back){S.corr=S.corr.filter(x=>x!==back);}m.d=d;m.reg=r;m.r=rk;m.role=corrTitle(rk,o);m.acting=0;m.desk=0;m.hqIn=S.turn;S.corr.push(m);return back;}
+// 주재지가 비었거나 없어진 지역에 묶인 주재기자: 사람이 가장 적은 지역으로 옮긴다
+function corrRegFix(P){if(!Array.isArray(S.corr))return;const regs=(P&&P.regs)||[];if(!regs.length)return;S.corr.forEach(m=>{if(!m.reg||!regs.includes(m.reg)){const c=regs.map(r=>[r,S.corr.filter(x=>x.reg===r).length]).sort((a,b)=>a[1]-b[1])[0];m.reg=c[0];}});}
 // 정기 인사 때 주재지 정리: 정년·이직 → 같은 직급 겹침 정리 → 빈 책임자 자리 채우기
 function corrLife(out){if(S.founder||!Array.isArray(S.corr)||!S.corr.length)return;const o=OUT();const P=corrPlan(o);const d=o.depts.find(x=>isRegD(x));if(!d)return;
-  const quiet=!S.corrN2;S.corrN2=1;const said=[];const add=t=>{if(!quiet)said.push(t);};const need=[0,10,15,19];
+  corrRegFix(P);const quiet=!S.corrN2;S.corrN2=1;const said=[];const add=t=>{if(!quiet)said.push(t);};const need=[0,10,15,19];
   const repl=m=>{S.corr=S.corr.filter(x=>x!==m);if(S.team)S.team=S.team.filter(x=>x!==m);const n=genMember(d,30,60);n.reg=m.reg;n.r=0;n.role='주재기자';n.yrs=R(2,8);n.t0=S.turn;n.rel=R(0,15);fitSk(n);S.corr.push(n);return n;};
   [...new Set(S.corr.map(m=>m.reg))].forEach(r=>{let L=S.corr.filter(m=>m.reg===r);
     L.forEach(m=>{const a=npcAge(m);if(a>=60){repl(m);add(`${m.name} ${m.role||'주재기자'}(${r}) 정년퇴직`);}else if(m.r&&a>=55&&chance(.08)){repl(m);add(`${m.name} ${m.role}(${r}) 명예퇴직`);}else if(!m.r&&myrs(m)>=6&&chance(.04)){repl(m);add(`${m.name}(${r} 주재) → ${pick(['지자체 공보관','지역 기업 홍보실','지방의원 출마','지역 방송사','고향 지역지'])}`);}});
