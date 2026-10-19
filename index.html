@@ -816,6 +816,9 @@ b,strong{font-weight:600}
 .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}.galimg{width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:6px;display:block}.galimg.lock{background:repeating-linear-gradient(45deg,var(--panel2) 0 8px,var(--panel3) 8px 16px)}
 .card.dim{opacity:.6}.hrun .t small{color:var(--mute);font-weight:400}.nxt .t,.sigc .t{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.nxt .t .ic,.sigc .t .ic{color:var(--sodium)}.sigc .t small{color:var(--mute);font-size:12px}
 .styc .t{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.styc .t .ic{color:var(--sodium)}.sbar{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:8px;font-size:12px;color:var(--mute);margin-top:4px}.sbar i{display:block;height:7px;border-radius:9px;background:linear-gradient(90deg,var(--c) var(--p),var(--panel3) var(--p))}
+.arcc{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid color-mix(in srgb,var(--red) 55%,var(--line));background:linear-gradient(160deg,rgba(255,90,90,.12),transparent 70%);border-radius:14px;padding:9px 12px;margin:0 0 10px;font-size:13px}.arcc b{display:inline-flex;align-items:center;gap:6px;color:#ff8f8f}.arcc span{color:var(--mute);font-size:12px}.arcc.big{animation:arcp 2.4s ease-in-out infinite}@keyframes arcp{50%{box-shadow:0 0 0 3px rgba(255,90,90,.18)}}
+.arch{display:flex;justify-content:space-between;font-size:12px;color:#ff8f8f;margin:-4px 0 8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+@media (prefers-reduced-motion:reduce){.arcc.big{animation:none}}
 </style>
 
 <div class="wrap">
@@ -3689,7 +3692,7 @@ function endWeek(){
       if(S.rank<7)apply({eval:(perf-56)/12});}
     const vals=[];if(S.monthQ.length)vals.push(avg(S.monthQ));if(perf!==null)vals.push(perf);
     S.co.q=S.co.q*.75+(vals.length?avg(vals):50+R(-5,5))*.25;S._mqA=S.monthQ.slice();S.monthQ=[];
-    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
+    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);arcTick(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
     if(t%24===23)portalReview(lines);
     if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);staffBalance(lines);owePay(lines);}catch(e){console.error(e);}corrMonth(lines);
     if(S.rank>=6)S.trust=clamp(S.trust+(S.co.q-55)/25+(55-S.trust)*.03,0,100);
@@ -3991,6 +3994,9 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.1','경영진의 머리',[
+  '주요|위기 아크: 몇 달에 걸쳐 2~3단계로 이어지는 위기가 생겼다. 초반(가로채인 단독·위협받는 취재원·첫 오보 논란), 중반(부서원 조작 기사·광고주 삭제 요구·번아웃), 후반 대위기(정권의 언론 탄압·사주 일가 비리·간판 특종 조작 의혹·적대적 인수·1000억 소송). 단계마다 고른 길이 다음 고비와 결말을 바꾸고, 잘 넘기면 칭호가 남지만 잘못 고르면 권고사직까지 간다. 대위기는 한 커리어에 한두 번 찾아오고(대위기 뒤엔 3년간 쉰다), 18년 차를 넘기면 한 번은 꼭 온다. 진행 중인 위기는 할 일 맨 위에 뜬다',
+  '주요|창간 위기: 투자사의 경영권 압박(지면 이사회 표 대결로 해임까지), 100억 소송 폭탄, 핵심 기자 집단 이탈, 포털 알고리즘 변경',
+  '조정|간소화 모드의 위기는 덜 자주 오고, 중간 단계를 건너뛰며 손해가 40% 작고, 해임까지는 가지 않는다',
   '조정|경영진 AI 개편: 내가 사장이 아닐 때 회사는 매달 무조건 품질에 돈을 붓던 것을 그만두고, 분기마다 상황을 읽어 전략을 고른다 — 보도 품질 방어 · 디지털 전환 · 광고 영업 강화(경쟁사 단가 공세 방어) · 비용 절감(적자일 때) · 내실 다지기. 분기 전략과 연말 결산이 월말 보고에 뜬다',
   '수정|평기자 한 명의 업계 평판이 회사 전체 영향력·광고 점유율을 좌우하던 문제: 이제 직급이 낮을수록 내 평판이 회사 점유율에 주는 영향이 작고, 부국장 이상부터 온전히 반영된다'],'2026.10.19',['경영진 AI']],
  ['6.0','편집국의 얼굴',[
@@ -6637,7 +6643,7 @@ function misCheck(fin){if(!S.mis||!S.mis.list||S.story)return;if(fin)S.mis.list.
 function misSum(){try{const M=S.mis;if(!M||!M.list||!M.list.length)return '';misCheck();const n=M.list.filter(x=>x.done).length;return `<div class="mis" style="margin-bottom:10px"><div class="mish"><b>이달의 미션 ${n}/${M.list.length}</b><span>${M.all?'모두 달성 · 이번 달 행동력 +1':n?'일부 달성':'다음 달엔 할 일 맨 위 미션부터'}</span></div>${M.list.map(x=>`<div class="misr${x.done?' ok':''}"><i>${x.done?'✓':''}</i><span>${esc(x.t)}</span><em></em></div>`).join('')}</div>`;}catch(e){return '';}}
 function misEnd(){/* 새 달이 되면 misEnsure가 새 미션을 만든다 */}
 function misHTML(){if(S.story)return '';misEnsure();misCheck();const M=S.mis;if(!M||!M.list.length)return '';const n=M.list.filter(x=>x.done).length;
-  return `<div class="mis"><div class="mish"><b>${ic('trophy')}이달의 미션</b><span><b class="mcnt">${n}/${M.list.length}</b>${M.all?' · 다음 달 행동력 +1':'<span class="mlong"> · 다 하면 다음 달 행동력 +1</span>'}${(S.misStreak||0)>=1&&S.misLast>=M.m-1?` · 연속 ${S.misStreak}달 (3달마다 보상)`:''}</span></div>${M.list.map(x=>{const v=Math.min(x.g,Math.max(0,misProg(x)));const D=MIS_DEF[x.k];const show=x.done?'달성':D&&D.end?'월말 확정':x.rel?`지금 ${Math.max(0,Math.round(misProg(x)*10)/10)}`:`${Math.max(0,Math.floor(Math.min(x.g,misProg(x))))}/${x.g}`;return `<div class="misr${x.done?' ok':''}"><i>${x.done?'✓':''}</i><span>${esc(x.t)}${x.h&&!x.done?`<small>${esc(x.h)}</small>`:''}</span><em>${show}</em></div>`;}).join('')}${promoLine()}</div>`;}
+  return `${arcCard()}<div class="mis"><div class="mish"><b>${ic('trophy')}이달의 미션</b><span><b class="mcnt">${n}/${M.list.length}</b>${M.all?' · 다음 달 행동력 +1':'<span class="mlong"> · 다 하면 다음 달 행동력 +1</span>'}${(S.misStreak||0)>=1&&S.misLast>=M.m-1?` · 연속 ${S.misStreak}달 (3달마다 보상)`:''}</span></div>${M.list.map(x=>{const v=Math.min(x.g,Math.max(0,misProg(x)));const D=MIS_DEF[x.k];const show=x.done?'달성':D&&D.end?'월말 확정':x.rel?`지금 ${Math.max(0,Math.round(misProg(x)*10)/10)}`:`${Math.max(0,Math.floor(Math.min(x.g,misProg(x))))}/${x.g}`;return `<div class="misr${x.done?' ok':''}"><i>${x.done?'✓':''}</i><span>${esc(x.t)}${x.h&&!x.done?`<small>${esc(x.h)}</small>`:''}</span><em>${show}</em></div>`;}).join('')}${promoLine()}</div>`;}
 // 다음 승진까지 무엇이 모자란지 한 줄로
 const MIS_TAG={art:['write','invest'],q60:['write','invest'],exw:['write'],place:['pitch','write'],rb:['invest','write'],slot:['pitch'],excl:['invest','discover','source','beat','hari'],beatm:['beat','source'],trust:['source'],nolost:['write','invest'],src:['sasu','source'],bigrep:['sasu','report'],caprel:['drink','colleague'],fw:['front'],mood:['deptlife','colleague','paypol','wage'],profit:['adsell','adsales','fsales','revenue','cut'],subs:['campaign','fbrand','digital'],trustUp:['write','fethics']};
 function misTag(id){try{if(S.story)return '';misEnsure();misCheck();const M=S.mis;if(!M)return '';const hit=M.list.some(x=>!x.done&&(x.k===id||(MIS_TAG[x.k]||[]).includes(id)));return hit?'<i class="mtag">미션</i>':'';}catch(e){return '';}}
@@ -6985,6 +6991,130 @@ function slStage(id){const x=SL_MAP[id],a=S.sl&&S.sl[id];if(!x||!a||a.done)retur
 function fxPreview(fx){if(!fx)return '';const N={trust:'신뢰',fame:'평판',eval:'평가',hp:'컨디션',men:'멘탈',money:'통장'};const L=Object.entries(fx).filter(([k,v])=>v&&N[k]).map(([k,v])=>`${N[k]}${v>0?'↑':'↓'}`);return L.join(' · ');}
 function slHTML(){if(S.story)return '';const M=S.sl||{};const done=SL.filter(x=>M[x.id]&&M[x.id].ok);const act=SL.find(x=>M[x.id]&&!M[x.id].done);
   return `<div class="sec">나의 이야기 ${done.length}/${SL.length}</div>${act?`<div class="card"><div class="t">진행 중 · ${esc(act.n)} <span class="tg">${M[act.id].st+1}/${act.st.length}장</span></div><p class="hint" style="margin:4px 0 0">다음 장은 ${Math.max(0,Math.ceil((M[act.id].due-S.turn)/4))}개월 안에 · 끝까지 가면 칭호 「${esc(act.b)}」</p></div>`:''}${done.length?`<div class="chips" style="margin-top:6px">${done.map(x=>`<span class="cp" title="${esc(x.n)} · ${esc(M[x.id].ok)}">🏅 ${esc(x.b)}</span>`).join('')}</div>`:`<p class="hint">평소처럼 일하다 보면 이야기가 찾아온다. 상황(직급·부서·경력)에 맞는 이야기 ${SL.length}편이 있다.</p>`}`;}
+
+// ===================== 6.1 위기 아크: 몇 달에 걸쳐 이어지는 위기. 초반·중반 위기와 후반 대위기, 창간 위기 =====================
+// 간소화 모드: 중간 단계를 건너뛰고 손해가 작으며 해임까지는 가지 않는다
+function arcK(){return S.simple?.6:1;}
+function arcFx(fx){const k=arcK();const o={};for(const x in fx)o[x]=fx[x]<0?fx[x]*k:fx[x];return apply(o);}
+function arcFire(reason){if(S.simple){arcFx({eval:-6});log('위기 끝 문책 — 자리는 지켰다');toast('문책을 받았지만 자리는 지켰다');return;}fired(reason);}
+function arcCash(v){if(S.co)S.co.cash+=v*(v<0?arcK():1);}
+function arcRev(){return (S.co&&S.co.last&&S.co.last.rev)||(OUT().p*1.5);}
+function arcEnd(win,title){const a=S.arc2;if(!a)return;S.arc2=null;const BG=!!(A2.find(x=>x.id===a.id)||{}).big;S.arcCool=S.turn+(BG?144:win==null?56:64);S.arcDone=(S.arcDone||[]).concat([a.id]);if(win&&title){log(`위기 극복: ${title}`);try{metaMark('titles',title);}catch(e){}}if(A2.find(x=>x.id===a.id)?.big)S.bigCrisis=(S.bigCrisis||0)+1;}
+const A2=[
+ // ── 초반 ──
+ {id:'steal',n:'가로채인 단독',tier:0,c:()=>!S.founder&&S.rank<=1&&S.items.some(i=>i.excl)&&!!colBy('senior'),st:[
+   ()=>{const sr=colBy('senior');return {t:'가로채인 단독',d:`<p class="lede">내가 석 달 공들인 단독을 ${esc(sr.name)} 선배가 자기 이름으로 데스크에 올렸다. "네가 정리를 못 하길래 내가 다듬었어."</p>`,o:[
+     {l:'부장에게 정식으로 항의한다',s:'원칙대로 · 선배와 척진다',fn:()=>{S.arc2.f.prot=1;relUp(colBy('senior'),-12,'단독 항의');return {wait:6};}},
+     {l:'공동 바이라인을 제안한다',s:'타협 · 관계를 지킨다',fn:()=>{S.arc2.f.joint=1;relUp(colBy('senior'),6,'공동 바이라인');return {wait:6};}},
+     {l:'참는다',s:'이번엔 넘긴다 · 빚을 남긴다',fn:()=>{S.arc2.f.swallow=1;return {wait:6};}}]};},
+   ()=>{const f=S.arc2.f,sr=colBy('senior');if(f.prot){if(chance(.55)){return {t:'단독의 주인',d:`<p class="lede">부장이 취재 메모와 통화 기록을 확인했다. 바이라인이 내 이름으로 바뀌었다. 편집국에 소문이 돌았다. "그 수습, 만만치 않네."</p>${fxLine(arcFx({fame:2,eval:1.5,men:2}))}`,end:1,ti:'만만치 않은 신입'};}return {t:'팀워크 문제',d:`<p class="lede">${esc(sr?sr.name:'선배')} 선배가 먼저 손을 썼다. 부장이 "후배가 선배 기사에 시비를 건다"며 나를 불렀다.</p>${fxLine(arcFx({eval:-1.5,men:-2}))}`,end:0};}
+     if(f.joint)return {t:'공동 바이라인',d:`<p class="lede">기사는 둘의 이름으로 나갔다. 선배가 술자리에서 어깨를 쳤다. "다음엔 네 이름만 나가게 밀어 줄게."</p>${fxLine(arcFx({eval:.6,cha:.4}))}`,end:1};
+     const it=makeItem(S.dept,{excl:true,keyConf:true});S.items.push(it);return {t:'갚은 빚',d:`<p class="lede">선배가 조용히 메모 한 장을 건넸다. "지난번 건, 미안했다. 이건 네 거야." → 「${esc(it.title)}」</p>`,end:1};}]},
+ {id:'srcThreat',n:'위협받는 취재원',tier:0,c:()=>!S.founder&&S.rank<=2&&(S.sources||[]).length>=2,st:[
+   ()=>{const s=(S.sources||[]).slice().sort((a,b)=>b.trust-a.trust)[0]||{id:0,name:'제보자',role:'내부 직원',trust:50};S.arc2.f.sid=s.id;return {t:'위협받는 취재원',d:`<p class="lede">새벽 1시, ${esc(s.name)}(${esc(s.role)})에게서 전화가 왔다. "회사가 제보자를 찾고 있어요. 차에 누가 따라붙었어요."</p>`,o:[
+     {l:'기사를 미루고 취재원부터 지킨다',s:'사비 100만 원 · 기사 보류',fn:()=>{S.money-=100;S.arc2.f.guard=1;return {wait:5};}},
+     {l:'기사를 바로 낸다',s:'단독은 지킨다 · 취재원은 위험',fn:()=>{S.arc2.f.rush=1;return {wait:3};}},
+     {l:'경찰에 신고하고 공론화한다',s:'회사 법무팀 도움 · 노출 위험',fn:()=>{S.arc2.f.pub=1;return {wait:4};}}]};},
+   ()=>{const f=S.arc2.f,s=(S.sources||[]).find(x=>x.id===f.sid);if(f.guard){if(s)s.trust=clamp(s.trust+30,0,100);const it=makeItem(S.dept,{excl:true,keyConf:true,pre:1,mult:1.15});S.items.push(it);return {t:'지켜 준 사람',d:`<p class="lede">${esc(s?s.name:'그 사람')}이(가) 보름 만에 연락해 왔다. "기자님만 믿어요." 결정적인 문건을 넘겼다. → 「${esc(it.title)}」</p>${fxLine(arcFx({trust:1.5}))}`,end:1,ti:'제보자의 방패'};}
+     if(f.rush){if(s)S.sources=S.sources.filter(x=>x!==s);return {t:'잃은 사람',d:`<p class="lede">기사는 1면에 걸렸다. 그리고 ${esc(s?s.name:'그 사람')}은(는) 회사에서 쫓겨났다. 연락이 끊겼다.</p>${fxLine(arcFx({fame:2.5,trust:-3,men:-3}))}`,end:0};}
+     return {t:'공론화',d:`<p class="lede">경찰 수사가 시작되자 미행은 멈췄다. 언론단체가 "제보자 보호" 성명을 냈다.</p>${fxLine(arcFx({trust:2.5,fame:1}))}`,end:1};}]},
+ {id:'firstErr',n:'첫 오보 논란',tier:0,c:()=>!S.founder&&S.rank<=1&&(S.clips||[]).filter(c=>!c.staff).length>=3,st:[
+   ()=>{const c=mine()[0]||{h:'내 기사'};S.arc2.f.h=c.h;return {t:'"명백한 허위"',d:`<p class="lede">「${esc(c.h)}」 속 당사자가 SNS에 "명백한 허위 기사"라며 내 실명을 올렸다. 댓글이 수천 개다.</p>`,o:[
+     {l:'틀린 부분이 있는지 다시 확인하고 정정한다',s:'안전 · 평가 조금↓',fn:()=>{S.arc2.f.fix=1;return {wait:2};}},
+     {l:'녹취를 공개하며 반박한다',s:'모 아니면 도',fn:()=>{S.arc2.f.fight=1;return {wait:3};}},
+     {l:'데스크에 맡기고 입을 닫는다',s:'책임을 떠넘긴다',fn:()=>{S.arc2.f.hide=1;return {wait:2};}}]};},
+   ()=>{const f=S.arc2.f;if(f.fix)return {t:'정정 보도',d:`<p class="lede">숫자 하나가 틀려 있었다. 정정문을 냈다. 캡이 말했다. "틀릴 순 있어. 숨기면 끝이야."</p>${fxLine(arcFx({eval:-.8,trust:1.2}))}`,end:1};
+     if(f.fight){if(chance(.5+(S.st.ver||40)/250))return {t:'진실의 녹취',d:`<p class="lede">녹취 속 당사자 목소리가 공개되자 여론이 뒤집혔다. "기자가 맞았네."</p>${fxLine(arcFx({fame:3,trust:2}))}`,end:1,ti:'녹취의 승리'};return {t:'맥락 논란',d:`<p class="lede">녹취 앞뒤가 잘렸다는 반박이 나왔다. 언론중재위에 제소됐다.</p>${fxLine(arcFx({trust:-4,eval:-2}))}`,end:0};}
+     const cp=colBy('cap');if(cp)relUp(cp,-8,'책임 회피');return {t:'떠넘긴 책임',d:`<p class="lede">데스크가 "기자 개인의 판단"이라고 선을 그었다. 이름만 남았다.</p>${fxLine(arcFx({eval:-2,men:-2}))}`,end:0};}]},
+ // ── 중반 ──
+ {id:'fabric',n:'조작된 인용',tier:1,c:()=>!S.founder&&S.rank>=2&&S.rank<=3&&(S.team||[]).length>=2,st:[
+   ()=>{const m=pick(S.team);S.arc2.f.w=m.name;return {t:'존재하지 않는 사람',d:`<p class="lede">우리 부서 ${esc(m.name)} 기자 기사에 인용된 "익명의 학부모"가 실존하지 않는다는 제보가 왔다. 내가 데스킹한 기사다.</p>`,o:[
+     {l:'즉시 내부 조사를 연다',s:'정공법',fn:()=>{S.arc2.f.probe=1;return {wait:3};}},
+     {l:'기사를 조용히 내린다',s:'당장은 조용하다',fn:()=>{S.arc2.f.del=1;return {wait:4};}},
+     {l:'기자를 믿고 감싼다',s:'의리 · 사실이면 함께 무너진다',fn:()=>{S.arc2.f.cover=1;return {wait:4};}}]};},
+   ()=>{const f=S.arc2.f;if(f.probe){S.team=S.team.filter(x=>x.name!==f.w);return {t:'공개 사과',d:`<p class="lede">조사 결과 인용은 지어낸 것이었다. ${esc(f.w)} 기자는 징계를 받았고, 지면에 사과문이 실렸다. 업계는 "그래도 정직했다"고 평했다.</p>${fxLine(arcFx({trust:2.5,eval:-1}))}`,end:1,ti:'정직한 데스크'};}
+     if(f.del){if(chance(.6)){S.disc=S.turn;return {t:'"몰래 삭제"',d:`<p class="lede">미디어 비평지가 "기사 몰래 삭제" 사실을 보도했다. 데스크인 내 이름이 나왔다.</p>${fxLine(arcFx({trust:-6,eval:-3}))}`,end:0};}return {t:'묻힌 일',d:'<p class="lede">아무도 모른 채 지나갔다. 마음 한구석이 무겁다.</p>',end:null};}
+     if(chance(.8))return {t:'함께 무너지다',d:`<p class="lede">인용은 지어낸 것이었다. "데스크가 알고도 감쌌다"는 기사가 났다. 국장실로 불려 갔다.</p>${fxLine(arcFx({trust:-7,eval:-4}))}`,next:1};return {t:'믿음의 보답',d:`<p class="lede">취재원이 직접 나섰다. 인용은 사실이었다. ${esc(f.w)} 기자가 고개를 숙였다. "끝까지 믿어 주셔서…"</p>${fxLine(arcFx({eval:1,cha:.5}))}`,end:1};},
+   ()=>({t:'국장실',d:'<p class="lede">국장: "책임질 사람이 필요해. 자네가 물러나든지, 버티든지."</p>',o:[{l:'보직을 내려놓고 사과한다',s:'평가 크게↓ · 자리는 남는다',fn:()=>{arcFx({eval:-5,trust:2});return {end:0,msg:'보직을 내려놓았다. 다시 기자로 돌아간다.'};}},{l:'버틴다',s:'절반의 확률로 권고사직',fn:()=>{if(chance(.5)){arcEnd(false);arcFire('조작 기사를 감싼 책임으로');return {stop:1};}arcFx({eval:-3});return {end:0,msg:'버텼다. 하지만 편집국의 눈빛이 달라졌다.'};}}]})]},
+ {id:'adKill',n:'광고주의 삭제 요구',tier:1,c:()=>!S.founder&&S.rank>=2&&S.rank<=4,st:[
+   ()=>{const big=pick(ENTS.filter(e=>e[2]==='corp'&&e[4]))||['c0','대형 광고주'];S.arc2.f.e=big[0];S.arc2.f.n=big[1];return {t:'삭제 요구',d:`<p class="lede">${esc(big[1])}이(가) 우리 부서 기사를 내리지 않으면 연간 광고를 끊겠다고 한다. 국장이 직접 전화했다. "적당히 하자."</p>`,o:[
+     {l:'거부한다',s:'광고 손실 · 신뢰↑',fn:()=>{S.arc2.f.no=1;return {wait:4};}},{l:'표현만 다듬는다',s:'타협',fn:()=>{S.arc2.f.mid=1;return {wait:3};}},{l:'기사를 내린다',s:'회사 지키기 · 들키면 큰일',fn:()=>{S.arc2.f.kill=1;return {wait:4};}}]};},
+   ()=>{const f=S.arc2.f;if(f.no){arcCash(-arcRev()*.8);if(S.net&&S.net[f.e])S.net[f.e].cut=(S.net[f.e].cut||0)+12;const sup=chance(.45);return {t:sup?'업계의 지지':'광고가 끊겼다',d:`<p class="lede">${esc(f.n)} 광고가 끊겼다.${sup?' 기자협회와 시민단체가 "광고로 기사를 사려 한다"는 성명을 냈다. 독자 후원이 몰렸다.':' 국장의 눈빛이 차갑다.'}</p>${fxLine(arcFx(sup?{trust:4,fame:3}:{trust:3,eval:-2}))}`,end:1,ti:sup?'광고에 굴하지 않은 데스크':''};}
+     if(f.mid)return {t:'다듬어진 기사',d:'<p class="lede">기사는 살았고 광고도 살았다. 다만 날은 조금 무뎌졌다.</p>'+fxLine(arcFx({trust:-.5})),end:null};
+     if(chance(.5))return {t:'내부 고발',d:`<p class="lede">노조가 "광고주 요구로 기사 삭제"라는 성명을 냈다. 기사 원문이 커뮤니티에 돌았다.</p>${fxLine(arcFx({trust:-6,eval:-2}))}`,end:0};return {t:'조용한 삭제',d:'<p class="lede">기사는 사라졌다. 광고는 남았다.</p>'+fxLine(arcFx({eval:1,trust:-1})),end:null};}]},
+ {id:'burnout',n:'번아웃',tier:1,c:()=>!S.founder&&S.rank>=1&&S.hp<40,st:[
+   ()=>({t:'쓰러지다',d:'<p class="lede">마감 직후 편집국에서 쓰러졌다. 응급실 의사가 말했다. "이렇게 일하시면 큰일 납니다."</p>',o:[
+     {l:'2주 입원한다',s:'컨디션 회복 · 다음 달 행동력↓',fn:()=>{S.hp=90;S.sick=S.turn+2;return {end:1,msg:'푹 쉬었다. 몸이 돌아왔다.'};}},
+     {l:'진통제로 버틴다',s:'당장은 일한다 · 재발 위험',fn:()=>{S.hp=Math.min(100,S.hp+12);return {wait:6};}},
+     {l:'한 달 휴직한다',s:'완전히 회복 · 평가 조금↓ · 아이템 일부를 넘긴다',fn:()=>{S.hp=100;S.items=S.items.slice(0,1);arcFx({eval:-1});return {end:1,msg:'한 달을 쉬었다. 돌아와 보니 세상은 그대로였다.'};}}]}),
+   ()=>{if(chance(.6)){S.hp=20;S.sick=S.turn+4;return {t:'재발',d:`<p class="lede">다시 쓰러졌다. 이번엔 한 달 병가를 받았다.</p>${fxLine(arcFx({eval:-1.5,men:-3}))}`,end:0};}return {t:'버텨 냈다',d:'<p class="lede">어떻게든 버텼다. 하지만 이게 언제까지 될까.</p>',end:null};}]},
+ // ── 후반 대위기 ──
+ {id:'regime',n:'정권의 언론 탄압',tier:2,big:1,sk:1,c:()=>!S.founder&&S.rank>=4,st:[
+   ()=>({t:'대위기 · 세무조사 통보',d:`<p class="lede">정권 실세 비리 연속 보도 이후 국세청이 ${esc(OUT().n)}에 대한 특별 세무조사를 통보했다. 업계는 "보복"이라고 수군댄다.</p>`,o:[
+     {l:'"세무조사는 보복" 정면 보도',s:'강경 · 다음 압박이 온다',fn:()=>{S.arc2.f.stand=(S.arc2.f.stand||0)+1;return {wait:6};}},{l:'조용히 법적 대응',s:'신중',fn:()=>{S.arc2.f.quiet=1;return {wait:6};}},{l:'비판 수위를 조절하겠다고 약속',s:'굴복의 첫걸음',fn:()=>{S.arc2.f.bow=(S.arc2.f.bow||0)+1;return {wait:6};}}]}),
+   ()=>{arcCash(-arcRev()*1.2);return {t:'대위기 · 광고 중단과 압수수색',d:'<p class="lede">정부 광고가 끊겼고, 검찰이 편집국 압수수색 영장을 들고 왔다. 기자들이 사옥 로비에 모였다.</p>',o:[
+     {l:'1면을 백지로 내고 독자에게 호소한다',s:'평판·신뢰 크게↑ · 회사 손실',fn:()=>{S.arc2.f.stand=(S.arc2.f.stand||0)+1;arcCash(arcRev()*.6);return {wait:4};}},{l:'변호인단을 꾸려 법정 싸움',s:'비용↑',fn:()=>{S.arc2.f.stand=(S.arc2.f.stand||0)+.5;arcCash(-arcRev()*.3);return {wait:4};}},{l:'사과문을 싣는다',s:'압박은 멈춘다 · 기자들이 등을 돌린다',fn:()=>{S.arc2.f.bow=(S.arc2.f.bow||0)+2;return {wait:4};}}]};},
+   ()=>{const f=S.arc2.f;if((f.stand||0)>=(S.simple?1:1.5)){S.awards=(S.awards||0)+1;return {t:'편집권의 수호자',d:`<p class="lede">버텼다. 세무조사는 아무것도 찾지 못했고, 압수수색 영장 남발이 국정감사에서 도마에 올랐다. ${esc(OUT().n)}의 백지 1면은 언론사(史)에 남았다. 한국기자상 특별상.</p>${fxLine(arcFx({fame:8,trust:8,eval:3}))}`,end:1,ti:'편집권의 수호자'};}
+     if((f.bow||0)>=(S.simple?1:2)){if(S.rank>=6&&chance(.5)){return {t:'굴복의 대가',d:'<p class="lede">기자 200명이 "편집국장 퇴진" 성명에 이름을 올렸다. 이사회가 움직였다.</p>',fire:'정권에 굴복했다는 비판 속에'};}return {t:'굴복의 대가',d:`<p class="lede">압박은 멈췄다. 하지만 후배들이 인사를 하지 않는다. "그때 우리를 팔았잖아요."</p>${fxLine(arcFx({trust:-10,eval:-3,men:-4}))}`,end:0};}
+     return {t:'애매한 끝',d:`<p class="lede">세무조사는 추징금 조금으로 끝났다. 싸우지도, 굴복하지도 않았다.</p>${fxLine(arcFx({trust:1}))}`,end:null};}]},
+ {id:'owner',n:'사주 일가의 비리',tier:2,big:1,c:()=>!S.founder&&S.rank>=4&&S.rank<7,st:[
+   ()=>({t:'대위기 · 사주 일가 제보',d:`<p class="lede">내부 제보가 왔다. 사주 아들 회사로 ${esc(OUT().n)} 인쇄·광고 일감 수백억이 몰렸다는 회계 자료다. 진짜다.</p>`,o:[
+     {l:'우리 회사 비리를 보도한다',s:'언론의 원칙 · 자리를 건다',fn:()=>{S.arc2.f.run=1;return {wait:4};}},{l:'감사실에 넘긴다',s:'절차대로',fn:()=>{S.arc2.f.audit=1;return {wait:5};}},{l:'묻는다',s:'회사를 지킨다 · 언젠가 터진다',fn:()=>{S.arc2.f.bury=1;return {wait:24};}}]}),
+   ()=>{const f=S.arc2.f;if(f.run){if(S.rank>=6&&chance(.45))return {t:'사주의 분노',d:'<p class="lede">기사가 나간 날 저녁, 사주가 이사회를 소집했다. "배은망덕한 놈."</p>',fire:'사주 일가 비리를 보도한 뒤'};S.awards=(S.awards||0)+1;return {t:'제 살을 깎은 기사',d:`<p class="lede">자사 사주 비리를 스스로 보도한 기사는 업계를 흔들었다. 사주가 사과문을 냈고, 기자상을 받았다. 대신 다음 인사에서 한직으로 밀려날 각오는 해야 한다.</p>${fxLine(arcFx({trust:10,fame:6,eval:-4}))}`,end:1,ti:'제 살을 깎은 기자'};}
+     if(f.audit){if(chance(.35))return {t:'형식적 감사',d:`<p class="lede">감사는 "문제없음"으로 끝났고, 제보 자료가 다른 매체에 흘러갔다.</p>${fxLine(arcFx({trust:-3,eval:-1}))}`,end:0};return {t:'조용한 정리',d:`<p class="lede">감사실이 계약을 정리했다. 밖으로 새지 않았다.</p>${fxLine(arcFx({eval:1}))}`,end:null};}
+     if(chance(.75)){if(chance(.3)&&S.rank>=5)return {t:'2년 뒤의 폭로',d:'<p class="lede">경쟁지가 사주 일가 일감 몰아주기를 보도했다. "편집국 간부들은 알고도 묻었다." 내 이름이 나왔다.</p>',fire:'알고도 묻었다는 보도가 나온 뒤'};return {t:'2년 뒤의 폭로',d:`<p class="lede">경쟁지가 사주 일가 비리를 터뜨렸다. "${esc(OUT().n)} 간부들은 알고도 묻었다."</p>${fxLine(arcFx({trust:-12,eval:-5}))}`,end:0};}return {t:'묻힌 채로',d:'<p class="lede">아무 일도 없었다. 아직은.</p>',end:null};}]},
+ {id:'scandal',n:'간판 특종 조작 의혹',tier:2,big:1,c:()=>!S.founder&&S.rank>=4,st:[
+   ()=>({t:'대위기 · 조작 의혹',d:`<p class="lede">${esc(OUT().n)}가 지난해 터뜨린 간판 특종의 핵심 증언자가 "기자가 시킨 대로 말했다"고 폭로했다. 편집국 전체가 얼어붙었다.</p>`,o:[
+     {l:'외부 진상조사위를 꾸린다',s:'투명하게 · 무엇이 나올지 모른다',fn:()=>{S.arc2.f.ext=1;return {wait:6};}},{l:'내부 감사로 조용히 확인',s:'시간을 번다',fn:()=>{S.arc2.f.int=1;return {wait:5};}},{l:'기자를 공개적으로 옹호한다',s:'편집국을 지킨다 · 틀리면 끝',fn:()=>{S.arc2.f.def=1;return {wait:5};}}]}),
+   ()=>{const f=S.arc2.f;const fake=chance(.6);if(f.ext)return fake?{t:'진상조사 보고서',d:`<p class="lede">조사위는 증언 일부가 유도됐다고 결론 냈다. 지면 2개 면에 걸쳐 진상 보고서와 사과문을 실었다. 뼈아프지만 업계는 "정면 돌파"라고 평했다.</p>${fxLine(arcFx({trust:3,eval:-2,fame:1}))}`,end:1,ti:'정면 돌파'}:{t:'무혐의',d:`<p class="lede">조사위는 기사가 사실에 근거했다고 밝혔다. 증언자는 회사에서 압박을 받았다고 털어놨다.</p>${fxLine(arcFx({trust:5,fame:4}))}`,end:1,ti:'흔들리지 않은 특종'};
+     if(f.int)return fake?{t:'커지는 의혹',d:`<p class="lede">"${esc(OUT().n)}이 덮으려 한다"는 보도가 이어졌다.</p>${fxLine(arcFx({trust:-6,eval:-2}))}`,end:0}:{t:'잠잠해진 의혹',d:'<p class="lede">조용히 확인했고, 조용히 지나갔다.</p>',end:null};
+     if(fake){if(S.rank>=5&&chance(.5))return {t:'책임론',d:'<p class="lede">조작이 확인됐다. "끝까지 옹호한 간부"에게 책임론이 쏠렸다.</p>',fire:'조작 보도를 옹호한 책임으로'};return {t:'책임론',d:`<p class="lede">조작이 확인됐다. 옹호 발언이 두고두고 회자됐다.</p>${fxLine(arcFx({trust:-8,eval:-6}))}`,end:0};}
+     return {t:'지켜 낸 기자',d:`<p class="lede">증언자의 폭로는 거짓이었다. 끝까지 기자를 믿은 간부로 이름이 남았다.</p>${fxLine(arcFx({trust:4,fame:4,eval:2}))}`,end:1,ti:'기자를 지킨 간부'};}]},
+ {id:'mna',n:'적대적 인수',tier:2,big:1,c:()=>!S.founder&&S.rank>=5&&S.rank<7&&OUT().p>=3,st:[
+   ()=>({t:'대위기 · 사모펀드의 인수 시도',d:`<p class="lede">사모펀드가 ${esc(OUT().n)} 지분을 사들이고 있다. 인수 뒤 "수익성 없는 부서 정리"가 계획서에 적혀 있다.</p>`,o:[
+     {l:'기자 총회를 열고 반대 성명을 주도한다',s:'편집국을 지킨다 · 눈엣가시가 된다',fn:()=>{S.arc2.f.fight=1;return {wait:8};}},{l:'편집권 독립 조항을 협상한다',s:'실리',fn:()=>{S.arc2.f.deal=1;return {wait:8};}},{l:'새 주인을 환영한다',s:'자리는 지킨다',fn:()=>{S.arc2.f.wel=1;return {wait:8};}}]}),
+   ()=>{const f=S.arc2.f,c=S.co;if(f.fight){if(chance(.6))return {t:'인수 무산',d:`<p class="lede">독자 모금과 기자 총회 성명이 여론을 움직였다. 사모펀드가 손을 뗐다.</p>${fxLine(arcFx({fame:4,trust:4,eval:2}))}`,end:1,ti:'편집국을 지킨 사람'};if(c){c.staff=Math.max(5,Math.round(c.staff*.88));c.q-=4;}return {t:'인수 완료',d:`<p class="lede">인수는 성사됐다. 새 경영진의 첫 인사 명단에 내 이름이 "검토 대상"으로 올랐다.</p>${fxLine(arcFx({eval:-5}))}`,end:0};}
+     if(f.deal)return {t:'독립 조항',d:`<p class="lede">인수는 됐지만 편집권 독립 조항과 편집국장 임명동의제를 지켜 냈다.</p>${fxLine(arcFx({trust:2,eval:1}))}`,end:1};
+     if(c){c.staff=Math.max(5,Math.round(c.staff*.85));c.q-=5;}S.money+=2000;return {t:'구조조정',d:`<p class="lede">새 주인은 기자 15%를 내보냈다. 남은 간부에겐 스톡옵션 2,000만 원. 편집국은 조용해졌다.</p>${fxLine(arcFx({eval:3,trust:-5}))}`,end:null};}]},
+ {id:'mega',n:'1000억 소송',tier:2,big:1,c:()=>!S.founder&&S.rank>=4,st:[
+   ()=>{const big=pick(ENTS.filter(e=>e[2]==='corp'))||['c0','대기업'];S.arc2.f.n=big[1];return {t:'대위기 · 1000억 손해배상',d:`<p class="lede">${esc(big[1])}이(가) 우리 연속 보도에 1000억 원 손해배상을 청구했다. 사상 최대다. 사장이 "어떻게 할 거냐"고 묻는다.</p>`,o:[
+     {l:'끝까지 간다',s:'1년 뒤 판결 · 승패에 커리어가 걸린다',fn:()=>{S.arc2.f.go=1;arcCash(-arcRev()*.3);return {wait:16};}},{l:'정정 보도로 합의한다',s:'신뢰↓ · 끝',fn:()=>{arcFx({trust:-4,eval:1});return {end:0,msg:'합의했다. 기사 일부가 정정됐다.'};}},{l:'기사를 내린다',s:'소송은 취하 · 후배들이 등을 돌린다',fn:()=>{arcFx({trust:-7,men:-3});return {end:0,msg:'기사를 내렸다. 편집국이 술렁였다.'};}}]};},
+   ()=>{const f=S.arc2.f;if(chance(.55+(S.trust-50)/200)){S.awards=(S.awards||0)+1;return {t:'승소',d:`<p class="lede">법원은 "공익을 위한 보도로 상당한 이유가 있었다"며 ${esc(f.n)}의 청구를 기각했다. 언론자유 판례로 남았다.</p>${fxLine(arcFx({fame:6,trust:6,eval:3}))}`,end:1,ti:'1000억을 이긴 기자'};}
+     arcCash(-arcRev()*2.5);return {t:'패소',d:'<p class="lede">일부 패소. 배상액은 줄었지만 회사가 휘청였다. 책임론이 나왔다.</p>'+fxLine(arcFx({eval:-4,trust:-3})),end:0};}]},
+ // ── 창간 ──
+ {id:'fInvest',n:'투자사의 경영권 압박',tier:3,big:1,c:()=>S.founder&&S.investor,st:[
+   ()=>({t:'창간 위기 · 경영권 압박',d:'<p class="lede">투자사가 "편집 방향을 바꾸든지 이사 두 자리를 내놓으라"고 통보했다.</p>',o:[
+     {l:'우호 투자자를 찾아 맞선다',s:'회사 자금 -2억 · 독립',fn:()=>{arcCash(-2);S.arc2.f.fight=1;return {wait:6};}},{l:'이사 한 자리를 내준다',s:'지분 -5%',fn:()=>{S.equity=Math.max(10,(S.equity||100)-5);return {end:null,msg:'이사회에 투자사 사람이 앉았다.'};}},{l:'요구를 받아들인다',s:'트래픽 기사 늘리기 · 신뢰↓',fn:()=>{arcFx({trust:-5});S.co.bT+=.03;return {end:0,msg:'편집 방향이 바뀌었다. 창간 멤버들이 술렁인다.'};}}]}),
+   ()=>{if(chance(.55+fs('pr')/300))return {t:'독립을 지키다',d:`<p class="lede">우호 투자자가 지분을 사들였다. 투자사가 손을 뗐다.</p>${fxLine(arcFx({trust:4,fame:2}))}`,end:1,ti:'독립 언론의 대표'};if(!S.simple&&chance(.4))return {t:'이사회 표 대결',d:'<p class="lede">이사회 표 대결에서 한 표 차로 졌다.</p>',fend:'이사회 해임'};arcCash(-1);return {t:'상처뿐인 방어',d:`<p class="lede">겨우 막았지만 돈과 사람을 많이 잃었다.</p>${fxLine(arcFx({trust:1}))}`,end:null};}]},
+ {id:'fSuit',n:'창간 매체 소송 폭탄',tier:3,c:()=>S.founder&&(S.scoops||0)>=1,st:[
+   ()=>{const big=pick(ENTS.filter(e=>e[2]==='corp'))||['c0','대기업'];S.arc2.f.n=big[1];return {t:'창간 위기 · 100억 소송',d:`<p class="lede">${esc(big[1])}이(가) 우리 보도에 100억 원 소송을 걸었다. 작은 매체를 말려 죽이려는 소송이다.</p>`,o:[
+     {l:'끝까지 싸운다',s:'변호 비용 · 1년 뒤 판결',fn:()=>{arcCash(-.8);return {wait:16};}},{l:'독자 소송 후원을 모은다',s:'후원 · 싸운다',fn:()=>{arcCash(.6);S.arc2.f.fund=1;return {wait:16};}},{l:'정정하고 합의한다',s:'끝 · 신뢰↓',fn:()=>{arcFx({trust:-5});return {end:0,msg:'합의했다.'};}}]};},
+   ()=>{if(chance(.55+(S.arc2.f.fund?.1:0)))return {t:'승소',d:`<p class="lede">청구 기각. "작은 매체가 대기업을 이겼다"는 기사가 쏟아졌다. 후원 회원이 늘었다.</p>${fxLine(arcFx({fame:5,trust:5}))}`,end:1,ti:'다윗의 대표'};arcCash(-3);return {t:'패소',d:'<p class="lede">일부 패소. 배상금 3억. 통장이 바닥을 보인다.</p>',end:0};}]},
+ {id:'fExodus',n:'핵심 기자 집단 이탈',tier:3,c:()=>S.founder&&S.co&&S.co.staff>=8,st:[
+   ()=>({t:'창간 위기 · 집단 이탈',d:'<p class="lede">에이스 기자 셋이 대형 매체로 한꺼번에 옮기겠다고 통보했다. "대표님 비전은 좋은데, 월급이…"</p>',o:[
+     {l:'임금을 올려 붙잡는다',s:'임금 수준↑ · 비용↑',fn:()=>{S.payLv=+((S.payLv||1)+.08).toFixed(2);return {end:1,msg:'붙잡았다. 대신 인건비가 늘었다.'};}},{l:'지분을 나눠 준다',s:'지분 -6% · 충성도↑',fn:()=>{S.equity=Math.max(10,(S.equity||100)-6);S.co.q+=2;return {end:1,msg:'"우리 회사"가 됐다. 셋 다 남았다.'};}},{l:'보낸다',s:'품질↓ · 새 사람을 뽑는다',fn:()=>{S.co.staff=Math.max(2,S.co.staff-3);S.co.q-=5;return {end:0,msg:'셋이 떠났다. 편집국이 텅 빈 것 같다.'};}}]})]},
+ {id:'fPlatform',n:'포털 알고리즘 변경',tier:3,c:()=>S.founder&&S.co&&S.co.tr>0,st:[
+   ()=>{S.co.tr*=.6;return {t:'창간 위기 · 트래픽 반토막',d:'<p class="lede">포털이 뉴스 알고리즘을 바꿨다. 하루아침에 트래픽이 40% 날아갔다.</p>',o:[
+     {l:'구독 전환에 투자한다',s:'자금 -1.5억 · 장기적으로 구독↑',fn:()=>{arcCash(-1.5);S.co.bS+=.04;return {wait:8};}},{l:'포털에 로비한다',s:'관계망 의존',fn:()=>{S.arc2.f.lobby=1;return {wait:6};}},{l:'버틴다',s:'아무것도 안 한다',fn:()=>{return {wait:8};}}]};},
+   ()=>{const f=S.arc2.f;if(f.lobby&&chance(.5)){S.co.tr*=1.35;return {t:'원상 복구',d:'<p class="lede">포털이 일부 매체 노출을 되돌렸다. 우리도 포함됐다.</p>',end:1};}if(S.co.bS>0){S.co.subs*=1.15;return {t:'구독의 힘',d:'<p class="lede">포털에 기대지 않는 독자가 늘었다. 트래픽은 덜해도 수입은 더 단단하다.</p>'+fxLine(arcFx({trust:2})),end:1,ti:'포털에 기대지 않는 매체'};}return {t:'줄어든 판',d:'<p class="lede">트래픽은 돌아오지 않았다. 새 판에 적응해야 한다.</p>',end:0};}]}
+];
+function arcPick(){const late=!S.founder&&(S.rank>=4||years()>=15);const tier=S.founder?3:late?2:S.rank>=2?1:0;const done=S.arcDone||[];
+  const el=A2.filter(a=>(a.tier===tier||(tier===2&&a.tier===1&&chance(.25)))&&!done.includes(a.id)&&(()=>{try{return a.c();}catch(e){return false;}})());return el.length?pick(el):null;}
+function arcTick(lines){if(!S||S.phase!=='game'||S.story)return;const a=S.arc2;
+  if(a){if(S.turn>=a.due)Q.push(()=>arcShow());return;}
+  if((S.arcCool||0)>S.turn||(S.calmT||0)>S.turn)return;const late=!S.founder&&(S.rank>=4||years()>=15);
+  const bc=S.bigCrisis||0;let p=S.founder?.035:late?(bc>=2?.004:bc?(S.simple?.004:.012):(years()>=18?(S.simple?.05:.08):.03)):S.rank>=2?.045:S.rank>=1?.035:0;if(S.simple)p*=.6;p*=(DF().crisis||1);if(!chance(p))return;
+  const x=arcPick();if(!x)return;S.arc2={id:x.id,st:0,due:S.turn,f:{}};calmSet(4);Q.push(()=>arcShow());}
+function arcShow(){const a=S.arc2;if(!a)return closeModal();const X=A2.find(x=>x.id===a.id);if(!X){S.arc2=null;return closeModal();}
+  let si=a.st;if(S.simple&&X.sk&&si>0&&si<X.st.length-1)si=X.st.length-1;const r=X.st[si]();const N=X.st.length;
+  const head=`<div class="arch"><b>${X.big?'대위기':'위기'} · ${esc(X.n)}</b><span>${si+1}/${N}단계</span></div>`;
+  const fin=(res)=>{if(!res)return;if(res.stop)return;if(res.end!==undefined){arcEnd(res.end,res.ti||null);if(res.msg)toast(res.msg);return;}if(res.fire){arcEnd(false);arcFire(res.fire);return;}a.st=si+1;a.due=S.turn+(res.wait||4);};
+  if(r.o){openModal(r.t,head+r.d,r.o.map(o=>({label:o.l,sub:o.s,fn:()=>{const res=o.fn();fin(res);if(res&&res.stop)return false;}})));return;}
+  if(r.fire){openModal(r.t,head+r.d,[{label:'받아들인다',fn:()=>{arcEnd(false);arcFire(r.fire);return false;}}]);return;}
+  if(r.fend){openModal(r.t,head+r.d,[{label:'결과 보기',fn:()=>{arcEnd(false);ending(r.fend);render();return false;}}]);return;}
+  if(r.next){a.st=si+1;a.due=S.turn+2;openModal(r.t,head+r.d,[{label:'다음',cls:'ghost'}]);return;}
+  arcEnd(r.end,r.ti);openModal(r.t,head+r.d+(r.ti&&r.end?`<p class="fx">칭호 「${esc(r.ti)}」</p>`:''),[{label:'넘어간다'}]);}
+function arcCard(){const a=S&&S.arc2;if(!a)return '';const X=A2.find(x=>x.id===a.id);if(!X)return '';const left=Math.max(0,a.due-S.turn);return `<div class="arcc${X.big?' big':''}"><b>${ic('fire')} ${X.big?'대위기':'위기'} 진행 중 · ${esc(X.n)}</b><span>${a.st+1}/${X.st.length}단계 · 다음 고비까지 ${left?heatTxt(left):'곧'}</span></div>`;}
 
 // ===================== 6.0 기자의 길: 어떻게 일하느냐가 커리어를 바꾼다 =====================
 // 매달 내 행동과 기사로 네 갈래 성향이 쌓인다. 1년이 지나 한 갈래가 뚜렷하면 '유형'이 정해지고, 확실한 장점과 대가가 붙는다
