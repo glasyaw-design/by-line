@@ -1604,7 +1604,7 @@ function cleanFor(d,subj){const k=CLEAN_C[d]?d:'all';const pool=CLEAN_C.all.conc
  who.forEach(w=>when.forEach((t,i)=>{const x=what[(i+who.indexOf(w))%what.length];CLEAN_C.all.push(`${w}은 ${t} ${x[0]}.`.replace('측은','측은').replace(/([가-힣])은 /,(m,c)=>((c.charCodeAt(0)-44032)%28?c+'은 ':c+'는 '))); }));
  const src=['국가통계포털(KOSIS)','감사원 감사 보고서','국회 입법조사처 자료','국민권익위원회 자료','법원 판결문','금융감독원 전자공시','건강보험심사평가원 자료','행정안전부 자료','고용노동부 통계','교육부 학교알리미'];
  src.forEach(x=>CLEAN_C.all.push(`이 수치는 ${x}를 본지가 분석한 결과다.`));
- ['3년','5년','10년'].forEach(y=>['비슷한 민원','같은 유형의 사고','관련 소송'].forEach(z=>CLEAN_C.all.push(`최근 ${y}간 ${z}는 꾸준히 늘었다고 관계 기관 자료는 밝히고 있다.`)));
+ ['3년','5년','10년'].forEach(y=>['비슷한 민원','같은 유형의 사고','관련 소송'].forEach(z=>CLEAN_C.all.push(`최근 ${y}간 ${jo2(z,'은','는')} 꾸준히 늘었다고 관계 기관 자료는 밝히고 있다.`)));
 })();
 const CLEAN=CLEAN_C.all.concat(CLEAN_C.soc);
 function flawFor(subj){return shuffle(FLAWS).map(f=>({t:f.t.replace(/\{S\}/g,subj||'A씨'),e:f.e}));}
@@ -2874,11 +2874,43 @@ function clipHTML(c,sm){return `<div class="clip${sm?' sm':''}"><div class="mh">
 
 // --- 데스크 ---
 // ===== 5.7 부장 데스크: 본사 부장은 기사를 덜 쓰고 부서 초고를 다듬는다 (지역 주재 부장은 예전 그대로) =====
+// ===================== 6.2 데스킹 초고: 그 기사의 사실로 짓는다 =====================
+function jo2(w,a,b){const c=String(w||'').trim().slice(-1);const k=c.charCodeAt(0);if(k>=44032&&k<=55203)return w+((k-44032)%28?a:b);if(/[0-9]/.test(c))return w+('2459'.includes(c)?b:a);return w+b;}
+function ro2(w){const c=String(w||'').trim().slice(-1);const k=c.charCodeAt(0);if(k>=44032&&k<=55203){const b=(k-44032)%28;return w+(b===0||b===8?'로':'으로');}if(/[0-9]/.test(c))return w+('1378'.includes(c)?'로':'으로');return w+'로';}
+function bat2(w){const k=String(w||'').trim().slice(-1).charCodeAt(0);return k>=44032&&k<=55203&&(k-44032)%28>0;}
+function qGo(q){return /다$/.test(q)?`"${q}"고`:bat2(q)?`"${q}"이라고`:`"${q}"라고`;}
+function deskFactSent(f){const t=f.t;const m=/^(.{0,16}?)\s*"([^"]{2,40})"\s*$/.exec(t);
+  if(m){const who=m[1].trim()||'한 관계자';return `${jo2(who,'은','는')} ${/다$/.test(m[2])?`"${m[2]}"라고`:qGo(m[2])} 말했다.`;}
+  if(f.k==='d')return `취재팀이 입수한 문건에서도 ${jo2(t,'이','가')} 확인됐다.`;
+  if(f.k==='n')return `관련 자료를 분석했더니 「${t}」${bat2(t)?'이라는':'라는'} 결과가 나왔다.`;
+  if(f.k==='s')return `취재진이 현장을 찾아가 보니 ${jo2(t,'이','가')} 눈에 띄었다.`;
+  return `취재 결과 ${jo2(t,'이','가')} 확인됐다.`;}
+function deskFlaws(d){const S0=d.subj||'해당 기관';const L=[];const fx=d.fx||[];
+  const nf=fx.find(f=>/\d/.test(f.t));if(nf){const tm=/\d+\s*(개월|년|일|세|시간|주|분|차|회)/.test(nf.t);const bad=nf.t.replace(/(\d+)/,(m)=>String(tm?(+m+R(2,9)):+m*10));const fs=deskFactSent({t:bad,k:nf.k});L.push({t:fs,e:`취재 메모에는 "${nf.t}"${ro2(nf.t).slice(nf.t.length)} 적혀 있다. 숫자를 옮겨 적다 틀렸다.`,src:nf.t});}
+  const mo=pick([[2,30],[2,31],[4,31],[6,31],[9,31],[11,31]]);L.push({t:`${jo2(S0+' 측','은','는')} ${mo[0]}월 ${mo[1]}일까지 해명 자료를 내기로 했다.`,e:`${mo[0]}월에는 ${mo[1]}일이 없다.`});
+  {const a=R(4,9)*10,b=a+a/2;L.push({t:`관련 신고는 지난해 ${a}건에서 올해 ${b}건으로 ${a/2}% 늘었다.`,e:`${a}건에서 ${b}건이면 50% 증가다. 늘어난 건수를 퍼센트로 착각했다.`});}
+  {const n=R(3,6)*40;L.push({t:`응답자 ${n}명 중 ${n/4}명, 즉 3분의 1이 같은 경험을 했다고 답했다.`,e:`${n/4}/${n}은 4분의 1이다.`});}
+  L.push({t:`${jo2(S0+' 측','은','는')} 공식적으로 침묵하고 있지만 사실상 의혹을 인정한 것이다.`,e:'침묵을 인정으로 해석했다. 기자의 비약.'});
+  L.push({t:'이번 일은 사상 최악의 사태로 기록될 전망이다.',e:'근거 없는 최상급 표현. 무엇과 비교한 "사상 최악"인지 없다.'});
+  L.push({t:`제보자 D씨는 ${S0}에서 3년째 ${pick(['총무 일을','회계 일을','시설 관리를','실무를'])} 맡고 있다.`,e:'제보자 신원 노출. 취재원 보호 원칙 위반.'});
+  L.push({t:'한 관계자는 "이제 어떻해요"라며 한숨을 쉬었다.',e:'"어떻해요"는 틀린 표기. "어떡해요"가 맞다.'});
+  L.push({t:`관련 손실은 약 ${R(2,9)*10}여억 원으로 추산된다.`,e:'"약"과 "여"를 겹쳐 썼다. 둘 중 하나만.'});
+  L.push({t:'이는 본지가 국내 최초로 확인한 사실이다.',e:'확인할 수 없는 "최초" 주장. 근거 없는 과장.'});
+  return [L[0]].concat(shuffle(L.slice(1)));}
+function deskSents(d,nb,nok){const S0=d.subj||'해당 기관';const fx=(d.fx&&d.fx.length?d.fx:[{t:d.f0,k:'d'}]);
+  const FL=deskFlaws(d).slice(0,nb);const srcT=(FL.find(x=>x.src)||{}).src;
+  const ok=[`${jo2(S0,'을','를')} 둘러싼 의혹이 본지 취재로 확인됐다.`].concat(fx.filter(f=>f.t!==srcT).slice(0,3).map(deskFactSent),[`${jo2(S0+' 측','은','는')} ${qGo(pick(['사실관계를 확인 중','절차에 따라 진행했다','일부 사실과 다르다']))} 해명했다.`,pick([`관계 당국은 다음 주 조사 결과를 발표할 예정이다.`,`본지는 ${S0} 측에 여러 차례 입장을 물었으나 답변을 받지 못했다.`,'관계 부처는 실태 조사에 착수했다고 밝혔다.'])]);
+  const okS=ok.slice(0,1).concat(shuffle(ok.slice(1))).slice(0,nok).map(t=>({t,bad:0}));
+  const badS=FL.map(f=>({t:f.t,e:f.e,bad:1}));
+  return {ss:[okS[0]].concat(shuffle(okS.slice(1).concat(badS))),bad:badS};}
+function deskHeads(d){const fx=d.fx||[];const q=(fx.map(f=>/"([^"]{2,24})"/.exec(f.t)).find(Boolean)||[])[1];const n=(fx.find(f=>f.k==='n')||{}).t;const fill=x=>x.replace(/\{T\}/g,d.t).replace(/\{S\}/g,d.subj||'당국').replace(/\{R\}/g,'사실과 다르다').replace(/\{N\}/g,n||'').replace(/\{Q\}/g,q||'');
+  const ok=x=>!(/\{N\}/.test(x)&&!n)&&!(/\{Q\}/.test(x)&&!q);
+  const g=fill(pick(HEAD.honest.filter(x=>x!=='{T}'&&ok(x))));return {good:(d.excl&&!/^\[단독\]/.test(g)?'[단독] ':'')+g,hype:fill(pick(HEAD.bait)),dull:fill(pick(HEAD.calm.filter(ok)))};}
 function bjDeskOn(){return !!(S&&S.phase==='game'&&!S.founder&&!S.story&&S.rank===3&&!isRegD(S.dept)&&(S.team||[]).length);}
 const DESK_HYPE=['[충격] ','[경악] ','"믿을 수 없다"… '],DESK_DULL=[' 관련 문제 제기',' 논란 일어',' 지적 나와'];
 function bjDraft(){const T=S.team||[];const m=T.length?pick(T):{name:rname(),skill:50};const it=makeItem(S.dept);const sk=m.skill||50;
-  return {id:uid(),w:m.name,role:m.r>=1?'desk':'peer',rel:m.rel??20,sk,t:it.title,d:it.d,subj:(it.subj||'').replace(/ 측$/,''),imp:it.imp,excl:!!it.excl,f0:(it.facts[0]||{t:'관계자 확인'}).t,q:clamp(Math.round(sk*.62+R(4,26)),25,85),fl:clamp(3-Math.floor((sk-35)/22)+(chance(.3)?1:0),1,S.simple?2:3),due:S.turn+R(2,4),back:0,base:it.base};}
-function bjEnsure(){if(!bjDeskOn())return;S.dq=S.dq||[];S.deskM=S.deskM||{n:0,q:0,top:0,err:0};if(S.dqT==null||S.turn-S.dqT>=2){S.dqT=S.turn;const want=clamp(Math.ceil((S.team||[]).length*.6),2,4);while(S.dq.length<want)S.dq.push(bjDraft());}}
+  return {id:uid(),w:m.name,role:m.r>=1?'desk':'peer',rel:m.rel??20,sk,t:it.title,d:it.d,subj:(it.subj||'').replace(/ 측$/,''),imp:it.imp,excl:!!it.excl,f0:(it.facts[0]||{t:'관계자 확인'}).t,fx:it.facts.map(f=>({t:f.t,k:f.k})),q:clamp(Math.round(sk*.62+R(4,26)),25,85),fl:clamp(3-Math.floor((sk-35)/22)+(chance(.3)?1:0),1,S.simple?2:3),due:S.turn+R(2,4),back:0,base:it.base};}
+function bjEnsure(){if(!bjDeskOn())return;S.dq=S.dq||[];S.deskM=S.deskM||{n:0,q:0,top:0,err:0};if(S.dqT==null||S.turn-S.dqT>=2){S.dqT=S.turn;const want=clamp(Math.ceil((S.team||[]).length*.6),2,4);let g=0;while(S.dq.length<want&&g++<12){const nd=bjDraft();if(S.dq.some(x=>x.t===nd.t||fBase(x.t)===fBase(nd.t)))continue;S.dq.push(nd);}}}
 function deskClip(d,q,head,place){const o=OUT();const it={d:d.d};const pl=place||placeOf(q,d.imp,it);const views=Math.round(q*d.imp*(o.p+1)*R(6,10)/10);
   const clip={h:head,o:o.n,d:d.d,q,imp:d.imp,excl:d.excl,date:dateShort(),turn:S.turn,views,lead:`${d.f0}.`,by:d.w+' 기자',staff:1,desk:S.name,place:pl.n,portal:clamp(Math.round(32-views/1800),1,30),base:d.base};
   S.clips.unshift(clip);if(S.clips.length>60)S.clips.pop();if(/1면|톱|첫 꼭지/.test(pl.n||''))S.deskM.top=(S.deskM.top||0)+1;return clip;}
@@ -2892,14 +2924,13 @@ function bjDeskQuick(){const Q=S.dq.slice().sort((a,b)=>a.due-b.due).slice(0,2);
     if(miss&&chance(.06*miss*DF().risk))S.pending.push({type:'err',title:`${d.w} 기자의 「${d.t}」`,due:S.turn+R(1,3),desk:1});
     lines.push(`<li class="${miss?'':'g'}">${esc(d.w)} · 「${esc(d.t)}」 → 완성도 ${d.q}→${q} · ${esc(c.place||'')}${miss?` · 놓친 문제 ${miss}곳`:''}</li>`);});
   const t=apply({eval:.5,kno:.2});openModal('빠른 데스킹 결과',`<ul class="feed">${lines.join('')}</ul><p class="hint">빨리 넘기면 시간은 벌지만 후배는 덜 큰다.</p>${fxLine(t)}`);}
-function bjDeskFull(d){const nb=d.fl,nok=S.simple?3:4;const ok=shuffle(cleanFor(cat1(d.d),d.subj)).slice(0,nok-1).map(t=>({t,bad:0})).concat([{t:`취재팀 확인 결과, ${d.f0}.`,bad:0}]);
-  const bad=flawFor(d.subj).slice(0,nb).map(f=>({t:f.t,e:f.e,bad:1}));const ss=shuffle(ok.concat(bad));
+function bjDeskFull(d){const nb=d.fl,nok=S.simple?3:4;const DS=deskSents(d,nb,nok);const bad=DS.bad,ss=DS.ss;
   openModal(`데스킹 1/3 · ${d.w} 기자 초고`,`<p class="lede">「${esc(d.t)}」 · 초고 완성도 ${d.q}</p><p>문제가 있는 문장 <b>${nb}개</b>를 골라 지워라. 멀쩡한 문장을 자르면 후배가 상처받는다.</p>${ss.map((x,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(x.t)}</button>`).join('')}`,[{label:'다음: 제목',fn:()=>{
     const sel=[...document.querySelectorAll('#mb .sent')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>+b.dataset.i);let hit=0,fal=0;sel.forEach(i=>ss[i].bad?hit++:fal++);const miss=bad.length-hit;
     const fb=bad.map(b=>`<li class="${sel.includes(ss.indexOf(b))?'g':'r'}">${esc(b.t)}<br><small>${esc(b.e)}</small></li>`).join('');
     bjDeskHead(d,{hit,fal,miss,fb});return false;}},{label:'그만두기',cls:'ghost'}]);
   document.querySelectorAll('#mb .sent').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true'));}
-function bjDeskHead(d,r){const good=(d.excl?'[단독] ':'')+d.t+(d.excl?' — 내부 문건 확인':'…취재로 확인');const hype=pick(DESK_HYPE)+d.t+'!';const dull=(d.subj||'관련 기관')+pick(DESK_DULL);
+function bjDeskHead(d,r){const HH=deskHeads(d);const good=HH.good,hype=HH.hype,dull=HH.dull;
   const H=shuffle([{t:good,k:'good'},{t:hype,k:'hype'},{t:dull,k:'dull'}]);
   openModal('데스킹 2/3 · 제목 달기',`<ul class="feed">${r.fb}</ul><p>${r.miss?`놓친 문제 문장 ${r.miss}곳.`:r.fal?'멀쩡한 문장까지 잘랐다.':'문장 손질은 깔끔했다.'} 이제 제목을 정한다.</p>`,H.map(h=>({label:h.t,sub:'',fn:()=>{bjDeskFin(d,r,h);return false;}})));}
 function bjDeskFin(d,r,h){const hb={good:6,hype:3,dull:-2}[h.k];const q=clamp(Math.round(d.q+r.hit*6-r.miss*8-r.fal*3+hb+(S.st.wri||40)/20),15,95);
@@ -2922,9 +2953,7 @@ RUN.desk=function(){if(bjDeskOn())return bjDeskOpen();
   spend(1,4);
   const it=makeItem(S.rank>=4?pick(Object.keys(DEPTS)):S.dept);
   const subj=(it.subj||'').replace(/ 측$/,'');const nb=S.simple?1:S.rank>=4?3:2;const nok=S.simple?3:S.rank>=4?4:3;
-  const ok=shuffle(cleanFor(cat1(it.d),subj)).slice(0,nok-1).map(t=>({t,bad:0})).concat([{t:`취재팀 확인 결과, ${it.facts[0].t}.`,bad:0}]);
-  const bad=flawFor(subj).slice(0,nb).map(f=>({t:f.t,e:f.e,bad:1}));
-  const ss=shuffle(ok.concat(bad));const writer=S.team.length?pick(S.team).name:rname();
+  const DS=deskSents({subj,t:it.title,fx:it.facts.map(f=>({t:f.t,k:f.k})),f0:(it.facts[0]||{t:''}).t},nb,nok);const bad=DS.bad,ss=DS.ss;const writer=S.team.length?pick(S.team).name:rname();
   openModal(`데스킹 · ${writer} 기자 초고`,`<p class="lede">「${esc(it.title)}」 초고다. 문제가 있는 문장 ${nb}개를 골라 지워라.</p>${ss.map((s,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(s.t)}</button>`).join('')}`,[{label:'데스킹 완료',fn:()=>{
     const sel=[...document.querySelectorAll('#mb .sent')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>+b.dataset.i);
     let hit=0,fal=0;sel.forEach(i=>ss[i].bad?hit++:fal++);
@@ -2982,7 +3011,7 @@ function hireBoard(kind,keep){const o=OUT();const B=keep&&S.hb&&S.hb.kind===kind
      got.forEach(c=>{log(`${kind==='new'?'수습기자':'경력'} 채용: ${c.name}${c.from?` (${c.from.n})`:''}`);if(c.from)tick(`${c.from.n} ${c.name} 기자, ${o.n}로 이적`);});
      openModal('채용 결과',`<p class="lede">${got.length?`${got.map(c=>esc(c.name)).join(', ')} 입사 확정.`:'아무도 오지 않았다.'}</p>${no.length?`<p>${no.map(c=>esc(c.name)).join(', ')}은(는) "지금 회사에 남겠다"며 거절했다.${S.rank===3?' (국장 결재에서 막힌 건도 있다)':''}</p>`:''}${got.some(c=>c.flaw)?'<p class="hint">평판 조회에 걸렸던 사람이 있다. 시간이 지나면 드러날 수도 있다.</p>':''}`);return false;}},
    {label:'면접을 한 번 더 본다',sub:'행동력 1 · 추정 범위가 좁아지고 숨은 흠이 보인다',disabled:B.round>=2||S.ap<1,fn:()=>{spend(1,2);B.round++;hireBoard(kind,true);return false;}},
-   {label:'후보를 새로 받는다',sub:'지금 명단을 버린다',fn:()=>{hireBoard(kind);return false;}},
+   {label:'후보를 새로 받는다',sub:S.hbRm===Math.floor(S.turn/4)?'이번 달엔 새 명단을 더 받을 수 없다':'지금 명단을 버린다 · 한 달에 한 번',disabled:S.hbRm===Math.floor(S.turn/4),fn:()=>{S.hbRm=Math.floor(S.turn/4);hireBoard(kind);return false;}},
    {label:'닫기',cls:'ghost'}]);}
 
 function candidates(){return [0,1,2].map(()=>{const from=pick(OUTLETS.filter(o=>o.id!==S.outlet));return{name:rname(),from,d:pick(from.depts),skill:R(45,85),ask:R(4,9)};});}
@@ -3248,7 +3277,7 @@ function initNet(old){
   ENTS.forEach(([id,n,kind])=>{const tr0=entTrait(id);const base=(tr0.very?-5:0)+R(-5,15)+(kind==='gov'&&o.p>=4?8:0)+(kind==='corp'&&o.p>=4?6:0)+(lb[id]||0)+(kind==='corp'?(lb.corp||0):0)+(REGIONS[o.id]&&['city','lcouncil','lcon','lbank','pr_mayor','pr_mp','pr_boss'].includes(id)?10:0);const prev=old&&old[id];const same=prev&&prev.who&&prev.nm===n;net[id]={rel:prev?Math.round(base+(prev.rel-base)*.5):base,cut:0,block:0,who:kind==='person'?(same?prev.who:rname()):null,nm:n,known:false};if(same){net[id].tEnd=prev.tEnd;net[id].tN=prev.tN;}});
   S.net=net;knowInit();if(old)ENTS.forEach(([id])=>{if(old[id]&&old[id].known&&ENT[id]&&ENT[id].kind==='person'&&chance(.5))S.net[id].known=true;});
 }
-const entName=id=>{const e=ENT[id];const st=S.net&&S.net[id];return e.kind==='person'&&st&&st.who?`${e.n} ${st.who}`:e.n;};
+const entName=id=>{const e=ENT[id];if(!e)return '관계 기관';const st=S.net&&S.net[id];return e.kind==='person'&&st&&st.who?`${e.n} ${st.who}`:e.n;};
 const netRel=id=>(S.net&&S.net[id])?S.net[id].rel:0;
 // 5.7 아이템이 어느 기관·업체 이야기인지, 그쪽과 내 관계
 function itEnt(it){const id=it&&it.ent;if(!id||!ENT[id])return null;const e=S.net&&S.net[id];return {id,n:entName(id),k:({gov:'정부·기관',party:'정당',corp:'기업',person:'인물'})[ENT[id].kind]||'',rel:e?Math.round(e.rel):0,known:!!(e&&e.known),block:!!(e&&e.block),cut:!!(e&&e.cut),ad:!!ENT[id].w};}
@@ -4125,6 +4154,8 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.2','숨 고르기',[
+  '수정|채용 후보 명단을 공짜로 무한히 새로 받을 수 있던 문제: 이제 한 달에 한 번만 새로 받는다',
+  '수정|데스킹 초고가 기사 주제와 상관없는 문장(보이스피싱 기사에 교육청 일정, 정치 기사에 환율 계산 등)으로 채워지던 문제: 이제 초고는 그 기사의 증언·문건·현장 사실과 상대 해명으로 짓고, 문제 문장도 그 기사 안에서 나온다(취재 메모와 다른 숫자, 없는 날짜, 침묵을 인정으로 해석, 제보자 신원 노출 등). 어색했던 제목 후보와 조사("민원는") 오류도 고쳤다',
   '주요|취재 개편 — 단서가 단서를 부른다: 사실을 확인하면 가끔 새 단서(결재란의 이름, "그날 트럭이 들어왔다"는 말, 돈이 흘러간 업체…)가 나오고, 단서를 따라가면 다른 경로로 확인한 것으로 인정된다',
   '주요|취재 개편 — 막혀도 다른 길: 전화를 안 받으면 집 앞 뻗치기, 현장이 막히면 밤에 다시 가거나 근처 CCTV를 부탁하는 식으로 실패한 자리에서 새 선택지가 열린다',
   '주요|취재 개편 — 상대의 반격: 취재가 깊어지면 상대도 움직인다. 증거 인멸, 선제 해명 보도자료, 변호사 내용증명, 취재원 입막음에 어떻게 맞설지 고른다. 내용증명을 받고 반론 없이 쓰면 소송이 걸릴 수 있다',
