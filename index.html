@@ -820,6 +820,9 @@ b,strong{font-weight:600}
 .arch{display:flex;justify-content:space-between;font-size:12px;color:#ff8f8f;margin:-4px 0 8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
 @media (prefers-reduced-motion:reduce){.arcc.big{animation:none}}
 .nvo{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:10px 0}.nvo button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;border:1px solid var(--line);border-radius:12px;background:var(--card,transparent);color:inherit;font:inherit;font-size:12px;cursor:pointer;min-height:56px}.nvo button i{display:inline-flex;width:20px;height:20px}.nvo button i svg{width:20px;height:20px}.nvo button[aria-pressed="true"]{border-color:var(--acc,#ffcf5a);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc,#ffcf5a) 40%,transparent)}
+.invnb{border:1px dashed var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:13px}.invnb .t{font-weight:700;margin-bottom:4px}.invnb ul{margin:0;padding-left:16px}.invnb li{margin:2px 0;line-height:1.45}.invnb b{color:var(--siren);margin-right:4px;font-weight:600}
+.clip .cq{margin:6px 0 4px;padding-left:10px;border-left:3px solid var(--siren);font-style:italic;font-size:13px;line-height:1.5}.clip .cq small{font-style:normal;opacity:.7}
+.paperv .pvq{position:absolute;font-style:normal;font-family:'Noto Serif KR','Noto Serif CJK KR',serif;font-size:clamp(9px,2.6vw,13px);color:#2b2b2b;text-align:center;line-height:1.35;padding:.25em .4em;background:#f1ead9;border-radius:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 </style>
 
 <div class="wrap">
@@ -2488,77 +2491,155 @@ function mChance(it,m,f){
   p*=({S:.82,A:.9,B:1,C:1.08}[gradeOf(it)]||1);
   if(it.alert>=60&&['docs','ask','call'].includes(m))p*=.65;
   const er=netRel(it.ent);if(['call','docs','ask'].includes(m))p+=clamp(er,-40,60)/320;if(m==='docs'&&S.net&&S.net[it.ent]&&S.net[it.ent].block)p*=.35;if(m==='data'&&hasF('data'))p+=.08;if(m==='scene'&&S.gear&&S.gear.camera)p+=.1;if(['call','ask'].includes(m)&&S.gear&&S.gear.rec)p+=.04;if(m==='data'&&S.gear&&S.gear.tablet)p+=.05;
+  if(M.dept)p+=.06;p+=(medInv().meth||{})[m]||0;if(it.gag&&['call','docs'].includes(m))p*=.85;p+=it.nb||0;
   if(f.key&&f.via.includes(M.n))p*=.55;
   p*=DF().ver;if(it.hoax)p=.03;return clamp(p,.03,.93);
 }
+// ===================== 6.2 취재 개편: 단서 사슬 · 다른 길 · 상대의 반격 · 부서 기법 =====================
+// 부서마다 그 부서 기자만 쓰는 취재 기법이 하나씩 있다
+const DEPT_METH={court:'record',case:'night',soc:'night',nat:'night',inv:'stake',pol:'hall',city:'hall',diplo:'wire',int:'wire',eco:'filing',ind:'filing',fin:'filing',stock:'filing',estate:'filing',it:'filing',med:'insider',edu:'insider',cul:'agency',culspo:'agency',ent:'agency',spo:'locker',base:'locker',foot:'locker',sigun:'native',loc:'native'};
+Object.assign(METH,{
+ record:{n:'공소장·판결문 열람',t:1,k:['d','n'],st:()=>S.st.ver*.5+S.st.kno*.5,al:1,d:'법조 기자의 무기. 재판 기록은 거짓말을 안 한다',dept:1},
+ night:{n:'형사과 야간 취재',t:1,k:['w','d'],st:()=>S.st.net*.5+S.st.sta*.3+S.st.inv*.2,al:4,d:'밤 11시 형사과. 당직 형사가 입을 연다',dept:1,hp:3},
+ stake:{n:'장기 잠복·추적',t:2,k:['s','d'],st:()=>S.st.inv*.6+S.st.sta*.4,al:-2,d:'며칠을 붙어 있는다. 상대는 모른다',dept:1,hp:8},
+ hall:{n:'국회 복도 뻗치기',t:1,k:['w'],st:()=>S.st.net*.5+S.st.cha*.5,al:5,d:'회의장 앞에서 기다렸다가 붙잡는다',dept:1},
+ wire:{n:'외교가·현지 통신원',t:1,k:['w','d'],st:()=>(S.st.lng||40)*.5+S.st.net*.5,al:2,d:'대사관 인맥과 현지 통신원에게 묻는다',dept:1},
+ filing:{n:'공시·등기부 대조',t:1,k:['n','d'],st:()=>S.st.dat*.6+S.st.kno*.4,al:0,d:'공시·등기부·감사보고서를 맞춰 본다',dept:1},
+ insider:{n:'현직자 단체방',t:1,k:['w'],st:()=>S.st.net*.6+S.st.cha*.4,al:3,d:'의사·교사 현직자 단체방에서 증언을 모은다',dept:1},
+ agency:{n:'업계 관계자 술자리',t:1,k:['w'],st:()=>S.st.net*.5+S.st.cha*.5,al:3,d:'소속사·제작사 사람들의 뒷이야기',dept:1,money:3},
+ locker:{n:'라커룸·에이전트',t:1,k:['w','s'],st:()=>S.st.net*.5+S.st.spd*.5,al:4,d:'경기 뒤 믹스트존과 에이전트 전화',dept:1},
+ native:{n:'토박이 인맥',t:1,k:['w','s'],st:()=>S.st.net*.4+S.st.cha*.6,al:2,d:'이장님, 다방 사장님, 동창회장',dept:1}
+});
+Object.assign(SUCC,{record:'재판 기록에서 확인:',night:'당직 형사에게서 확인:',stake:'잠복 끝에 포착:',hall:'복도에서 붙잡아 확인:',wire:'현지 취재로 확인:',filing:'공시 대조로 확인:',insider:'현직자 증언 확보:',agency:'업계 관계자에게서 확인:',locker:'라커룸에서 확인:',native:'토박이에게서 확인:'});
+Object.assign(FAILS,{record:['열람 신청이 반려됐다. 비공개 재판이다.','기록 어디에도 그 이름은 없다.'],night:['"오늘은 안 돼. 위에서 입단속 들어왔어."','당직 형사가 바뀌었다. 처음 보는 얼굴이다.'],stake:['사흘을 기다렸지만 아무도 나타나지 않았다.','들킨 것 같다. 차가 갑자기 방향을 틀었다.'],hall:['의원은 다른 문으로 빠져나갔다.','"기자님, 지금은 말 못 해요." 엘리베이터 문이 닫혔다.'],wire:['통신원이 연락이 닿지 않는다. 현지는 휴일이다.','대사관은 "확인해 줄 수 없다"는 말만 반복했다.'],filing:['공시에는 깨끗하게 정리돼 있다.','등기부상 대표가 이미 바뀌어 있었다.'],insider:['단체방이 조용하다. 누가 캡처를 돌렸다는 소문이 돌았다.','"이거 말하면 저 바로 찍혀요."'],agency:['술만 마시고 들은 건 소문뿐이다.','"그 얘기는 우리 바닥에서 금기예요."'],locker:['믹스트존에서 선수가 고개만 숙이고 지나갔다.','에이전트가 "노코멘트"를 세 번 말했다.'],native:['"외지 기자한테 할 말 없어."','이장님은 그날 읍내에 나가 계셨다.']});
+// 단서: 확인한 사실이 다음 길을 연다
+const LEAD_T={
+ d:[['결재란에 찍힌 이름','결재자를 직접 찾아간다',['w','s'],'결재 문서'],['문건 속 회의록 날짜','그날 참석자를 찾는다',['w'],'회의록'],['첨부된 계약서 번호','계약 당사자를 추적한다',['n','d'],'계약서']],
+ w:[['"그날 밤 트럭이 들어왔다"는 말','근처 CCTV를 찾아본다',['s','d'],'목격 증언'],['"나 말고 본 사람이 또 있다"','다른 목격자를 찾아간다',['w'],'첫 증언'],['증언 속 "윗선"이라는 말','윗선을 거슬러 올라간다',['d','w'],'내부 증언']],
+ n:[['돈이 흘러간 업체 이름','그 업체의 등기부를 뗀다',['d','n'],'자금 흐름표'],['해마다 튀는 숫자 하나','그해 담당자를 찾는다',['w'],'통계 이상치']],
+ s:[['현장에서 마주친 전직 직원','그 사람과 따로 만난다',['w'],'현장 사진'],['현장에 버려진 서류 더미','서류를 주워 대조한다',['d'],'현장 증거']]
+};
+function leadMake(it,f){if(!f||!LEAD_T[f.k])return null;it.leads=it.leads||[];if(it.leads.length>=2)return null;if(!chance(.36+(f.key?.14:0)))return null;
+  const L=pick(LEAD_T[f.k]);if(it.leads.some(x=>x.t===L[0]))return null;const o={id:uid(),t:L[0],act:L[1],k:L[2],ev:L[3]};it.leads.push(o);return o;}
+function leadTarget(it,L){const un=it.facts.filter(f=>!fOK(f));if(!un.length)return null;const m=un.filter(f=>L.k.includes(f.k));const pool=m.length?m:un;return pool.find(f=>f.key)||pool[0];}
+function leadChance(it){return clamp(.44+S.st.inv/400+({S:-.1,A:-.05,C:.05}[gradeOf(it)]||0)+(it.gag?-.08:0),.25,.9)*(DF().ver||1);}
+// 상대의 반격: 경계가 높아지면 상대도 움직인다
+const CTR={
+ wipe:{n:'증거 인멸 조짐',d:it=>`${esc(it.subj)} 쪽에서 서류를 파쇄하고 하드디스크를 바꿨다는 말이 들린다.`,o:[
+   {l:'먼저 손쓴다 — 증거부터 확보',s:'시간 1칸 · 성공하면 피해 없음',need:1,fn:(it,T,f)=>{T.left-=1;if(chance(.55+S.st.inv/400)){T.lines.push({c:'g',t:'한발 앞서 사본을 확보했다. 인멸 전에 막았다.'});return;}if(f){f.need=Math.min(3,f.need+1);T.lines.push({c:'r',t:`늦었다. 「${f.t}」 확인이 더 어려워졌다.`});}}},
+   {l:'그대로 취재를 이어 간다',s:'확인이 한 단계 어려워진다',fn:(it,T,f)=>{if(f){f.need=Math.min(3,f.need+1);T.lines.push({c:'r',t:`증거가 사라졌다. 「${f.t}」을 다른 경로로 한 번 더 확인해야 한다.`});}}}]},
+ pr:{n:'선제 해명 보도자료',d:it=>`${esc(it.subj)}이(가) 기사도 나오기 전에 "일부 언론의 의혹 제기는 사실과 다르다"는 해명 보도자료를 뿌렸다.`,o:[
+   {l:'해명의 허점을 판다',s:'경계↑ · 기사 완성도↑',fn:(it,T)=>{it.alert=clamp(it.alert+5,0,100);it.prR=1;T.lines.push({c:'g',t:'해명 자료에서 앞뒤가 안 맞는 대목을 찾았다. 기사에 쓸 수 있다.'});}},
+   {l:'서둘러 쓰기로 한다',s:'타사 추격이 빨라지지만 파급력은 지킨다',fn:(it,T)=>{it.heat=Math.max(1,(it.heat||3)-1);T.lines.push({c:'s',t:'해명이 먼저 나가 타사도 냄새를 맡았다. 서둘러야 한다.'});}},
+   {l:'무시한다',s:'파급력↓',fn:(it,T)=>{it.imp=Math.max(10,Math.round(it.imp*.9));T.lines.push({c:'r',t:'해명이 먼저 퍼져 기사의 힘이 빠졌다.'});}}]},
+ law:{n:'변호사 내용증명',d:it=>`${esc(it.subj)} 측 법무법인에서 "보도 시 민형사상 책임을 묻겠다"는 내용증명이 왔다.`,o:[
+   {l:'법무팀 검토를 받는다',s:'소송 위험↓ · 시간 1칸',need:1,fn:(it,T)=>{T.left-=1;it.lawyer=.4;T.lines.push({c:'g',t:'법무팀이 문제 될 표현을 미리 짚어 줬다.'});}},
+   {l:'반론을 꼭 받아 두기로 한다',s:'반론을 받으면 소송 위험이 사라진다',fn:(it,T)=>{it.lawyer=1;T.lines.push({c:'s',t:'반론 없이 쓰면 소송이 걸릴 수 있다.'});}}]},
+ gag:{n:'취재원 입막음',d:it=>`${esc(it.subj)} 쪽이 내부 직원들에게 "외부 접촉 금지" 공지를 돌렸다. 내 취재원이 겁을 먹었다.`,o:[
+   {l:'취재원을 찾아가 안심시킨다',s:'시간 1칸 · 취재원 신뢰 유지',need:1,fn:(it,T)=>{T.left-=1;const s=srcOf(it.d);if(s)s.trust=clamp(s.trust+4,0,100);T.lines.push({c:'g',t:'"기자님 믿을게요." 취재원이 다시 마음을 열었다.'});}},
+   {l:'새 취재원을 찾는다',s:'운이 좋으면 새 취재원 · 기존 취재원은 멀어진다',fn:(it,T)=>{it.gag=1;const s=srcOf(it.d);if(s)s.trust=clamp(s.trust-10,0,100);if(chance(.45)){const n=addSource(it.d,R(15,30));T.lines.push({c:'g',t:`새 취재원을 뚫었다: ${n.name} ${n.role}`});}else T.lines.push({c:'r',t:'새 사람도 입을 닫았다.'});}},
+   {l:'그냥 둔다',s:'전화·문건 확인이 어려워진다',fn:(it,T)=>{it.gag=1;const s=srcOf(it.d);if(s)s.trust=clamp(s.trust-12,0,100);T.lines.push({c:'r',t:'취재원이 전화를 받지 않는다.'});}}]}
+};
+function ctrPick(it){const L=[];if(it.facts.some(f=>!fOK(f)&&(f.k==='d'||f.k==='s')))L.push('wipe');L.push('pr');if(!it.lawyer)L.push('law');if(!it.gag&&(S.sources||[]).some(s=>s.d===it.d))L.push('gag');return pick(L);}
+function ctrShow(it,T,k,back){const C=CTR[k];const f=it.facts.find(x=>!fOK(x)&&(x.k==='d'||x.k==='s'))||it.facts.find(x=>!fOK(x));
+  if(T.auto){C.o[C.o.length-1].fn(it,T,f);return back();}
+  openModal(`상대의 반격 · ${C.n}`,`<p class="lede">${C.d(it)}</p><p class="hint">「${esc(it.title)}」 · 상대 경계 ${Math.round(it.alert)}</p>`,C.o.map(o=>({label:o.l,sub:o.s,disabled:!!o.need&&T.left<1,fn:()=>{o.fn(it,T,f);back();return false;}})));}
+// 실패해도 길은 있다
+const RETRY={
+ call:[['집 앞에서 기다린다 (뻗치기)','시간 1칸 · 컨디션↓ · 취재력이 높을수록 잘 된다',1,(it,T,f)=>{S.hp=clamp(S.hp-6,0,100);return chance(.4+S.st.inv/300)?'밤 11시, 퇴근하던 그가 결국 입을 열었다':null;},'뻗치기'],['문자로 질문을 남긴다','다음 확인이 쉬워진다',0,(it)=>{it.nb=(it.nb||0)+.12;return '';}]],
+ scene:[['밤에 다시 온다','시간 1칸 · 컨디션↓',1,(it,T,f)=>{S.hp=clamp(S.hp-6,0,100);return chance(.42+S.st.sta/300)?'인적 없는 밤, 셔터를 올리는 순간을 찍었다':null;},'야간 현장'],['근처 가게 CCTV를 부탁한다','운이 좋으면 새 단서',0,(it,T,f)=>{if(chance(.4)){it.leads=it.leads||[];if(it.leads.length<3)it.leads.push({id:uid(),t:'근처 편의점 CCTV 영상',act:'영상 속 차량 번호를 추적한다',k:['s','d'],ev:'CCTV 영상'});return '편의점 사장님이 영상을 보여 줬다. 새 단서가 생겼다.';}return '"경찰 아니면 못 보여 줘요."';}]],
+ ask:[['다른 사람을 소개받는다','새 취재원이나 단서가 생길 수 있다',0,(it)=>{if(chance(.45)){const s=addSource(it.d,R(12,25));return `"저 말고 ${s.role} 쪽에 물어봐요." 새 취재원: ${s.name}`;}return '소개받은 사람도 고개를 저었다.';}],['한 번 더 찾아간다','시간 1칸 · 진심이 통할 수도',1,(it)=>chance(.38+S.st.cha/300)?'세 번째 찾아가자 결국 문을 열어 줬다':null,'재방문']],
+ docs:[['정보공개청구로 돌린다','시간 없이 청구 · 2~4주 뒤 결과',0,(it)=>{if(S.pending.some(p=>p.type==='foi'&&p.item===it.id))return '이미 청구 중이다.';S.pending.push({type:'foi',item:it.id,due:S.turn+R(2,4)});return '정보공개청구서를 냈다.';}],['다른 부서 사람을 통해 구한다','시간 1칸',1,(it)=>chance(.36+S.st.net/300)?'옆 부서 직원이 조용히 파일을 건넸다':null,'우회 입수']],
+ data:[['기준을 맞춰 다시 계산한다','시간 1칸 · 데이터 능력에 달렸다',1,(it)=>chance(.4+S.st.dat/250)?'기준 연도를 맞추자 숫자가 맞아떨어졌다':null,'재분석']]
+};
+function retryShow(m,it,T,f,back){const L=RETRY[m]||[['한 번 더 파고든다','시간 1칸',1,(it)=>chance(.4+S.st.inv/300)?'끈질기게 파고든 끝에 확인했다':null,'재취재']];
+  openModal('다른 길',`<p class="lede">「${esc(f.t)}」 확인이 막혔다. 다른 길이 있을까.</p><p class="hint">남은 시간 ${T.left}칸</p>`,L.map(([l,s,cost,fn,via])=>({label:l,sub:s,disabled:cost>T.left,fn:()=>{T.left-=cost;const r=fn(it,T,f);if(r===null)T.lines.push({c:'r',t:`${f.t} — 이번에도 실패했다.`});else if(via){f.conf++;f.via.push(via);T.lines.push({c:'g',t:`${r}: ${f.t}`});leadMake(it,f);}else if(r)T.lines.push({c:'s',t:r});back();return false;}})).concat([{label:'접는다',cls:'ghost',fn:()=>{back();return false;}}]));}
+// 인터뷰 심리전: 경계심(입을 닫는 정도)과 동요(흔들리는 정도). 증거는 꺼내는 타이밍이 중요하다
+function ivCards(it){const C=[];it.facts.filter(f=>fOK(f)&&f.k!=='w').slice(0,3).forEach(f=>C.push({id:'f'+it.facts.indexOf(f),n:`[${FK[f.k]}] ${f.t}`,key:f.key}));(it.leads||[]).filter(l=>l.ev).slice(0,2).forEach(l=>C.push({id:'l'+l.id,n:`[단서] ${l.ev}`,key:false}));return C.filter(c=>!(it.usedEv||[]).includes(c.id));}
+function interview(it,T,back){
+  it.interviewed=1;const recB=S.gear&&S.gear.rec?.08:0;const nOK=it.facts.filter(fOK).length;
+  const I={g:clamp(45+it.alert*.35-netRel(it.ent)/6+R(-10,10)-(S.gear&&S.gear.suit?6:0),10,95),s:clamp(12+nOK*7+R(-5,5),5,60),r:0,max:3,lines:[]};
+  const slip=()=>{const tg=it.facts.find(f=>f.key&&!fOK(f))||it.facts.find(f=>f.k==='w'&&!fOK(f))||it.facts.find(f=>!fOK(f));if(tg){tg.conf++;tg.via.push('당사자 발언');}const q=pick(IVL.slip);it.tape=1;if(!it.quote)it.quote=q.replace(/^"|"$/g,'');ach('tape');I.lines.push({c:'g',t:q});return tg;};
+  const end=(why)=>{T.lines.push({c:'q',t:`인터뷰 종료 — ${why}`});if(it.quote)T.lines.push({c:'g',t:`녹취 확보: "${it.quote}"`});it.alert=clamp(it.alert+10,0,100);back();};
+  const meter=(n,v,c)=>`<div class="meter"><span>${n}</span><div class="bar"><i style="width:${v}%;--c:${c}"></i></div><span class="num">${Math.round(v)}</span></div>`;
+  const step=()=>{
+    if(I.r>=I.max){if(I.max===3&&I.s>=65){I.max=4;I.lines.push({c:'s',t:'상대의 손이 떨린다. 질문 하나를 더 던질 수 있을 것 같다.'});}else return end('질문을 다 했다');}
+    const cards=ivCards(it);
+    const body=`<p class="lede">${esc(it.subj)} 관계자와 마주 앉았다. ${I.r===0?'녹음기를 켰다.':''}</p>${meter('경계심',I.g,'var(--red)')}${meter('동요',I.s,'var(--siren)')}<ul class="feed">${I.lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul><p class="hint">질문 ${I.r+1}/${I.max} · 경계심이 높을 때 증거를 먼저 꺼내면 입을 닫는다. 동요가 클수록 증거가 잘 먹힌다.</p>`;
+    const go=(k,fn)=>()=>{I.r++;if(k)I.lines.push({c:'',t:'나: '+IVL.q[k]});fn();return false;};
+    const C=[
+      {label:'부드럽게 라포 쌓기',sub:'경계심↓ · 동요도 조금↓',fn:go('soft',()=>{I.g=clamp(I.g-(12+S.st.cha/10),0,100);I.s=clamp(I.s-4,0,100);gain('int',.15);I.lines.push({c:'q',t:pick(IVL.soften)});if(chance(.08))slip();step();})},
+      {label:'모르는 척 떠보기',sub:'동요↑ · 취재력이 높을수록 잘 걸린다',fn:go('probe',()=>{if(chance(.12+recB+S.st.int/280+(50-I.g)/260+I.s/400))slip();else I.lines.push({c:'r',t:pick(IVL.deny)});I.g=clamp(I.g+8,0,100);I.s=clamp(I.s+9,0,100);step();})},
+      {label:'침묵하며 기다리기',sub:'경계가 낮으면 상대가 침묵을 못 견딘다',fn:go('silence',()=>{if(I.g<50&&chance(.22+I.s/300))slip();else I.lines.push({c:'q',t:'"..."'});I.g=clamp(I.g-4,0,100);I.s=clamp(I.s+6,0,100);step();})}];
+    cards.forEach(cd=>C.push({label:`증거 내밀기 — ${cd.n}`,sub:I.r===0&&I.g>55?'지금 꺼내면 너무 이르다':`성공 ${pct(clamp(.3+I.s/200+(60-I.g)/250+recB+(cd.key?.1:0),.05,.9))}`,risk:I.r===0&&I.g>55,fn:go('press',()=>{(it.usedEv=it.usedEv||[]).push(cd.id);
+      if(I.r===1&&I.g>55){I.g=clamp(I.g+20,0,100);I.s=clamp(I.s+5,0,100);I.lines.push({c:'r',t:'너무 일찍 패를 깠다. 상대가 자세를 고쳐 앉는다.'});if(chance(.4)){I.lines.push({c:'r',t:pick(IVL.hang)});return end('상대가 자리를 박차고 나갔다');}return step();}
+      if(chance(clamp(.3+I.s/200+(60-I.g)/250+recB+(cd.key?.1:0),.05,.9))){const f=slip();if(f)I.lines.push({c:'g',t:'녹취로 확인: '+f.t});I.s=clamp(I.s+15,0,100);I.g=clamp(I.g+6,0,100);}
+      else{I.lines.push({c:'r',t:pick(IVL.deny)});I.s=clamp(I.s+10,0,100);I.g=clamp(I.g+8,0,100);}step();})}));
+    if(!cards.length)C.push({label:'증거 없이 몰아붙이기',sub:'증거가 없으면 끊길 수 있다',risk:true,fn:go('press',()=>{I.g=clamp(I.g+25,0,100);I.s=clamp(I.s+5,0,100);I.lines.push({c:'r',t:pick(IVL.deny)});if(I.g>78&&chance(.5)){I.lines.push({c:'r',t:pick(IVL.hang)});return end('상대가 일어났다');}step();})});
+    C.push({label:'반론 기회를 주고 마무리',sub:'반론을 확보하고 끝낸다',fn:go('rebut',()=>{it.rebut=I.g<85?'got':'no';I.lines.push({c:'q',t:pick(it.rebut==='got'?IVL.rebutGot:IVL.rebutNo)});end('반론을 듣고 일어났다');})});
+    openModal('당사자 인터뷰',body,C);
+  };
+  step();
+}
+
+// 취재 수첩: 확보한 녹취·증언·현장 사진은 기사와 지면에 그대로 쓰인다
+function invNote(it,f,m){if(f.k==='s'&&!it.photo)it.photo=f.t;if(f.k==='w'&&!it.wq){const mm=/(.{0,14}?)\s*"([^"]{4,40})"/.exec(f.t);if(mm)it.wq={who:mm[1].trim()||'관계자',q:mm[2]};}}
+function invNotebook(it){const L=[];if(it.quote)L.push(`<li><b>녹취</b> "${esc(it.quote)}"</li>`);if(it.wq)L.push(`<li><b>증언</b> ${esc(it.wq.who)} "${esc(it.wq.q)}"</li>`);if(it.photo)L.push(`<li><b>현장 사진</b> ${esc(it.photo)}</li>`);(it.leads||[]).forEach(l=>L.push(`<li><b>남은 단서</b> ${esc(l.t)} → ${esc(l.act)}</li>`));return L.length?`<div class="invnb"><div class="t">취재 수첩</div><ul>${L.join('')}</ul></div>`:'';}
+function clipQuote(c){return c.quote?`<p class="cq">“${esc(c.quote)}” <small>— ${esc(c.qsrc||'녹취')}</small></p>`:'';}
 function factList(it){return `<ul class="facts">${it.facts.map(f=>`<li class="${fOK(f)?'v':f.conf?'h':''}">${esc(f.t)} <small>[${FK[f.k]}${f.key?' · 핵심':''}] ${f.conf}/${f.need}${f.via.length?' · '+f.via.join(', '):''}</small></li>`).join('')}</ul>`;}
 function session(it){
   const fiv=freeInv()&&S._curAct==='invest';if(fiv)S.freeInvM=Math.floor(S.turn/4);
   const rkB=S.founder?1+(S.turn-(S.fStart||0)>=YW*3?1:0):(S.rank>=2?1:0)+(S.rank>=4?1:0);const gr0=gradeOf(it);if(gr0==='S'&&!S.simple)it.facts.forEach(f=>{if(f.key&&f.need<3)f.need=3;});
-  const grB={S:2,A:1}[gr0]||0;const T={left:3+(S.st.sta>=60?1:0)+rkB+grB,max:3+(S.st.sta>=60?1:0)+rkB+grB,lines:[]};
+  const grB=({S:2,A:1}[gr0]||0)+(medInv().slot||0);const T={left:Math.max(2,3+(S.st.sta>=60?1:0)+rkB+grB),max:Math.max(2,3+(S.st.sta>=60?1:0)+rkB+grB),lines:[]};
   spend(fiv?0:1,6);gain('inv',.3);S.scene='field';if(fiv)toast('출입처 정기 취재 — 이번 달 첫 취재는 행동력이 들지 않는다');
-  const alertUp=v=>{const b=it.alert;it.alert=clamp(it.alert+v*({S:1.4,A:1.2}[gradeOf(it)]||1),0,100);if(b<60&&it.alert>=60)T.lines.push({c:'r',t:`${it.subj} 측이 취재 사실을 눈치챘다. 문건 확보와 탐문이 어려워진다.`});};
+  const alertUp=v=>{const b=it.alert;it.alert=clamp(it.alert+v*({S:1.4,A:1.2}[gradeOf(it)]||1),0,100);if(b<60&&it.alert>=60)T.lines.push({c:'r',t:`${it.subj} 측이 취재 사실을 눈치챘다. 문건 확보와 탐문이 어려워진다.`});
+    const mx=S.simple?1:2;if((it.ctrN||0)<mx&&((b<30&&it.alert>=30)||(b<55&&it.alert>=55))&&chance(S.simple?.35:.65))T.ctrQ=ctrPick(it);};
+  const FM=m=>['call','docs','scene','ask','data'].includes(m)||!!(METH[m]&&METH[m].dept);
   const finish=()=>{
     if(it.hoax&&it.facts.every(f=>!fOK(f))&&T.max-T.left>=3&&chance(.5)){S.items=S.items.filter(x=>x!==it);log(`「${it.title}」은 허위 제보로 드러났다`);openModal('허위 제보',`<p class="lede">아무리 파도 근거가 없다. 최초 글쓴이는 계정을 지웠다. 쓰지 않은 게 다행이다.</p>${fxLine(apply({inv:.4,trust:1}))}`);return false;}
     if(it.dud&&!it.dudShown&&it.facts.some(fOK)&&chance(.65)){dudReveal(it);return false;}
     const bribe=!it.bribed&&it.alert>=50&&chance(.3);
-    openModal('편집국 복귀',`<p class="lede">「${esc(it.title)}」 취재를 마쳤다.</p><ul class="feed">${T.lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>${factList(it)}<p class="hint">반론: ${it.rebut==='got'?'받음':it.rebut==='no'?'노코멘트(요청 기록 있음)':'아직'} · 전문가 코멘트: ${it.expert?'있음':'없음'} · 녹취: ${it.tape?'있음':'없음'} · 상대 경계: ${Math.round(it.alert)}</p>`,
+    openModal('편집국 복귀',`<p class="lede">「${esc(it.title)}」 취재를 마쳤다.</p><ul class="feed">${T.lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>${factList(it)}${invNotebook(it)}<p class="hint">반론: ${it.rebut==='got'?'받음':it.rebut==='no'?'노코멘트(요청 기록 있음)':'아직'} · 전문가 코멘트: ${it.expert?'있음':'없음'} · 녹취: ${it.tape?'있음':'없음'} · 상대 경계: ${Math.round(it.alert)}${it.lawyer?' · 내용증명 받음':''}</p>`,
       bribe?[{label:'계속',fn:()=>{bribeEvent(it);return false;}}]:[]);
     return false;
   };
   const doM=m=>{
-    const M=METH[m];T.left-=M.t;alertUp(M.al);if(M.hp)S.hp=clamp(S.hp-M.hp,0,100);
+    const M=METH[m];T.left-=M.t;alertUp(M.al);if(M.hp)S.hp=clamp(S.hp-M.hp,0,100);if(M.money)S.money-=M.money;
     if(m==='foi'){S.pending.push({type:'foi',item:it.id,due:S.turn+R(2,4)});T.lines.push({c:'s',t:'정보공개청구서를 냈다. 2~4주 뒤 결과가 나온다.'});gain('kno',.2);return draw();}
     if(m==='expert'){it.expert=1;T.lines.push({c:'g',t:`${pick(['교수','변호사','회계사','전직 감독관'])} 자문: "${pick(['구조적인 문제입니다.','법 위반 소지가 큽니다.','이 정도면 감사가 필요합니다.','통계가 말해주고 있어요.'])}"`});gain('kno',.4);return draw();}
     if(m==='rebut'){it.rebut=chance(.55)?'got':'no';T.lines.push({c:'q',t:`${it.subj}: ${pick(it.rebut==='got'?IVL.rebutGot:IVL.rebutNo)}`});return draw();}
     if(m==='interview'){interview(it,T,draw);return;}
     const f=target(it,m);if(!f){T.lines.push({c:'',t:'더 확인할 사실이 없다.'});return draw();}
-    const p=mChance(it,m,f);gain({call:'net',docs:'ver',scene:'inv',ask:'cha',data:'dat'}[m],.35);gain('ver',.12);
+    const p=mChance(it,m,f);it.nb=0;gain({call:'net',docs:'ver',scene:'inv',ask:'cha',data:'dat'}[m]||'inv',.35);gain('ver',.12);
     (T.auto?(g=>g(0)):(g=>moment(m,it,g)))(b=>{const pp=clamp(p+b,.03,.97);
-    if(chance(pp)){f.conf++;f.via.push(M.n);T.lines.push({c:'g',t:`${SUCC[m]} ${f.t}${f.key&&f.conf<f.need?' — 단일 출처. 다른 경로로 한 번 더 확인해야 한다':''}`});twist(it,T);}
-    else T.lines.push({c:'r',t:`${f.t} — ${pick(FAILS[m])}${it.hoax&&S.st.ver>=55&&chance(.4)?' (제보 자체가 수상하다는 느낌이 든다)':''}`});
+    if(chance(pp)){f.conf++;f.via.push(M.n);T.lines.push({c:'g',t:`${SUCC[m]} ${f.t}${f.key&&f.conf<f.need?' — 단일 출처. 다른 경로로 한 번 더 확인해야 한다':''}`});invNote(it,f,m);const L=leadMake(it,f);if(L)T.lines.push({c:'s',t:`단서 발견 — ${L.t}. "${L.act}" 길이 열렸다.`});twist(it,T);}
+    else{T.lines.push({c:'r',t:`${f.t} — ${pick(FAILS[m])}${it.hoax&&S.st.ver>=55&&chance(.4)?' (제보 자체가 수상하다는 느낌이 든다)':''}`});if(!T.auto&&!it.hoax&&chance(.5))return retryShow(m,it,T,f,draw);}
     draw();});
   };
+  const useLead=L=>{T.left-=1;alertUp(4);it.leads=(it.leads||[]).filter(x=>x!==L);const f=leadTarget(it,L);if(!f){T.lines.push({c:'',t:'더 확인할 사실이 없다.'});return draw();}gain('inv',.3);
+    if(chance(leadChance(it))){f.conf++;f.via.push('단서 추적');T.lines.push({c:'g',t:`단서를 따라가 확인: ${f.t} (${L.t})`});invNote(it,f,'lead');const L2=leadMake(it,f);if(L2)T.lines.push({c:'s',t:`또 다른 단서 — ${L2.t}`});}else T.lines.push({c:'r',t:`단서는 막다른 길이었다: ${L.t}`});draw();};
   const draw=()=>{
+    if(T.ctrQ&&T.left>0){const k=T.ctrQ;T.ctrQ=null;it.ctrN=(it.ctrN||0)+1;return ctrShow(it,T,k,draw);}
     if(T.left<=0)return finish();
     const src=srcOf(it.d);
-    const body=`<p class="lede">「${esc(it.title)}」</p><div class="timer">남은 시간 ${Array.from({length:T.max},(_,i)=>`<i class="${i<T.left?'':'off'}"></i>`).join('')}<span style="margin-left:10px">상대 경계 ${Math.round(it.alert)}</span><span style="margin-left:10px">${entName(it.ent)} 관계 ${Math.round(netRel(it.ent))}${S.net&&S.net[it.ent]&&S.net[it.ent].block?' · 자료 거부 중':''}</span>${it.excl?`<span style="margin-left:10px;color:var(--red)">타사 추격까지 ${heatTxt(it.heat)}</span>`:''}</div>${factList(it)}${T.lines.length?`<ul class="feed" style="margin-top:8px">${T.lines.slice(-4).map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>`:''}`;
-    const ch=Object.keys(METH).map(m=>{const M=METH[m];let dis=M.t>T.left,sub=M.d;
-      if(['call','docs','scene','ask','data'].includes(m)){const f=target(it,m);if(!f){dis=true;sub='확인할 사실 없음';}else sub=`→ ${f.t} · 성공 ${pct(mChance(it,m,f))}`;}
+    const body=`<p class="lede">「${esc(it.title)}」</p>${S.outlet&&medInv().h?`<p class="hint">${esc(medInv().h)}</p>`:''}<div class="timer">남은 시간 ${Array.from({length:T.max},(_,i)=>`<i class="${i<T.left?'':'off'}"></i>`).join('')}<span style="margin-left:10px">상대 경계 ${Math.round(it.alert)}</span><span style="margin-left:10px">${entName(it.ent)} 관계 ${Math.round(netRel(it.ent))}${S.net&&S.net[it.ent]&&S.net[it.ent].block?' · 자료 거부 중':''}</span>${it.excl?`<span style="margin-left:10px;color:var(--red)">타사 추격까지 ${heatTxt(it.heat)}</span>`:''}</div>${factList(it)}${T.lines.length?`<ul class="feed" style="margin-top:8px">${T.lines.slice(-4).map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul>`:''}`;
+    const ch=Object.keys(METH).filter(m=>!METH[m].dept||DEPT_METH[S.dept]===m).map(m=>{const M=METH[m];let dis=M.t>T.left,sub=M.d;
+      if(FM(m)){const f=target(it,m);if(!f){dis=true;sub='확인할 사실 없음';}else sub=`→ ${f.t} · 성공 ${pct(mChance(it,m,f))}`;}
       if(m==='call'&&!src){dis=true;sub='이 분야 취재원이 없다';}
       if(m==='docs'&&bestSrc(it.d)<40){dis=true;sub='신뢰 40 이상 취재원 필요 (정보공개청구로 대체 가능)';}
       if(m==='foi'&&S.pending.some(p=>p.type==='foi'&&p.item===it.id)){dis=true;sub='이미 청구 중';}
       if(m==='expert'&&it.expert){dis=true;sub='이미 확보';}
       if(m==='rebut'&&it.rebut){dis=true;sub='이미 요청함';}
       if(m==='interview'&&it.interviewed){dis=true;sub='이미 만났다';}
-      return{m,label:`${M.n} (${M.t}칸)`,sub,disabled:dis,fn:()=>{doM(m);return false;}};});
-    try{let best=null,bp=0;ch.forEach(c=>{if(c.disabled||!['call','docs','scene','ask','data'].includes(c.m))return;const f=target(it,c.m);const p=f?mChance(it,c.m,f):0;if(p>bp){bp=p;best=c;}});if(!it.rebut&&it.facts.filter(fOK).length>=2){const rb=ch.find(c=>c.m==='rebut'&&!c.disabled);if(rb)best=rb;}if(best)best.rec=true;}catch(e){}
-    if(T.auto){const b2=ch.find(c=>c.rec&&!c.disabled&&c.m!=='interview');if(b2){doM(b2.m);}else finish();return;}
+      return{m,label:`${M.dept?'★ ':''}${M.n} (${M.t}칸)`,sub:M.dept&&!dis?`부서 기법 · ${sub}`:sub,disabled:dis,fn:()=>{doM(m);return false;}};});
+    (it.leads||[]).slice().reverse().forEach(L=>{const f=leadTarget(it,L);ch.unshift({m:'lead',label:`단서 따라가기 — ${L.act} (1칸)`,sub:f?`${L.t} → ${f.t} · 성공 ${pct(leadChance(it))} · 다른 경로로 인정`:'확인할 사실 없음',disabled:!f||T.left<1,lead:L,fn:()=>{useLead(L);return false;}});});
+    try{let best=null,bp=0;ch.forEach(c=>{if(c.disabled)return;if(c.m==='lead'){const p=leadChance(it);if(p>bp){bp=p;best=c;}return;}if(!FM(c.m))return;const f=target(it,c.m);const p=f?mChance(it,c.m,f):0;if(p>bp){bp=p;best=c;}});if(!it.rebut&&it.facts.filter(fOK).length>=2){const rb=ch.find(c=>c.m==='rebut'&&!c.disabled);if(rb)best=rb;}if(best)best.rec=true;}catch(e){}
+    if(T.auto){const b2=ch.find(c=>c.rec&&!c.disabled&&c.m!=='interview');if(b2){if(b2.lead)useLead(b2.lead);else doM(b2.m);}else finish();return;}
     if(T.left>=2&&ch.some(c=>c.rec&&!c.disabled))ch.unshift({label:'추천 기법으로 끝까지',sub:'남은 시간을 성공 확률이 가장 높은 기법에 알아서 쓴다 · 현장 돌발 상황은 건너뛴다',fn:()=>{T.auto=true;draw();return false;}});
     ch.push({label:'편집국으로 복귀',cls:'ghost',fn:()=>{finish();return false;}});
     openModal('취재 중',body,ch);
   };
   draw();
-}
-function interview(it,T,back){
-  it.interviewed=1;
-  const I={g:clamp(45+it.alert*.35-netRel(it.ent)/6+R(-10,10)-(S.gear&&S.gear.suit?6:0),10,95),r:0,lines:[]};const recB=S.gear&&S.gear.rec?.08:0;
-  const hasDoc=it.facts.some(f=>f.k==='d'&&fOK(f));
-  const slip=()=>{const tg=it.facts.find(f=>f.key&&!fOK(f))||it.facts.find(f=>f.k==='w'&&!fOK(f))||it.facts.find(f=>!fOK(f));if(tg){tg.conf++;tg.via.push('당사자 발언');}it.tape=1;ach('tape');return tg;};
-  const end=(why)=>{T.lines.push({c:'q',t:`인터뷰 종료 — ${why}`});it.alert=clamp(it.alert+10,0,100);back();};
-  const step=()=>{
-    if(I.r>=3)return end('질문을 다 했다');
-    const body=`<p class="lede">${esc(it.subj)} 관계자와 마주 앉았다. ${I.r===0?'녹음기를 켰다.':''}</p><div class="meter"><span>상대 경계심</span><div class="bar"><i style="width:${I.g}%;--c:var(--red)"></i></div><span class="num">${Math.round(I.g)}</span></div><ul class="feed">${I.lines.map(l=>`<li class="${l.c}">${esc(l.t)}</li>`).join('')}</ul><p class="hint">질문 ${I.r+1}/3${hasDoc?' · 확인된 문건이 있어 압박이 통한다':' · 확인된 문건이 없다. 압박하면 역효과'}</p>`;
-    const go=(k,fn)=>()=>{I.r++;I.lines.push({c:'',t:'나: '+IVL.q[k]});fn();return false;};
-    openModal('당사자 인터뷰',body,[
-      {label:'부드럽게 라포 쌓기',sub:'경계심을 낮춘다',fn:go('soft',()=>{I.g=clamp(I.g-(12+S.st.cha/10),0,100);gain('int',.15);I.lines.push({c:'q',t:pick(IVL.soften)});if(chance(.08)){const f=slip();if(f)I.lines.push({c:'g',t:'뜻밖의 한마디로 확인: '+f.t});}step();})},
-      {label:'문건 들이밀며 압박',sub:hasDoc?'자백을 끌어낼 수 있다':'증거 없이 압박하면 끊긴다',fn:go('press',()=>{if(hasDoc&&chance(.28+recB+S.st.int/240+(60-I.g)/220)){I.lines.push({c:'g',t:pick(IVL.slip)});const f=slip();if(f)I.lines.push({c:'g',t:'녹취로 확인: '+f.t});I.g+=10;step();}else{I.g+=hasDoc?12:25;I.lines.push({c:'r',t:pick(IVL.deny)});if(I.g>78&&chance(.6)){I.lines.push({c:'r',t:pick(IVL.hang)});if(!it.rebut)it.rebut='no';return end('상대가 자리를 떴다');}step();}})},
-      {label:'모르는 척 떠보기',sub:'취재력이 높을수록 잘 걸린다',fn:go('probe',()=>{if(chance(.12+recB+S.st.int/280+(50-I.g)/260)){I.lines.push({c:'g',t:pick(IVL.slip)});const f=slip();if(f)I.lines.push({c:'g',t:'확인: '+f.t});}else I.lines.push({c:'r',t:pick(IVL.deny)});I.g+=8;step();})},
-      {label:'침묵하며 기다리기',sub:'경계가 낮으면 상대가 침묵을 못 견딘다',fn:go('silence',()=>{if(I.g<50&&chance(.32)){I.lines.push({c:'g',t:pick(IVL.slip)});const f=slip();if(f)I.lines.push({c:'g',t:'확인: '+f.t});}else I.lines.push({c:'q',t:'"..."'});I.g-=4;step();})},
-      {label:'반론 기회를 주고 마무리',sub:'반론을 확보하고 끝낸다',fn:go('rebut',()=>{it.rebut=I.g<85?'got':'no';I.lines.push({c:'q',t:pick(it.rebut==='got'?IVL.rebutGot:IVL.rebutNo)});end('반론을 듣고 일어났다');})}
-    ]);
-  };
-  step();
 }
 function bribeEvent(it){
   it.bribed=1;
@@ -2628,27 +2709,72 @@ function writeHead(W){
   const hs=headOpts(it,on,W);
   openModal('4단계 · 제목 달기',`<p>독자가 가장 먼저 보는 한 줄이다. 제목 감각(능력치)이 높을수록 어떤 제목이든 효과가 커진다.</p>`,hs.map(x=>({label:x.h,sub:x.s,disabled:!!x.dis,rec:x===(hs.find(y=>y.y&&W.angle===it.yama)||hs.find(y=>y.k==='honest'&&!y.dis)),risk:x.k==='bait',fn:()=>{W.head=x.k;W.headY=x.y?1:0;W.headline=x.h;writeMedium(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{S.simple?RUN.write():writeFacts(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
+// ===================== 6.2 매체마다 다른 플레이 =====================
+const MED_G=t=>['tv','jp','ch'].includes(t)?'tv':t;
+const MED_INV={wire:{slot:0,meth:{call:.06,scene:-.04},h:'통신사 — 전화 취재가 빠르다. 현장은 짧게'},daily:{slot:0,meth:{docs:.03,record:.02},h:'일간지 — 문건과 기록으로 지면을 채운다'},econ:{slot:0,meth:{data:.05,filing:.05},h:'경제지 — 숫자와 공시가 무기다'},local:{slot:0,meth:{ask:.06,native:.05,scene:.03},h:'지역지 — 동네 사람들이 곧 취재원이다'},weekly:{slot:2,meth:{},h:'주간지 — 한 번 나가면 오래 판다 (시간 +2칸)'},tv:{slot:0,meth:{scene:.06,interview:0},h:'방송 — 그림이 있어야 리포트가 된다. 현장 확인을 챙기자'},online:{slot:0,meth:{data:.05,call:.04,scene:-.04},h:'인터넷 — 전화와 데이터로 빨리 친다. 현장은 짧게'},sports:{slot:0,meth:{locker:.06,scene:.03},h:'스포츠지 — 라커룸과 현장이 전부다'},eng:{slot:0,meth:{wire:.06,expert:0},h:'영문지 — 외신과 대사관이 독자다'},trade:{slot:0,meth:{call:.05,filing:.04},h:'전문지 — 업계 사람들이 취재원이자 독자다'}};
+function medInv(){return (S&&S.outlet&&MED_INV[MED_G(OUT().type)])||{slot:0,meth:{}};}
+function medNote(W,k,v){W.md=W.md||{};W.md[k]=(W.md[k]||0)+v;}
+function medCount(k,v){S.mMed=S.mMed||{};S.mMed[k]=(S.mMed[k]||0)+(v==null?1:v);}
 function writeMedium(W){
-  const t=OUT().type;
-  if(['tv','jp','ch'].includes(t)){
-    openModal('5단계 · 리포트 영상',`<p>방송 리포트는 그림이 절반이다.</p>`,[
-      {label:'현장 스탠드업 촬영',sub:'체력 -10, 방송감이 높을수록 완성도↑',fn:()=>{W.mq=3+S.st.brd/10;gain('brd',.4);S.hp=clamp(S.hp-10,0,100);writeFinish(W);return false;}},
-      {label:'녹취 화면 띄우기',sub:it2(W.it.tape,'녹취가 있으면 완성도 +12'),disabled:!W.it.tape,fn:()=>{W.mq=12;writeFinish(W);return false;}},
-      {label:'자료화면으로 대체',sub:'빠르지만 완성도 -4',fn:()=>{W.mq=-4;writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
-  }else if(t==='wire'){
-    openModal('5단계 · 송고 방식',`<p>통신사는 1분이 승부다. 언론사 수백 곳이 이 기사를 받아쓴다.</p>`,[
-      {label:'속보 먼저 송고 후 보강',sub:'파급력 +15%, 완성도 -5',fn:()=>{W.speed=1;W.mq=-5;writeFinish(W);return false;}},
-      {label:'완성본 한 번에 송고',sub:'안정적',fn:()=>{writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
-  }else if(t==='weekly'){
-    openModal('5단계 · 커버스토리 분량',`<p>주간지는 깊이로 승부한다. 확인된 팩트 3개 미만이면 데스크가 반려한다.</p>`,[
-      {label:'8쪽 심층 기사로',sub:'필력이 높을수록 완성도↑',fn:()=>{W.mq=S.st.wri/10;writeFinish(W);return false;}},
-      {label:'2쪽 단신으로 줄인다',sub:'파급력 -20%',fn:()=>{W.short=1;writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
-  }else if(t==='online'){
-    openModal('5단계 · 송출 시간',`<p>인터넷 매체는 포털 노출이 생명이다.</p>`,[
-      {label:'출근 시간 7시에 송출',sub:'조회수↑',fn:()=>{W.vm=1.3;writeFinish(W);return false;}},
-      {label:'준비되는 대로 바로',sub:'평범',fn:()=>{writeFinish(W);return false;}},{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]);
-  }else writeFinish(W);
+  const t=MED_G(OUT().type),it=W.it;const fin=()=>{writeFinish(W);return false;};const back=[{label:'← 이전 단계',cls:'ghost',fn:()=>{writeHead(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}];
+  const okK=k=>it.facts.some(f=>f.k===k&&fOK(f));const cov=it.facts.filter(fOK).length/Math.max(1,it.facts.length);
+  const O=[];let title='5단계 · 출고 방식',lede='';
+  if(t==='tv'){title='5단계 · 리포트 영상';lede='방송 리포트는 그림이 절반이다.'+(it.photo?' 현장 그림을 확보해 뒀다.':' 현장 그림이 없다.');
+    O.push({label:'현장 스탠드업 리포트',sub:it.photo?'현장 그림이 살아 있다 · 방송감이 높을수록 완성도↑ · 컨디션↓':'그림이 부족해 효과가 작다 · 컨디션↓',rec:!!it.photo,fn:()=>{W.mq=(it.photo?5:1)+S.st.brd/(it.photo?8:12);gain('brd',.4);S.hp=clamp(S.hp-10,0,100);medCount('rep');if(!it.photo)medNote(W,'note','현장 그림이 부족해 리포트가 밋밋했다.');return fin();}});
+    O.push({label:'녹취 화면 띄우기',sub:it2(it.tape,'녹취가 있으면 완성도 +12'),disabled:!it.tape,fn:()=>{W.mq=12;medCount('rep');return fin();}});
+    if(it.excl&&S.rank>=1)O.push({label:'중계차 연결 · 생방송 단독',sub:'파급력↑ · 평판↑ · 생방송 실수 위험',risk:true,fn:()=>{W.mq=S.st.brd/6-2;medNote(W,'imp',.15);medNote(W,'fame',1);medNote(W,'risk',.03);medCount('live');medCount('rep');return fin();}});
+    O.push({label:'자료화면으로 대체',sub:'빠르지만 완성도 -4',fn:()=>{W.mq=-4;return fin();}});}
+  else if(t==='wire'){title='5단계 · 송고 방식';lede='통신사는 1분이 승부다. 언론사 수백 곳이 이 기사를 받아쓴다.';
+    O.push({label:'1보 먼저 타전',sub:'파급력 +15% · 완성도 -5 · 단독이면 선점 효과',rec:!!it.excl,fn:()=>{W.speed=1;W.mq=-5;medCount('flash');if(it.excl){const n=R(30,120);medNote(W,'fame',.8);medCount('relay',n);medNote(W,'note',`1보 송고 3분 만에 ${n}개 매체가 받아썼다.`);}return fin();}});
+    O.push({label:'1보 뒤 2보·종합으로 이어 쓰기',sub:'파급력↑ · 완성도 조금↑ · 컨디션↓',disabled:S.hp<20,fn:()=>{W.speed=1;W.mq=2;medNote(W,'imp',.05);S.hp=clamp(S.hp-6,0,100);medCount('flash');if(it.excl)medCount('relay',R(40,150));return fin();}});
+    O.push({label:'완성본 한 번에 송고',sub:it.excl&&it.heat<=2?'안정적 · 타사가 먼저 칠 수 있다':'안정적',fn:()=>{if(it.excl&&it.heat<=2&&chance(.3)){medNote(W,'imp',-.2);medNote(W,'note','타사 1보가 2분 먼저 떴다. 선점을 놓쳤다.');}return fin();}});}
+  else if(t==='daily'){title='5단계 · 지면과 온라인';lede='종이 신문은 내일 아침에 나온다. 온라인에 먼저 풀지, 지면으로 아낄지.';
+    if(it.excl)O.push({label:'내일 아침 지면 단독으로 아낀다',sub:'파급력↑ · 밤사이 타사가 먼저 칠 위험',rec:true,fn:()=>{if(chance(.15)){medNote(W,'imp',-.25);medNote(W,'note','밤 11시, 타사가 온라인에 먼저 띄웠다. 아침 지면의 힘이 빠졌다.');}else{medNote(W,'imp',.12);medNote(W,'note','아침 지면이 나오자 다른 매체들이 받아쓰기 시작했다.');medCount('paper');}return fin();}});
+    O.push({label:'오늘 밤 온라인 선공개',sub:'조회수↑ · 파급력 조금↓',fn:()=>{W.vm=1.4;medNote(W,'imp',-.04);return fin();}});
+    if(OUT().p>=3)O.push({label:'경쟁지 가판 보고 다듬기',sub:'완성도↑ · 컨디션↓ (밤 10시 가판 확인)',fn:()=>{W.mq=4;S.hp=clamp(S.hp-5,0,100);medNote(W,'note','경쟁지 가판을 보고 제목과 리드를 다듬었다.');return fin();}});
+    O.push({label:'그대로 넘긴다',sub:'평범',fn:fin});}
+  else if(t==='econ'){title='5단계 · 시장과 타이밍';const corp=ENT[it.ent]&&ENT[it.ent].kind==='corp';lede=corp?'기업 기사다. 장중에 나가면 주가가 움직인다.':'경제지 독자는 숫자를 본다.';
+    if(corp){O.push({label:'장중 출고',sub:'조회수↑ · 평판↑ · 주가가 흔들리면 기업이 반발',risk:true,fn:()=>{W.vm=1.3;medNote(W,'fame',.8);if(chance(.3)){const d=R(4,12);medNote(W,'note',`출고 20분 만에 ${entName(it.ent)} 주가가 ${d}% 빠졌다. 증권가 메신저에 기사가 돌았다.`);netUp(it.ent,-12);medCount('market');if(chance(.08))S.pending.push({type:'suit',ent:it.ent,due:S.turn+R(3,6),title:it.title});}return fin();}});
+      O.push({label:'장 마감 뒤 출고',sub:'안정적 · 완성도 조금↑',fn:()=>{W.mq=2;return fin();}});}
+    O.push({label:'시장 데이터 박스 붙이기',sub:okK('n')?'확인된 숫자로 완성도↑':'확인된 숫자가 없다',disabled:!okK('n'),rec:okK('n'),fn:()=>{W.mq=5;return fin();}});
+    if(!corp)O.push({label:'정책 해설로 다듬기',sub:'상식이 높을수록 완성도↑',fn:()=>{W.mq=S.st.kno/12;return fin();}});}
+  else if(t==='local'){title='5단계 · 지역 밀착';lede='지역 독자는 "우리 동네 이야기"를 읽는다.';
+    O.push({label:'주민 목소리를 더 담는다',sub:okK('w')?'증언이 있어 완성도↑ · 신뢰↑ · 컨디션↓':'증언이 부족하다 · 컨디션↓',rec:okK('w'),fn:()=>{W.mq=okK('w')?5:1;if(okK('w'))medNote(W,'trust',.5);S.hp=clamp(S.hp-4,0,100);medCount('local');return fin();}});
+    O.push({label:'지역면 톱으로 크게',sub:'파급력↑ · 지역 유지와 관계↓',fn:()=>{medNote(W,'imp',.1);if(it.ent)netUp(it.ent,-6);return fin();}});
+    O.push({label:'그대로 출고',sub:'평범',fn:fin});}
+  else if(t==='weekly'){title='5단계 · 커버스토리 분량';lede='주간지는 깊이로 승부한다. 확인된 팩트 3개 미만이면 데스크가 반려한다.';
+    O.push({label:'8쪽 심층 기사로',sub:'필력이 높을수록 완성도↑',fn:()=>{W.mq=S.st.wri/10;medCount('cover');return fin();}});
+    O.push({label:'한 주 더 묵혀 커버스토리로',sub:cov>=.75?'완성도↑↑ · 파급력↑ · 다른 매체가 먼저 칠 위험':'확인된 사실이 4분의 3은 돼야 한다',disabled:cov<.75,rec:cov>=.75,fn:()=>{W.mq=S.st.wri/8+4;S.hp=clamp(S.hp-6,0,100);if(chance(.25)){medNote(W,'imp',-.25);medNote(W,'note','묵히는 사이 일간지가 먼저 썼다. 커버스토리의 힘이 빠졌다.');}else{medNote(W,'imp',.1);medCount('cover');}return fin();}});
+    O.push({label:'2쪽 단신으로 줄인다',sub:'파급력 -20%',fn:()=>{W.short=1;return fin();}});}
+  else if(t==='online'||t==='sports'){title='5단계 · 송출 전략';lede=t==='online'?'인터넷 매체는 포털 노출이 생명이다.':'스포츠 팬은 경기 직후를 기다린다.';
+    O.push({label:t==='online'?'출근 시간 7시에 송출':'경기 직후 바로 송출',sub:'조회수↑',fn:()=>{W.vm=1.3;return fin();}});
+    O.push({label:'실시간 업데이트 기사로',sub:'조회수↑↑ · 완성도 조금↑ · 컨디션↓',disabled:S.hp<15,fn:()=>{W.vm=1.5;W.mq=1;S.hp=clamp(S.hp-5,0,100);medCount('live');return fin();}});
+    O.push({label:'클릭 부르는 썸네일',sub:'조회수 크게↑ · 신뢰↓ · 포털 벌점 위험',risk:true,fn:()=>{W.vm=1.9;medNote(W,'trust',-.8);if(chance(.3))portalPen(1,'낚시 썸네일');return fin();}});
+    if(t==='sports'&&it.tape)O.push({label:'선수 육성 인터뷰 붙이기',sub:'완성도 +8',fn:()=>{W.mq=8;return fin();}});
+    O.push({label:'준비되는 대로 바로',sub:'평범',fn:fin});}
+  else if(t==='eng'){title='5단계 · 외신 독자';lede='영문 기사는 외신과 주한 대사관이 읽는다.';
+    O.push({label:'외신이 받아쓰게 영문 요약 송출',sub:'평판↑ · 조회수 조금↑',rec:!!it.excl,fn:()=>{W.vm=1.2;medNote(W,'fame',.6);medCount('relay',it.excl?R(3,12):0);if(it.excl)medNote(W,'note','외신 몇 곳이 기사를 인용했다.');return fin();}});
+    O.push({label:'국내 사정 해설 박스 붙이기',sub:'상식이 높을수록 완성도↑',fn:()=>{W.mq=S.st.kno/12;return fin();}});
+    O.push({label:'그대로 출고',sub:'평범',fn:fin});}
+  else if(t==='trade'){title='5단계 · 업계 독자';lede='전문지 독자는 그 업계 사람들이다. 틀리면 바로 안다.';
+    O.push({label:'업계 관계자 코멘트 보강',sub:okK('w')?'증언이 있어 완성도↑':'증언이 부족하다',rec:okK('w'),fn:()=>{W.mq=okK('w')?5:1;medCount('local');return fin();}});
+    O.push({label:'유료 회원에게 먼저 공개',sub:'조회수↓ · 평판·신뢰 조금↑',fn:()=>{W.vm=.8;medNote(W,'fame',.5);medNote(W,'trust',.3);return fin();}});
+    O.push({label:'그대로 출고',sub:'평범',fn:fin});}
+  else return writeFinish(W);
+  openModal(title,`<p>${lede}</p>`,O.concat(back));
 }
+function mediaMonth(lines){const M=S.mMed;S.mMed={};if(!M||S.story)return;const t=MED_G(OUT().type);const v=k=>M[k]||0;let x='';
+  if(t==='wire'&&v('flash'))x=`이달 1보 ${v('flash')}건${v('relay')?` · 받아쓴 매체 ${v('relay')}곳`:''}`;
+  else if(t==='tv'&&v('rep'))x=`이달 리포트 ${v('rep')}건${v('live')?` · 생방송 연결 ${v('live')}번`:''}`;
+  else if(t==='daily'&&v('paper'))x=`이달 아침 지면 단독 ${v('paper')}건`;
+  else if(t==='econ'&&v('market'))x=`이달 기사로 주가가 움직인 기업 ${v('market')}곳`;
+  else if(t==='weekly'&&v('cover'))x=`이달 커버스토리·심층 ${v('cover')}건`;
+  else if(t==='local'&&v('local'))x=`이달 주민 목소리 담은 기사 ${v('local')}건`;
+  else if(t==='trade'&&v('local'))x=`이달 업계 코멘트를 보강한 기사 ${v('local')}건`;
+  else if(t==='eng'&&v('relay'))x=`이달 외신 인용 ${v('relay')}곳`;
+  else if((t==='online'||t==='sports')&&v('live'))x=`이달 실시간 업데이트 기사 ${v('live')}건`;
+  if(x)lines.push({c:'g',t:x});}
+
 const it2=(c,s)=>c?s:'녹취가 없다';
 // 지면: 아침 발제 배정이 있으면 그 배정을 따른다(완성도가 너무 낮으면 데스크가 한 단계 내린다). 배정 없이 쓴 기사는 1면 톱에 오르기 아주 어렵다
 function secTop(d){const n=(DEPTS[d]||{}).n||'';if(/주재/.test(n))return '지역면 톱';const b=n.replace(/(부|팀|국)$/,'');return ({사건:'사회',법조:'사회',전국:'전국',시군:'지역',자치행정:'지역',탐사보도:'기획',탐사:'기획'}[b]||b||'종합')+'면 톱';}
@@ -2677,7 +2803,7 @@ function writeFinish(W){
   const o=OUT(),it=W.it,st=S.st;
   const inc=W.sel.map(i=>it.facts[i]),ver=inc.filter(fOK),unv=inc.filter(f=>!fOK(f));
   const allW=it.facts.reduce((a,f)=>a+fw(f),0);
-  let q=6+st.wri*.5+st.inv*.15+ver.length/Math.max(1,it.facts.length)*22+ver.length+R(-6,6)+(W.mq||0)+(W.ex?5:0)+(W.rb&&it.rebut==='got'?4:0)+(it.tape?4:0)+(isTV()?(st.brd-40)/6:0);
+  let q=6+st.wri*.5+st.inv*.15+ver.length/Math.max(1,it.facts.length)*22+ver.length+R(-6,6)+(W.mq||0)+(W.ex?5:0)+(W.rb&&it.rebut==='got'?4:0)+(it.tape?4:0)+((it.quote||it.wq)?3:0)+(it.photo?2:0)+(it.prR?3:0)+(isTV()?(st.brd-40)/6:0);
   q+=W.leadOK?5:-2;if(W.lead==='key'&&!W.leadOK)q-=3;if(S.peerRev){q+=S.peerRev.b;log(`${S.peerRev.n}가 원고를 봐 줬다 (완성도 +${S.peerRev.b})`);S.peerRev=null;}
   const notes=[];
   if(it.ideo){const L=leanOf(it);
@@ -2692,18 +2818,18 @@ function writeFinish(W){
   if(!W.rb){q-=5;notes.push('데스크: "반론 받았어? 없으면 위험해."');}
   if(o.type==='eng'){q+=st.lng*.3-12;notes.push('영문 기사라 어학이 완성도를 좌우했다.');}
   if(o.type==='weekly'&&ver.length<3&&!W.short){q*=.7;notes.push('데스크: "주간지에 이 정도 팩트로는 부족해."');}
-  q=clamp(Math.round(q),5,100);
+  if(W.md&&W.md.q)q+=W.md.q;q=clamp(Math.round(q),5,100);
   const slotM=it.slot&&it.slot.due>=S.turn?SLOT[it.slot.g].m:1;
   let imp=it.imp*(.4+ver.reduce((a,f)=>a+fw(f),0)/allW*.75+unv.length*.12)*(it.excl?1.45:1)*(.7+o.p*.1)*slotM*(W.yamaHit?1.08:1)*(W.angle==='li'&&LIFE_D.test((DEPTS[it.d]||{}).n||'')?1.05:1);
-  if(W.speed)imp*=1.08+S.st.spd/600;if(W.short)imp*=.8;if(W.adTone==='soft'){imp*=.72;notes.push('광고주를 의식해 표현을 다듬었다. 기사가 무뎌졌다.');}imp=Math.round(clamp(imp,1,130));if(it.dud&&!it.dudShown){imp=Math.max(5,Math.round(imp*.4));notes.push('기사가 나갔는데 반응이 없다. 알고 보니 이미 해명된 일이었다.');}
+  if(W.speed)imp*=1.08+S.st.spd/600;if(W.short)imp*=.8;if(W.md&&W.md.imp)imp*=1+W.md.imp;if(W.adTone==='soft'){imp*=.72;notes.push('광고주를 의식해 표현을 다듬었다. 기사가 무뎌졌다.');}imp=Math.round(clamp(imp,1,130));if(it.dud&&!it.dudShown){imp=Math.max(5,Math.round(imp*.4));notes.push('기사가 나갔는데 반응이 없다. 알고 보니 이미 해명된 일이었다.');}
   const mult=(W.head==='bait'?(o.type==='online'?2.2:1.5):W.head==='calm'?.8:({quote:1.2,num:1.1,ask:1.25}[W.head]||1))*(W.vm||1)*(1+S.st.hed/300);if(W.head!=='bait')q=Math.min(100,q+Math.round(S.st.hed/25));
   const views=Math.round(q*imp*(o.p+1)*mult*R(8,14)/10*portalMult());if(W.head==='bait')portalPen(1,'자극적 제목');
   const keySingle=inc.some(f=>f.key&&f.conf===1);
-  let risk=(hasF('fact')?.8:1)*(1-S.st.ver/250)*(unv.reduce((a,f)=>a+fw(f)*(f.conf?.5:1),0)*.11+(keySingle?.04:0)+(!W.rb?.035:0)+(W.lead==='key'&&!W.leadOK?.04:0)+(it.hoax?.5:0))*DF().risk;
+  let risk=(hasF('fact')?.8:1)*(1-S.st.ver/250)*(unv.reduce((a,f)=>a+fw(f)*(f.conf?.5:1),0)*.11+(keySingle?.04:0)+(!W.rb?.035:0)+(W.lead==='key'&&!W.leadOK?.04:0)+(it.hoax?.5:0)+((W.md&&W.md.risk)||0))*DF().risk;
   const ph=colBy('photo'),ed=colBy('editor');if(ph&&ph.rel>=40){q=Math.min(100,q+3);notes.push(`${ph.name} ${colRole(ph)}가 좋은 ${isTV()?'그림':'컷'}을 건졌다.`);}if(ed&&ed.rel>=40&&!isTV()){q=Math.min(100,q+2);notes.push(`편집기자 ${ed.name}가 제목을 살려 줬다.`);}
   const place=placeOf(q,imp,it);
   gain('hed',.3);gain('spd',.2);if(isTV())gain('brd',.2);
-  const fx={eval:q/34+(it.excl?(imp>=75?3:imp>=58?2:1.2):0)+(place.k==='front'?1.5:place.k==='one'?.6:place.k==='top'?.3:0)-(q<35?2:0),fame:Math.min(imp,100)/55+(it.excl?.8:0)+(place.k==='front'?1.2:0),wri:.6,inv:.2};
+  const fx={eval:q/34+(it.excl?(imp>=75?3:imp>=58?2:1.2):0)+(place.k==='front'?1.5:place.k==='one'?.6:place.k==='top'?.3:0)-(q<35?2:0),fame:Math.min(imp,100)/55+(it.excl?.8:0)+(place.k==='front'?1.2:0)+((W.md&&W.md.fame)||0),wri:.6,inv:.2};if(W.md&&W.md.trust)fx.trust=(fx.trust||0)+W.md.trust;if(W.md&&W.md.note)notes.push(W.md.note);
   // 5.7 보상 차등: 아이템 급이 클수록 더, 확인한 사실이 많을수록 더 (덜 확인하고 쓰면 보상이 깎인다)
   {const gr=gradeOf(it),cov=ver.reduce((a,f)=>a+fw(f),0)/Math.max(1,allW);fx.eval+=({B:.3,A:.8,S:1.4}[gr]||0)*(it.excl?1.3:1);fx.fame+=({B:.3,A:.8,S:1.6}[gr]||0)*(it.excl?1.3:1);
    fx.eval*=.65+.35*cov;fx.fame*=.6+.4*cov;if(cov<.5)notes.push('데스크: "확인된 게 절반도 안 되잖아. 다음엔 더 파 와."');else if(cov>=.99&&(gr==='A'||gr==='S'))notes.push('데스크: "빈틈이 없다. 이게 기사지."');}
@@ -2719,7 +2845,8 @@ function writeFinish(W){
   const cm=comments(q,W,unv.length>0);
   const follow=imp>=38&&(it.chain||0)<Math.min(3,FOLLOW_MAX)&&!S.items.some(x=>x!==it&&fBase(x.title)===fBase(it.title))&&chance(.65);
   const others=it.excl&&imp>=45?R(2,9):0;
-  const clip={iid:it.id,rb:!!(W.rb&&it.rebut==='got'),h:W.headline,o:o.n,d:it.d,q,imp,excl:it.excl,date:dateShort(),turn:S.turn,views,lead,by:S.name,place:place.n,portal,base:it.base,chain:it.chain};
+  const clip={iid:it.id,rb:!!(W.rb&&it.rebut==='got'),h:W.headline,o:o.n,d:it.d,q,imp,excl:it.excl,date:dateShort(),turn:S.turn,views,lead,by:S.name,place:place.n,portal,base:it.base,chain:it.chain,quote:it.quote||(it.wq&&it.wq.q)||'',qsrc:it.quote?`${it.subj||'관계자'} 녹취`:(it.wq?it.wq.who:''),photo:it.photo||''};
+  if(it.lawyer&&it.rebut!=='got'&&chance(.35*it.lawyer))S.pending.push({type:'suit',ent:it.ent,due:S.turn+R(2,5),title:W.headline});
   S.clips.unshift(clip);if(S.clips.length>60)S.clips.pop();if(S.founder&&S.co){const k=clamp(imp/50,.4,1.8)*(q/60);S.co.bS+=(.003+(it.excl?.006:0))*k;S.co.bT+=(.006+(it.excl?.012:0))*k;S.co.q=clamp(S.co.q+(it.excl?.6:.2),10,100);}try{medCheck(it,clip,unv.length,W);itemFromCredit(it);}catch(e){}try{flawTag(it,clip,unv,W);if(clip.fl&&(S.medQ||[]).some(m=>m.h===clip.h))clip.flDone=1;}catch(e){}
   S.weekArticles++;S.monthQ.push(q);S.totalArticles=(S.totalArticles||0)+1;if(it.excl)S.scoops++;
   ach('first');if(it.excl)ach('scoop');if(place.k==='front')ach('front');if(it.chain>=2)ach('series');if(S.totalArticles>=100)ach('hundred');
@@ -2743,7 +2870,7 @@ function scoopReact(it,imp,grade){const cn=(S.comp||[]).map(c=>OUTLETS.find(x=>x
   if(it.excl&&S.st.brd>=50&&!isTV()){apply({fame:.5});lines.push('방송사 시사 프로그램에서 패널 출연 요청이 왔다. (방송감 · 평판↑)');}
   if(S.rival&&grade!=='단독')lines.push(S.rival.pub?`${rvLabel()}가 업계 단톡방에 "축하합니다"라고만 남겼다.`:`라이벌 ${S.rival.name} 기자가 "이번엔 졌다"는 문자를 보냈다.`);
   return `<ul class="feed">${lines.map(l=>`<li class="g">${esc(l)}</li>`).join('')}</ul>`;}
-function clipHTML(c,sm){return `<div class="clip${sm?' sm':''}"><div class="mh"><b>${esc(c.o)}</b><span>${DEPTS[c.d].n} · ${c.date}${c.place?' · '+c.place:''}</span></div><h4>${esc(c.h)}</h4><p>${esc(c.lead)}</p><div class="by">${esc(c.by||S.name)} 기자${c.excl?' · 단독':''}</div></div>`;}
+function clipHTML(c,sm){return `<div class="clip${sm?' sm':''}"><div class="mh"><b>${esc(c.o)}</b><span>${DEPTS[c.d].n} · ${c.date}${c.place?' · '+c.place:''}</span></div><h4>${esc(c.h)}</h4><p>${esc(c.lead)}</p>${clipQuote(c)}<div class="by">${esc(c.by||S.name)} 기자${c.excl?' · 단독':''}</div></div>`;}
 
 // --- 데스크 ---
 // ===== 5.7 부장 데스크: 본사 부장은 기사를 덜 쓰고 부서 초고를 다듬는다 (지역 주재 부장은 예전 그대로) =====
@@ -3696,7 +3823,7 @@ function endWeek(){
       if(S.rank<7)apply({eval:(perf-56)/12});}
     const vals=[];if(S.monthQ.length)vals.push(avg(S.monthQ));if(perf!==null)vals.push(perf);
     S.co.q=S.co.q*.75+(vals.length?avg(vals):50+R(-5,5))*.25;S._mqA=S.monthQ.slice();S.monthQ=[];
-    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);crisisTick(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
+    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);crisisTick(lines);mediaMonth(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
     if(t%24===23)portalReview(lines);
     if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);staffBalance(lines);owePay(lines);}catch(e){console.error(e);}corrMonth(lines);
     if(S.rank>=6)S.trust=clamp(S.trust+(S.co.q-55)/25+(55-S.trust)*.03,0,100);
@@ -3998,6 +4125,13 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.2','숨 고르기',[
+  '주요|취재 개편 — 단서가 단서를 부른다: 사실을 확인하면 가끔 새 단서(결재란의 이름, "그날 트럭이 들어왔다"는 말, 돈이 흘러간 업체…)가 나오고, 단서를 따라가면 다른 경로로 확인한 것으로 인정된다',
+  '주요|취재 개편 — 막혀도 다른 길: 전화를 안 받으면 집 앞 뻗치기, 현장이 막히면 밤에 다시 가거나 근처 CCTV를 부탁하는 식으로 실패한 자리에서 새 선택지가 열린다',
+  '주요|취재 개편 — 상대의 반격: 취재가 깊어지면 상대도 움직인다. 증거 인멸, 선제 해명 보도자료, 변호사 내용증명, 취재원 입막음에 어떻게 맞설지 고른다. 내용증명을 받고 반론 없이 쓰면 소송이 걸릴 수 있다',
+  '주요|인터뷰 심리전: 상대의 경계심과 동요가 따로 보인다. 확인한 문건·단서를 증거 카드로 내밀 수 있는데, 경계가 높을 때 너무 일찍 꺼내면 상대가 입을 닫는다. 동요가 크면 질문을 하나 더 던질 수 있다',
+  '주요|부서마다 전용 취재 기법(★): 법조 공소장·판결문 열람, 사건 형사과 야간 취재, 탐사 장기 잠복, 정치 국회 복도 뻗치기, 경제 공시·등기부 대조, 문화·연예 업계 술자리, 스포츠 라커룸, 지역 토박이 인맥 등',
+  '주요|취재 수첩이 기사가 된다: 인터뷰 녹취와 증언 한마디, 현장 사진이 기사 인용문과 1면 지면에 그대로 실리고 완성도를 올린다',
+  '주요|매체마다 다른 출고: 통신사(1보 타전·2보 이어 쓰기), 일간지(아침 지면 단독으로 아끼기·가판 보고 다듬기), 경제지(장중 출고로 주가가 흔들리면 기업 반발), 지역지(주민 목소리), 주간지(한 주 묵혀 커버스토리), 방송(현장 그림이 있어야 리포트가 산다·중계차 생방송), 인터넷·스포츠지(실시간 업데이트·낚시 썸네일), 영문지·전문지까지 각자의 선택이 있다. 취재에도 매체 성격에 맞는 기법이 더 잘 먹히고, 월말 보고에 매체별 실적이 뜬다',
   '조정|컨디션: 매주 저절로 회복되는 양을 줄이고 휴식의 회복량을 늘렸다. 몰아서 일하면 컨디션이 떨어지고, 쉬어 주면 확실히 돌아온다. 체력 능력치가 높을수록 회복이 빠르다',
   '조정|행동력: 컨디션 보너스(다음 달 행동력 +1)를 받는 기준을 낮췄다. 틈틈이 쉬어 주면 예전과 같은 행동력을 쓰고, 쉬지 않고 몰아치면 행동력이 줄어든다',
   '수정|부장 자리가 빈 부서로 옮길 때 오류가 나던 문제',
@@ -6699,7 +6833,7 @@ function promoLine(){try{if(S.founder||S.rank>=7||S.rank===0||nextRank(S.rank)==
 // ===== 지면 연출: 내 기사가 1면·첫 꼭지에 실리면 내일 자 지면을 보여 준다 =====
 // 5.7 출고 지면 일러스트: 남색 제목 띠 위에 실제 제목을 얹는다
 const PAPER_BOX={front:[21.4,8.75,83.3,9.7],sec:[19.3,9.6,57.7,7.8],web:[17.2,9.6,73.3,7.8]};
-function paperHTML(c,kind){const b=PAPER_BOX[kind];if(!IMG['paper_'+kind])return '';return `<div class="paperv pv-${kind}">${imgTag('paper_'+kind,'pvimg')}<b class="pvh" style="top:${b[0]}%;left:${b[1]}%;width:${b[2]}%;height:${b[3]}%"><span>${esc(c.h||'')}</span></b></div>`;}
+function paperHTML(c,kind){const b=PAPER_BOX[kind];if(!IMG['paper_'+kind])return '';return `<div class="paperv pv-${kind}">${imgTag('paper_'+kind,'pvimg')}<b class="pvh" style="top:${b[0]}%;left:${b[1]}%;width:${b[2]}%;height:${b[3]}%"><span>${esc(c.h||'')}</span></b>${c.quote&&kind==='front'?`<i class="pvq" style="top:${b[0]+b[3]+.8}%;left:${b[1]}%;width:${b[2]}%">“${esc(c.quote)}”</i>`:''}</div>`;}
 function pageHTML(c,place){const o=OUT();const tv=isTV();const top=place.k==='front';
   if(tv)return `<div class="tvpage"><div class="tvbar"><b>${esc(o.n)}</b><span>${top?'메인뉴스 첫 꼭지':'메인뉴스'} · ${esc(c.date)}</span></div><div class="tvlow"><i>${c.excl?'단독':'뉴스'}</i><b>${esc(c.h.replace('[단독] ',''))}</b></div><p>${esc(c.lead)}</p><div class="by">${esc(c.by||S.name)} 기자 리포트</div></div>`;
   const no=1000+Math.floor(S.turn*1.75);
