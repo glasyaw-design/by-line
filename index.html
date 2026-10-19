@@ -819,6 +819,7 @@ b,strong{font-weight:600}
 .arcc{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid color-mix(in srgb,var(--red) 55%,var(--line));background:linear-gradient(160deg,rgba(255,90,90,.12),transparent 70%);border-radius:14px;padding:9px 12px;margin:0 0 10px;font-size:13px}.arcc b{display:inline-flex;align-items:center;gap:6px;color:#ff8f8f}.arcc span{color:var(--mute);font-size:12px}.arcc.big{animation:arcp 2.4s ease-in-out infinite}@keyframes arcp{50%{box-shadow:0 0 0 3px rgba(255,90,90,.18)}}
 .arch{display:flex;justify-content:space-between;font-size:12px;color:#ff8f8f;margin:-4px 0 8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
 @media (prefers-reduced-motion:reduce){.arcc.big{animation:none}}
+.nvo{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:10px 0}.nvo button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;border:1px solid var(--line);border-radius:12px;background:var(--card,transparent);color:inherit;font:inherit;font-size:12px;cursor:pointer;min-height:56px}.nvo button i{display:inline-flex;width:20px;height:20px}.nvo button i svg{width:20px;height:20px}.nvo button[aria-pressed="true"]{border-color:var(--acc,#ffcf5a);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc,#ffcf5a) 40%,transparent)}
 </style>
 
 <div class="wrap">
@@ -3994,6 +3995,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.1','경영진의 머리',[
+  '조정|모바일 하단 메뉴를 한 손으로 쓰기 편하게 바꿨다. 가장 자주 쓰는 할 일이 가운데로 왔다. 설정 → 하단 메뉴 순서에서 원하는 대로 바꿀 수 있다(왼손 배치·예전 배치도 있다)',
   '주요|위기 아크: 몇 달에 걸쳐 단계별로 이어지는 위기가 생겼다. 초반엔 가로채인 단독·위협받는 취재원·첫 오보 논란, 중반엔 부서원 조작 기사·광고주 삭제 요구·번아웃이 찾아온다. 고른 길이 다음 고비와 결말을 바꾸고, 잘 넘기면 칭호가 남지만 잘못 고르면 자리를 잃을 수도 있다',
   '주요|후반 대위기: 정권의 언론 탄압, 사주 일가 비리, 간판 특종 조작 의혹, 적대적 인수, 1000억 소송. 간부가 되면 커리어를 건 선택이 기다린다',
   '주요|창간 위기: 투자사의 경영권 압박, 소송 폭탄, 핵심 기자 집단 이탈, 포털 알고리즘 변경',
@@ -4184,6 +4186,7 @@ function gameMenu(){
 function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
   openModal('설정',`<p class="hint">켜고 끄는 설정은 바로 저장된다.</p>`,[
     {label:S.simple?'정통 모드로':'간소화 모드로',disabled:lock,sub:lock?`${Math.ceil((96-(S.turn-(S.modeT||0)))/4)}개월 뒤 바꿀 수 있다`:(S.simple?'모든 기능과 콘텐츠':'핵심만 빠르게'),fn:()=>{S.modeT=S.turn;S.simple=!S.simple;toast(S.simple?'간소화 모드':'정통 모드');saveGame();render();}},
+    {label:'하단 메뉴 순서',sub:'모바일 하단 메뉴 배치를 바꾼다',fn:()=>{navOrderMenu();return false;}},
     {label:`행동력 남김 경고: ${S.warnNext===false?'끔':'켬'}`,sub:'행동력이 남았을 때 다음 달로 넘기기 전에 묻기',fn:()=>{S.warnNext=S.warnNext===false?true:false;toast(S.warnNext===false?'경고를 껐다':'경고를 켰다');settingsMenu();return false;}},
     {label:`결과 창: ${S.resPop===false?'끔':S.simple&&S.resPop!==true?'알림만':'켬'}`,sub:'할 일 결과를 창으로',fn:()=>{S.resPop=S.resPop===false?true:S.resPop===true?false:(S.simple?true:false);toast(S.resPop===false?'결과 창을 껐다':'결과 창을 켰다');settingsMenu();return false;}},
     {label:`처음 하는 일 팁: ${S.tipsOn===false?'끔':'켬'}`,sub:'할 일마다 나오는 설명',fn:()=>{S.tipsOn=S.tipsOn===false;toast(`팁 ${S.tipsOn?'켜짐':'꺼짐'}`);settingsMenu();return false;}},
@@ -6842,13 +6845,25 @@ function fNewsroom(lines){const c=S.co,o=OUT();const rep=Math.max(0,c.staff-1);i
   S.fNewsN=n;lines.push({c:ex?'g':'',t:`편집국 기사 ${n}건 출고${ex?` · 단독 ${ex}건${first}`:''}${err}`});}
 // ===== 모바일: 한 화면에 하나씩 (할 일 · 현황 · 나 · 취재 · 사람 · 회사) =====
 const MNAV_IC={act:ic('clip'),dash:ic('chart'),me:ic('user'),work:ic('mic'),people:ic('users'),company:ic('bld')};
+// 6.1 하단 메뉴 순서: 오른손 엄지가 닿기 쉬운 가운데에 할 일을 두고, 순서는 기기마다 바꿀 수 있다
+const NAV_DEF=['company','me','act','work','dash','people'],NAV_NM={act:'할 일',dash:'현황',me:'나',work:'취재',people:'사람',company:'회사'};
+function navOrder(){try{const a=JSON.parse(localStorage.getItem('byline-nav')||'null');if(Array.isArray(a)&&a.length===NAV_DEF.length&&NAV_DEF.every(k=>a.includes(k)))return a;}catch(e){}return NAV_DEF.slice();}
+function navSave(a){try{localStorage.setItem('byline-nav',JSON.stringify(a));}catch(e){}window.__navO=a;}
+function navOrderMenu(sel){const o=window.__navO||navOrder();
+  const bar=`<div class="nvo">${o.map((k,i)=>`<button type="button" data-nk="${k}" aria-pressed="${sel===k}"><i aria-hidden="true">${MNAV_IC[k]||'•'}</i><span>${NAV_NM[k]}</span></button>`).join('')}</div>`;
+  openModal('하단 메뉴 순서 설정',`<p class="hint">모바일 하단 메뉴의 순서를 바꾼다. 바꿀 두 칸을 차례로 누르면 자리가 바뀐다.</p>${bar}<p class="hint">${sel?`「${NAV_NM[sel]}」을(를) 골랐다. 바꿀 자리를 누르세요.`:'이 기기에만 저장된다.'}</p>`,[
+    {label:'오른손 배치 (기본)',sub:'회사 · 나 · 할 일 · 취재 · 현황 · 사람',fn:()=>{navSave(NAV_DEF.slice());render();navOrderMenu();return false;}},
+    {label:'왼손 배치',sub:'오른손 배치를 좌우로 뒤집는다',fn:()=>{navSave(NAV_DEF.slice().reverse());render();navOrderMenu();return false;}},
+    {label:'예전 배치',sub:'할 일 · 현황 · 나 · 취재 · 사람 · 회사',fn:()=>{navSave(['act','dash','me','work','people','company']);render();navOrderMenu();return false;}},
+    {label:'닫기',cls:'ghost'}]);
+  document.querySelectorAll('.nvo [data-nk]').forEach(b=>b.onclick=()=>{const k=b.dataset.nk;if(!sel)return navOrderMenu(k);if(sel===k)return navOrderMenu();const a=o.slice(),i=a.indexOf(sel),j=a.indexOf(k);[a[i],a[j]]=[a[j],a[i]];navSave(a);render();navOrderMenu();});}
 function mobileNav(){let nav=$('#mnav');const on=!!(S&&S.phase==='game');document.body.classList.toggle('mvon',on);
   if(!on){if(nav)nav.remove();['mv-act','mv-dash','mv-tab'].forEach(c=>document.body.classList.remove(c));return;}
   if(window.__mvTurn!==S.turn){window.__mvTurn=S.turn;window.__MV='act';}
   const tg=window.__TG||[];const curG=((tg.find(x=>x[2].some(t=>t[0]===S.tab))||tg[0]||[''])[0]);const mv=window.__MV||'act';
   ['mv-act','mv-dash','mv-tab'].forEach(c=>document.body.classList.toggle(c,c==='mv-'+mv));
   if(!nav){nav=document.createElement('nav');nav.id='mnav';nav.setAttribute('aria-label','화면 전환');document.body.appendChild(nav);}
-  const items=[['act','할 일',S.ap>0?S.ap:''],['dash','현황',''],...tg.map(g=>['tab:'+g[0],g[1],''])];
+  const NO=window.__navO||(window.__navO=navOrder());const items=[['act','할 일',S.ap>0?S.ap:''],['dash','현황',''],...tg.map(g=>['tab:'+g[0],g[1],''])].sort((a,b)=>{const ia=NO.indexOf(a[0].split(':')[1]||a[0]),ib=NO.indexOf(b[0].split(':')[1]||b[0]);return (ia<0?99:ia)-(ib<0?99:ib);});
   nav.innerHTML=items.map(([k,n,b])=>{const key=k.split(':')[1]||k;const sel=k==='act'?mv==='act':k==='dash'?mv==='dash':(mv==='tab'&&key===curG);return `<button data-mv="${k}" aria-pressed="${sel}"><i aria-hidden="true">${MNAV_IC[key]||'•'}</i><span>${n}</span>${b!==''?`<em>${b}</em>`:''}</button>`;}).join('');
   nav.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const k=b.dataset.mv;if(k.startsWith('tab:')){window.__MV='tab';const g=tg.find(x=>x[0]===k.slice(4));if(g){const last=S.tabLast&&S.tabLast[g[0]];S.tab=g[2].some(t=>t[0]===last)?last:g[2][0][0];}}else window.__MV=k;render();try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}});}
 // ===== 5.7 스토리라인 30편: 평소 플레이 중에 시작돼 몇 달에 걸쳐 이어지는 이야기. 끝까지 가면 칭호가 남는다 =====
