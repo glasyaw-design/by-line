@@ -1624,18 +1624,25 @@ const HEAD_Q={
  ent:['사생활이라 확인 불가','계약서와 달랐다','정산은 한 번도 없었다','회사가 막았다','멤버들은 몰랐다','연습생 때부터 그랬다']
 };
 const HEAD_R=['사실과 다르다','절차상 문제없다','확인 중이다','법적 대응하겠다','오해가 있었다','재발 방지하겠다','책임을 통감한다'];
-function headOpts(it,on){const c=(typeof cat1==='function'&&DEPTS[it.d]?cat1(it.d):it.d);const qs=HEAD_Q[c]||HEAD_Q.soc;const T=it.title,S0=(it.subj||'당국').replace(/ 측$/,'');
+function headCore(it){const ok=k=>it.facts.find(f=>f.k===k&&fOK(f));const key=it.facts.find(f=>f.key&&fOK(f))||it.facts.find(fOK)||it.facts[0];const w=ok('w');const q=w&&(w.t.match(/"([^"]+)"/)||[])[1];return {K:key?yamaShort(key.t.replace(/^\*/,''),26):'',N:ok('n')?yamaShort(ok('n').t,22):'',Wq:q?yamaShort(q,22):'',Sc:ok('s')?yamaShort(ok('s').t,22):''};}
+function headYama(it,W,pre){const T=it.title,C=headCore(it),S0=(it.subj||'당국').replace(/ 측$/,'');const a=W&&W.angle;
+  const m={st:C.K&&`${T}…${C.K}`,ex:`왜 반복되나…${T}`,re:C.Sc?`[현장] ${T}…${C.Sc}`:`[현장] ${T}, 직접 가 보니`,iv:`[탐사] ${T}…${S0} 책임은 어디까지`,hu:C.Wq?`"${C.Wq}"…${T}`:`${T}, 그 사람들의 이야기`,da:C.N?`${C.N}…숫자로 본 ${T}`:`숫자로 본 ${T}`,li:`${T}…내 생활엔 어떤 영향?`,cons:`${T}…재정·안보 부담 우려`,prog:`${T}…약자 피해는 누가 책임지나`,neu:`${T}…엇갈리는 시선`}[a];
+  return m?(/^\[|^"/.test(m)?m.replace(/^/,pre&&!/^\[/.test(m)?pre:''):pre+m):null;}
+function headOpts(it,on,W){const c=(typeof cat1==='function'&&DEPTS[it.d]?cat1(it.d):it.d);const qs=HEAD_Q[c]||HEAD_Q.soc;const T=it.title,S0=(it.subj||'당국').replace(/ 측$/,'');
   const nf=it.facts.find(f=>f.k==='n'&&fOK(f));const f=s=>s.replace(/\{T\}/g,T).replace(/\{S\}/g,S0).replace(/\{R\}/g,it.rebut==='got'?pick(HEAD_R):'답변 없음').replace(/\{Q\}/g,pick(qs)).replace(/\{N\}/g,nf?nf.t:'');
   const pre=it.excl?'[단독] ':'';const hs=[];
-  const hon=HEAD.honest.filter(h=>(!h.includes('{N}')||nf)&&(!h.includes('{R}')||it.rebut));
-  shuffle(hon).slice(0,2).forEach((h,i)=>hs.push({k:'honest',h:pre+f(h),s:i?'정확형 — 사실을 덧붙여 신뢰도↑':'정확형 — 신뢰도가 조금 오른다'}));
+  const C=headCore(it);const hon=HEAD.honest.filter(h=>(!h.includes('{N}')||nf)&&(!h.includes('{R}')||it.rebut));
+  const yh=headYama(it,W,pre);if(yh)hs.push({k:'honest',y:1,h:yh,s:`야마형 — 잡은 야마(${(W&&W.angleL||'').replace(/「[^」]*」 — /,'').slice(0,18)})를 제목에 살린다${W&&W.angle===it.yama?' · 이 기사에 딱 맞다, 완성도↑':''}`});
+  if(C.K&&!yh?.includes(C.K))hs.push({k:'honest',h:pre+`${it.title}…${C.K} 확인`,s:'정확형 — 확인한 핵심 사실을 박는다 · 신뢰도↑'});
+  shuffle(hon).slice(0,hs.length>=2?1:2).forEach((h,i)=>hs.push({k:'honest',h:pre+f(h),s:'정확형 — 신뢰도가 조금 오른다'}));
   hs.push({k:'calm',h:f(pick(HEAD.calm)),s:'절제형 — 반응은 약하지만 안전 (단독 표시 없음)'});
   hs.push({k:'bait',h:pre+f(pick(HEAD.bait)),s:`자극형 — 조회수 ${on?'2배 이상':'1.5배'}, 신뢰도↓ · 포털 벌점`});
-  if(it.tape||it.expert||it.rebut==='got')hs.push({k:'quote',h:pre+f(pick(HEAD.quote)),s:'따옴표형 — 녹취·인터뷰 발언을 살린다. 조회수 +20%'});
+  if(C.Wq){if(!(yh||'').includes(C.Wq))hs.push({k:'quote',h:pre+`"${C.Wq}"…${it.title}`,s:'따옴표형 — 확인한 증언을 살린다. 조회수 +20%'});}
+  else if(it.tape||it.expert||it.rebut==='got')hs.push({k:'quote',h:pre+f(pick(HEAD.quote)),s:'따옴표형 — 녹취·인터뷰 발언을 살린다. 조회수 +20%'});
   else hs.push({k:'quote',h:'(인용할 발언이 없다)',s:'당사자 인터뷰·녹취·전문가 코멘트가 있어야 쓸 수 있다',dis:1});
-  if(nf)hs.push({k:'num',h:pre+f(nf.t+'…{T}'),s:'숫자형 — 확인한 수치를 앞세운다. 완성도 +2, 조회수 +10%'});
+  if(nf&&!(yh||'').includes(yamaShort(nf.t,22)))hs.push({k:'num',h:pre+f(nf.t+'…{T}'),s:'숫자형 — 확인한 수치를 앞세운다. 완성도 +2, 조회수 +10%'});
   else hs.push({k:'ask',h:f(pick(HEAD.ask)),s:'의문형 — 문제 제기. 조회수 +25%, 신뢰도 조금↓'});
-  return hs;}
+  hs.forEach(x=>{x.h=x.h.replace(/(논란|의혹|정황|확인) \1/g,'$1').replace(/(\S+) \1(?=$|…)/g,'$1');});const seen=new Set();return hs.filter(x=>{if(seen.has(x.h))return false;seen.add(x.h);return true;});}
 
 
 // 취재 기법
@@ -1965,14 +1972,19 @@ function makeItem(d0,opts={}){tplRegrade();
   const st=S.st||{},sk=clamp(((st.inv||0)+(st.net||0))/200,0,1),vk=clamp((st.ver||0)/100,0,1),plain=opts.story||opts.anyScale||opts.ticker;let excl=opts.excl??chance((t[2]<30?.08:.15)*(.6+1.1*sk));const qlo=.88+.08*sk;const qv=plain?1:(qlo+Math.random()*(1.04+.04*sk-qlo));if(!plain&&!opts.pre&&S.phase==='game'&&!S.story&&chance(Math.min(.25,(typeof years==='function'?years():0)*.025))){const c=facts.filter(x=>!fOK(x)&&!x.key);if(c.length){const x=pick(c);x.conf=x.need;x.via.push('출입처');}}
   const _ti=f(t[1]),_sj=f(t[4]);
   let exclLost=0;if(excl&&!opts.story&&!opts.anyScale&&!S.founder&&S.phase==='game'&&!chance(S.simple?.88:.82)){excl=false;exclLost=1;}
-  {const imp0=Math.round(t[2]*(opts.mult||1)*qv);if(!opts.story)factsFor(facts,gradeOf({imp:imp0,excl}),f);}
+  {const imp0=Math.round(t[2]*(opts.mult||1)*qv);if(!opts.story)factsFor(facts,gradeOf({imp:imp0,excl}),f,t[0]);}
   return{id:uid(),ent:findEnt(_ti,_sj,t[0]),base:t[1],title:_ti,d:t[0],subj:_sj,facts,imp:Math.round(t[2]*(opts.mult||1)*qv),heat:heatFor(excl),excl,ideo:t[3].includes('i'),adv:t[3].includes('a'),hoax:opts.hoax!=null?!!opts.hoax:(!opts.ticker&&!opts.anyScale&&S.phase==='game'&&S.story!=='rookie'&&chance(.025*(DF().risk||1))),dud:!opts.hoax&&!opts.ticker&&!opts.anyScale&&!opts.pre&&S.phase==='game'&&chance(.11*(1-.55*vk)),alert:0,rebut:null,expert:0,tape:0,slot:null,chain:opts.chain||0,born:S.turn,src:opts.src||'',exclLost};
 }
 // ===== 5.7 아이템 등급에 따라 알아야 할 사실 수가 다르다: C 2~3 · B 3~4 · A 5 · S 6 =====
 const EXTRA_F=['d:내부 결재 문서','d:회의록 원본','d:감사 보고서 초안','d:계약서 사본','n:관련 예산 {m}억 원','n:최근 3년 유사 사례 {n}건','n:피해 규모 {m}억 원 추정','w:전직 직원 "윗선이 알고 있었다"','w:관계자 "지시가 있었다"','w:피해자 "여러 번 문제를 제기했다"','s:관련 장소 직접 확인','s:현장 사진 확보'];
-function factsFor(facts,g,f){const want={C:chance(.5)?2:3,B:chance(.55)?3:4,A:5,S:6}[g]||4;
+const EXTRA_C={
+ ent:['d:계약서 원본','d:정산 내역서','w:전 매니저 "회사가 알고 있었다"','w:스태프 "현장 분위기가 험악했다"','n:미지급 정산금 {m}억 원','s:촬영장·사옥 앞 직접 확인','w:업계 관계자 "오래전부터 돌던 얘기"','d:SNS 게시물 원본'],
+ spo:['d:구단 내부 문건','d:협회 회의록','w:전 선수 "말도 못 했다"','w:학부모 "감독이 시킨 일"','n:관련 금액 {m}억 원','s:훈련장 직접 확인','n:최근 3년 유사 징계 {n}건','d:계약서 사본'],
+ cul:['d:지원금 집행 내역','d:심사 회의록','w:전 직원 "이름만 빌려줬다"','w:작가 "계약서도 없었다"','n:지원 예산 {m}억 원','s:공연장·전시장 직접 확인','d:계약서 사본','n:최근 3년 유사 사례 {n}건'],
+ int:['d:외교 전문','d:현지 당국 발표문','w:교민 "대사관은 연락도 없었다"','w:현지 관계자 증언','n:피해 교민 {n}명','s:현지 통신원 현장 확인','n:관련 금액 {m}억 원','d:계약서 사본']};
+function factsFor(facts,g,f,cat){const XF=(cat&&EXTRA_C[cat])||EXTRA_F;const want={C:chance(.5)?2:3,B:chance(.55)?3:4,A:5,S:6}[g]||4;
   while(facts.length>want){const i=facts.map((x,k)=>[x,k]).filter(([x])=>!x.key&&!fOK(x)).map(([,k])=>k).pop();if(i==null)break;facts.splice(i,1);}
-  const kinds=new Set(facts.map(x=>x.k));let g2=0;while(facts.length<want&&g2++<20){const pool=EXTRA_F.filter(x=>!facts.some(y=>y.t===f(x.slice(2))));const prefer=pool.filter(x=>!kinds.has(x[0]));const x=pick(prefer.length?prefer:pool);if(!x)break;const fx=parseFacts(x+'|'+x,f)[0];fx.key=false;fx.need=1;facts.push(fx);kinds.add(fx.k);}
+  const kinds=new Set(facts.map(x=>x.k));let g2=0;while(facts.length<want&&g2++<20){const pool=XF.filter(x=>!facts.some(y=>y.t===f(x.slice(2))));const prefer=pool.filter(x=>!kinds.has(x[0]));const x=pick(prefer.length?prefer:pool);if(!x)break;const fx=parseFacts(x+'|'+x,f)[0];fx.key=false;fx.need=1;facts.push(fx);kinds.add(fx.k);}
   if(!facts.some(x=>x.key)&&facts.length){facts[0].key=true;facts[0].need=S&&S.simple?1:2;}
   if(g==='C')facts.forEach(x=>{if(x.key)x.need=1;});return facts;}
 // 5.7 후속 제목: 원제목 + 단계별 꼬리 하나만. 같은 꼬리 반복 없이 시리즈가 흘러간다
@@ -1984,7 +1996,8 @@ function followLink(f,it){const n=(it.chain||0)+1;const t=followTitle(it,n);f.ti
 function followFixTitles(){try{(S.items||[]).forEach(i=>{if(/ — .* — /.test(i.title||'')){const parts=i.title.split(' — ');const suf=parts[parts.length-1];if((i.chain||0)>FOLLOW_MAX)i.chain=FOLLOW_MAX;i.title=`[후속${(i.chain||1)>1?i.chain:''}] ${fBase(i.title)} — ${suf}`;i.fsuf=[suf];}});}catch(e){}}
 function followUp(it,clip){
   const f=filler(vars());const n=it.chain+1;
-  const facts=parseFacts(shuffle(FOLLOW_F).slice(0,4).join('|'),f);
+  const FC={ent:['d:소속사 내부 문건','w:추가 피해 증언 잇따라','n:유사 사례 {m}건 추가 확인','w:*전 관계자 "회사가 덮었다"','s:사옥 앞 팬 항의','d:*계약서 원본 입수'],spo:['d:협회 징계위 소집 공문','w:추가 피해 선수 증언','n:유사 사례 {m}건 추가 확인','w:*전 코치 "윗선에 보고됐다"','s:훈련장 현장','d:*구단 내부 문건'],cul:['d:재단 감사 착수 공문','w:추가 피해 예술인 증언','n:유사 사례 {m}건 추가 확인','w:*내부자 "윗선에 보고됐다"','d:*지원금 집행 내역']}[cat1(it.d)];
+  const facts=parseFacts(shuffle(FC||FOLLOW_F).slice(0,4).join('|'),f);
   const ft=followTitle(it,n);
   return{id:uid(),ent:it.ent,base:it.base,title:ft.title,fsuf:ft.fsuf,d:it.d,subj:it.subj,facts,imp:Math.round(it.imp*.9),heat:heatFor(true),excl:!!it.excl&&chance(.35),ideo:it.ideo,adv:it.adv,hoax:false,alert:Math.round(it.alert*.5),rebut:null,expert:0,tape:0,slot:null,chain:n,born:S.turn,src:'후속'};
 }
@@ -2605,8 +2618,8 @@ function writeFacts(W){
 }
 function writeHead(W){
   const it=W.it;const pre=it.excl?'[단독] ':'';const on=OUT().type==='online';
-  const hs=headOpts(it,on);
-  openModal('4단계 · 제목 달기',`<p>독자가 가장 먼저 보는 한 줄이다. 제목 감각(능력치)이 높을수록 어떤 제목이든 효과가 커진다.</p>`,hs.map(x=>({label:x.h,sub:x.s,disabled:!!x.dis,rec:x.k===(hs.find(y=>y.k==='honest'&&!y.dis)?'honest':'quote'),risk:x.k==='bait',fn:()=>{W.head=x.k;W.headline=x.h;writeMedium(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{S.simple?RUN.write():writeFacts(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
+  const hs=headOpts(it,on,W);
+  openModal('4단계 · 제목 달기',`<p>독자가 가장 먼저 보는 한 줄이다. 제목 감각(능력치)이 높을수록 어떤 제목이든 효과가 커진다.</p>`,hs.map(x=>({label:x.h,sub:x.s,disabled:!!x.dis,rec:x===(hs.find(y=>y.y&&W.angle===it.yama)||hs.find(y=>y.k==='honest'&&!y.dis)),risk:x.k==='bait',fn:()=>{W.head=x.k;W.headY=x.y?1:0;W.headline=x.h;writeMedium(W);return false;}})).concat([{label:'← 이전 단계',cls:'ghost',fn:()=>{S.simple?RUN.write():writeFacts(W);return false;}},{label:'쓰기 취소',sub:'행동력은 쓰지 않는다',cls:'ghost'}]));
 }
 function writeMedium(W){
   const t=OUT().type;
@@ -2688,7 +2701,7 @@ function writeFinish(W){
   {const gr=gradeOf(it),cov=ver.reduce((a,f)=>a+fw(f),0)/Math.max(1,allW);fx.eval+=({B:.3,A:.8,S:1.4}[gr]||0)*(it.excl?1.3:1);fx.fame+=({B:.3,A:.8,S:1.6}[gr]||0)*(it.excl?1.3:1);
    fx.eval*=.65+.35*cov;fx.fame*=.6+.4*cov;if(cov<.5)notes.push('데스크: "확인된 게 절반도 안 되잖아. 다음엔 더 파 와."');else if(cov>=.99&&(gr==='A'||gr==='S'))notes.push('데스크: "빈틈이 없다. 이게 기사지."');}
   if(it.slot){if(it.slot.due>=S.turn){fx.eval+=1;notes.push(`발제대로 ${SLOT[it.slot.g].n}에 맞춰 출고했다.`);}}
-  if(W.head==='bait'){fx.trust=-3;S.flags.bait=(S.flags.bait||0)+1;}else if(W.head==='honest')fx.trust=.8;else if(W.head==='ask')fx.trust=-.6;else if(W.head==='quote'||W.head==='num')fx.trust=.4;if(W.head==='num')q=Math.min(100,q+2);
+  if(W.head==='bait'){fx.trust=-3;S.flags.bait=(S.flags.bait||0)+1;}else if(W.head==='honest')fx.trust=.8;else if(W.head==='ask')fx.trust=-.6;else if(W.head==='quote'||W.head==='num')fx.trust=.4;if(W.head==='num')q=Math.min(100,q+2);if(W.headY)q=Math.min(100,q+(W.angle===it.yama?4:1));
   if(o.type==='eng')fx.lng=.5;
   spend(1,10);const txt=apply(fx);
   if(chance(risk))S.pending.push({type:'err',title:W.headline,due:S.turn+R(1,4)});
@@ -3978,6 +3991,9 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.0','편집국의 얼굴',[
+  '조정|기사 제목 개편: 후보가 전부 "아이템 제목+꼬리말"이던 것을, 확인한 핵심 사실·증언·숫자를 살린 제목으로 바꿨다. 1단계에서 잡은 야마가 제목 후보로 나오고(현장형·탐사형·사람 이야기형·해설형 등), 기사에 맞는 야마로 제목까지 맞추면 완성도 보너스. "논란 논란" 같은 중복도 정리',
+  '수정|엉뚱한 주제가 섞이던 문제: 취재 중 반전·대특종 후속이 같은 부서의 다른 사안을 끌어오던 것을 원래 사안에서 이어지게 고쳤고, 연예·스포츠·문화·국제 기사에 엉뚱한 공통 사실(감사 보고서 등)이 붙던 것을 분야 전용 사실로 바꿨다. 광고주 보복 맞대응 후속도 그 회사 이야기로',
+  '조정|간소화 모드에선 새로 생긴 선택 팝업(특파원 찬스·지역 유지 청탁·기자 유형 사건)을 띄우지 않는다. 효과는 그대로',
   '주요|기자의 길: 매달 행동과 기사로 네 갈래 성향(단독·검증·인맥·속보)이 쌓이고, 1년쯤 한 방향으로 일하면 「스쿠프 헌터」「팩트의 수호자」「마당발」「속보 장인」 중 하나로 불린다. 유형마다 확실한 장점과 대가(예: 단독 아이템 +15% 대신 소송 위험 +30%), 유형 전용 사건, 결산 문구가 다르다. 방향을 바꾸면 유형도 바뀐다',
   '주요|기록실(타이틀 화면): 끝낸 판마다 이름·직급·회사·대표작·점수가 남는 명예의 전당, 16종 엔딩 도감(못 본 엔딩은 힌트만), 이야기·칭호·회사·부서·장면 갤러리 수집, 도전 과제와 유산 현황',
   '주요|세계가 이어진다: 창간 모드에서 키운 매체가 다음 판 회사 목록에 실제 회사로 남고, 부장 이상으로 끝낸 지난 판 주인공이 같은 회사의 국장·사장으로 나온다. 지난 판의 대표 특종은 편집국 전설로 회자된다',
@@ -5531,7 +5547,7 @@ function moment(m,it,go){const L=MOMENTS[m];if(!L||!chance(.32)){go(0);return;}c
 // 반전: 사실을 확인할 때 가끔 판이 바뀐다
 function twist(it,T){if(it._tw||!chance(.1))return;it._tw=1;const r=Math.random();
   if(r<.4){it.imp=Math.min(99,it.imp+R(8,15));T.lines.push({c:'g',t:`반전 — 판이 커졌다. 윗선이 연결돼 있다. (파급력 ${it.imp})`});sfx('alarm');}
-  else if(r<.7&&(it.chain||0)<FOLLOW_MAX&&!S.items.some(x=>x!==it&&fBase(x.title)===fBase(it.title))){const f=followLink(makeItem(it.d,{excl:true,pre:1,mult:1.1}),it);S.items.push(f);T.lines.push({c:'g',t:`새 단서 — 후속 아이템이 생겼다: 「${f.title}」`});}
+  else if(r<.7&&(it.chain||0)<FOLLOW_MAX&&!S.items.some(x=>x!==it&&fBase(x.title)===fBase(it.title))){const f=followUp(it);f.excl=true;f.imp=Math.min(99,Math.round(it.imp*1.05));{const k=f.facts.find(x=>!fOK(x));if(k){k.conf=k.need;k.via.push('취재원');}}S.items.push(f);T.lines.push({c:'g',t:`새 단서 — 후속 아이템이 생겼다: 「${f.title}」`});}
   else if(it.hoax){T.lines.push({c:'r',t:'이상하다 — 제보 내용 일부가 조작된 흔적이 있다. 허위 제보일 수도 있다.'});it.hoaxHint=1;}
   else{it.heat=Math.max(1,it.heat-1);T.lines.push({c:'r',t:'타사 기자가 같은 사람을 만나고 갔다는 말을 들었다. 서둘러야 한다.'});}}
 
@@ -5823,7 +5839,7 @@ function scoopAfter(g,it,lines){if(!g)return;const o=OUT();if(g==='특종'||g===
   if(S.comp)S.comp.forEach(c=>{c.aggro=clamp((c.aggro||0)+(g==='대특종'?8:g==='특종'?4:1),0,100);});
   if(S.agenda&&!S.agenda.done)S.agenda.p=Math.min(100,S.agenda.p+(g==='대특종'?12:g==='특종'?6:2));
   if(S.rank===0&&S.mission)S.mission.g.forEach(x=>{if(x.k==='write')x.c++;});
-  if(g==='대특종'){S.co.q=clamp(S.co.q+2,10,100);S.co.tr=Math.round(S.co.tr*1.03);if(!it.story&&(it.chain||0)<FOLLOW_MAX&&!S.items.some(x=>fBase(x.title)===fBase(it.title))){const f=followLink(makeItem(it.d,{excl:true,pre:1,mult:1.15}),it);S.items.push(f);lines.push('대특종의 후폭풍 — 내부자들이 줄줄이 연락해 왔다. 후속 아이템이 생겼다.');}else if(!it.story&&(it.chain||0)>=FOLLOW_MAX)lines.push('시리즈의 마침표 — 이 사안은 할 만큼 했다. 이제 판단은 독자와 수사기관의 몫이다.');
+  if(g==='대특종'){S.co.q=clamp(S.co.q+2,10,100);S.co.tr=Math.round(S.co.tr*1.03);if(!it.story&&(it.chain||0)<FOLLOW_MAX&&!S.items.some(x=>fBase(x.title)===fBase(it.title))){const f=followUp(it);f.excl=true;f.imp=Math.min(99,Math.round(it.imp*1.1));{const k=f.facts.find(x=>!fOK(x));if(k){k.conf=k.need;k.via.push('내부자');}}S.items.push(f);lines.push('대특종의 후폭풍 — 내부자들이 줄줄이 연락해 왔다. 후속 아이템이 생겼다.');}else if(!it.story&&(it.chain||0)>=FOLLOW_MAX)lines.push('시리즈의 마침표 — 이 사안은 할 만큼 했다. 이제 판단은 독자와 수사기관의 몫이다.');
     if(S.comp&&S.comp.length){const c=compPick();lines.push(`${cName(c)}가 하루 종일 우리 기사를 따라 썼다.`);}}
   if(g==='특종'&&chance(.3)&&S.comp&&S.comp.length){const c=compPick();lines.push(`${cName(c)} 데스크가 기자들을 불러 모았다는 소문이 돈다.`);}}
 // 속보: 기자에게도 사건이 터진다 (수습~부장)
@@ -6290,7 +6306,7 @@ function arcEvent(id,k,fol,a){const E=ENT[id],e=S.net[id];const nm=entName(id);c
   openModal('보복',`<p class="lede">${head}${esc(nm)}이(가) ${kind}에 나섰다.</p>`,[
     {label:'버틴다',sub:'신뢰↑ · 손실은 감수',fn:()=>{if(E.kind==='corp')e.cut=(e.cut||0)+12;else e.block=(e.block||0)+6;if(kind==='법적 대응 예고'&&chance(.4))S.pending.push({type:'suit',ent:id,due:S.turn+R(2,5),title:a.head||E.n});if(kind==='행사 협찬 철회')S.co.cash-=arcAmt(id,2);toast(apply({trust:.8}));}},
     {label:'찾아가 오해를 푼다',sub:'관계↑ · 신뢰 조금↓ · 기간 단축',fn:()=>{netUp(id,12);e.cut=Math.max(0,(e.cut||0)-6);e.block=0;toast(apply({trust:-.6}));}},
-    {label:'추가 보도로 맞선다',sub:'단독 후속 아이템 · 관계 더 나빠짐',fn:()=>{const it=makeItem(cat1(S.dept),{excl:true,mult:1.1});it.ent=id;it.title=`[후속] ${E.n}, ${pick(['내부 문건 입수','하청 갑질 정황','공시 누락 의혹','보복성 광고 중단 내막'])}`;S.items.push(it);netUp(id,-10);toast('후속 아이템을 잡았다');}}]);}
+    {label:'추가 보도로 맞선다',sub:'단독 후속 아이템 · 관계 더 나빠짐',fn:()=>{const it=makeItem(cat1(S.dept),{excl:true,mult:1.1});it.ent=id;const kind=pick(['내부 문건 입수','하청 갑질 정황','공시 누락 의혹','보복성 광고 중단 내막']);it.title=`[후속] ${E.n}, ${kind}`;it.subj=E.n;it.base='retal_'+id;it.facts=parseFacts(`d:*${E.n} ${kind==='공시 누락 의혹'?'미공시 계약 자료':'내부 문건'}|w:전직 직원 "${kind==='하청 갑질 정황'?'협력사에 떠넘겼다':'윗선 지시였다'}"|n:관련 금액 {m}억 원|s:${E.n} 본사 현장`,filler(vars()));S.items.push(it);netUp(id,-10);toast('후속 아이템을 잡았다');}}]);}
 
 // ===== 관계망 · 사내 관계 화면 =====
 function relPill(r,lo=-100,hi=100,good=40,bad=-25){const c=r>=good?'var(--good)':r<=bad?'var(--red)':'var(--siren)';return `<span class="rpill" style="--c:${c}"><i style="width:${clamp((r-lo)/(hi-lo)*100,2,100)}%"></i><b>${Math.round(r)}</b></span>`;}
@@ -6975,7 +6991,7 @@ function styleMonth(lines){if(!S||S.founder||S.story||S.phase!=='game')return;co
   if(S.styT&&S.styT!==prev){const st=STYLE[S.styT];lines.push({c:'g',t:`기자의 길 — 업계가 나를 「${st.n}」(${st.d})로 부르기 시작했다. 장점: ${st.up} · 대가: ${st.down}`});log(`기자 유형: ${st.n}`);}
   else if(prev&&!S.styT)lines.push({c:'',t:`기자의 길 — 「${STYLE[prev].n}」 색이 옅어졌다. 다시 방향을 잡을 때다`});
   // 유형별 고유 사건
-  const s=S.styT;if(!s||!chance(.14))return;
+  const s=S.styT;if(!s||S.simple||!chance(.14))return;
   if(s==='scoop')Q.push(()=>openModal('단독 경쟁',`<p class="lede">타사 ${pick(['캡','데스크','기자'])}가 같은 사안을 파고 있다는 첩보가 왔다. 먼저 쓰면 단독, 늦으면 물먹는다.</p>`,[{label:'오늘 밤 안에 끝낸다',sub:'확인이 반쯤 된 단독 아이템 · 컨디션↓ · 오보 위험',fn:()=>{const it=makeItem(S.dept,{excl:true,pre:1,mult:1.15});it.heat=Math.min(it.heat,2);S.items.push(it);S.hp=clamp(S.hp-8,0,100);toast(`「${it.title}」 · 추격까지 짧다`);}},{label:'확인될 때까지 기다린다',sub:'신뢰↑ · 단독은 놓칠 수 있다',fn:()=>{toast(apply({trust:1}));}}]));
   if(s==='fact')Q.push(()=>openModal('팩트체크 협업 제안',`<p class="lede">언론학회와 팩트체크 센터가 공동 검증 프로젝트에 이름을 올려 달라고 한다.</p>`,[{label:'참여한다',sub:'신뢰·사내 평가↑ · 행동력 1',fn:()=>{spend(1,3);toast(apply({trust:2,eval:1,ver:.5}));}},{label:'바빠서 사양한다',cls:'ghost'}]));
   if(s==='net')Q.push(()=>openModal('고위 인사의 부탁',`<p class="lede">오래 공들인 고위 인사가 조용히 불렀다. "자네한테만 주는 거야. 대신 내 쪽 얘기는 좀 빼 주고."</p>`,[{label:'정보만 받고 약속은 안 한다',sub:'단독 아이템 · 관계↓',fn:()=>{const it=makeItem(S.dept,{excl:true,keyConf:true});S.items.push(it);const so=(S.sources||[]).slice().sort((a,b)=>b.trust-a.trust)[0];if(so)so.trust=clamp(so.trust-10,0,100);toast(`「${it.title}」 · 그는 서운해했다`);}},{label:'거래한다',sub:'대형 단독 · 신뢰 크게↓ · 들키면 징계',fn:()=>{const it=makeItem(S.dept,{excl:true,keyConf:true,mult:1.25});S.items.push(it);apply({trust:-4});if(chance(.3)){S.disc=S.turn;log('징계: 견책 — 취재원과의 거래가 드러났다');}toast(`「${it.title}」`);}},{label:'거절한다',sub:'신뢰↑',fn:()=>toast(apply({trust:1.5}))}]));
@@ -7083,14 +7099,14 @@ function inSeason(){const m=month();const d=S.dept;return d==='base'?(m>=3&&m<=1
 function polSeason(){const m=month();return m===10||((typeof yearN==='function'?yearN():Math.floor(S.turn/YW))%2===0&&(m===3||m===4));}
 function deptSigMonth(lines){if(!deptSigOn())return;const f=deptFam();const add=it=>{S.items.push(it);return it;};
   if(f==='pol'){if(polSeason()){const it=add(makeItem(S.dept,{mult:1.15,excl:chance(.3)}));lines.push({c:'g',t:`${month()===10?'국정감사':'선거'} 시즌 — 정치부에 아이템이 쏟아진다 → 「${it.title}」`});S.polHot=S.turn;['ruling','opp'].forEach(k=>{if(S.net&&S.net[k])netUp(k,R(-7,4));});}}
-  if(f==='intl'){if(chance(.16))Q.push(()=>openModal('특파원 찬스',`<p class="lede">국제 회의 현장 출장 자리가 났다. 데스크가 "갈 사람?" 하고 쳐다본다.</p>`,[{label:'간다',sub:'어학·상식↑ · 해외 단독 아이템 · 컨디션↓',fn:()=>{gain('lng',2.5);gain('kno',1);S.hp=clamp(S.hp-8,0,100);const it=makeItem(S.dept,{excl:true,mult:1.1});S.items.push(it);toast(apply({fame:1})+` · 「${it.title}」`);}},{label:'이번엔 양보한다',sub:'동료 관계↑',fn:()=>{(S.cols||[]).slice(0,2).forEach(c=>relUp(c,4,'출장 양보'));}}]));}
+  if(f==='intl'){if(!S.simple&&chance(.16))Q.push(()=>openModal('특파원 찬스',`<p class="lede">국제 회의 현장 출장 자리가 났다. 데스크가 "갈 사람?" 하고 쳐다본다.</p>`,[{label:'간다',sub:'어학·상식↑ · 해외 단독 아이템 · 컨디션↓',fn:()=>{gain('lng',2.5);gain('kno',1);S.hp=clamp(S.hp-8,0,100);const it=makeItem(S.dept,{excl:true,mult:1.1});S.items.push(it);toast(apply({fame:1})+` · 「${it.title}」`);}},{label:'이번엔 양보한다',sub:'동료 관계↑',fn:()=>{(S.cols||[]).slice(0,2).forEach(c=>relUp(c,4,'출장 양보'));}}]));}
   if(f==='eco'){const mv=Math.round((Math.random()-.5)*10*10)/10;S.mkt=Math.round(((S.mkt||2500)*(1+mv/100))*10)/10;if(Math.abs(mv)>=3.2){const it=add(makeItem(S.dept,{mult:1.12,pre:1}));lines.push({c:mv<0?'r':'g',t:`시장 지표 ${mv>0?'+':''}${mv}% ${mv<0?'급락':'급등'} — 긴급 분석 아이템 「${it.title}」`});}else lines.push({c:'',t:`시장 지표 ${mv>0?'+':''}${mv}% · 지수 ${Math.round(S.mkt)}`});}
   if(f==='soc'){if(!S.breaking&&chance(.32)&&typeof newBreaking==='function'){try{newBreaking();lines.push({c:'r',t:'사건 당번 — 새벽에 큰 사건이 터졌다. 할 일에 "속보 대응"이 떴다'});}catch(e){}}S.hp=clamp(S.hp-2,0,100);}
   if(f==='court'&&chance(.45)){const it=add(makeItem(S.dept,{pre:1,mult:.95}));it.src='선고 일정';lines.push({c:'g',t:`선고 캘린더 — 이달 선고가 잡혔다. 판결문 일부를 미리 확인 → 「${it.title}」`});}
   if(f==='inv'){S.invP=Math.min(100,(S.invP||0)+R(9,16)+((S._mqA||[]).length?4:0));if(S.invP>=100){S.invP=0;const it=add(makeItem(S.dept,{excl:true,pre:2,mult:1.35,keyConf:true}));lines.push({c:'g',t:`장기 탐사 결실 — 몇 달 판 끝에 대형 단독이 손에 들어왔다 → 「${it.title}」`});}else lines.push({c:'',t:`장기 탐사 진척도 ${S.invP}%`});}
   if(f==='cul'){const n=(S._mqA||[]).length;if(S.dept==='ent'){if(n>=2){const fx=apply({fame:1,trust:-.4});lines.push({c:'',t:`조회수 전쟁 승리 — 연예 기사 ${n}건이 포털을 덮었다 (${fx})`});}}else{S.culRun=n?(S.culRun||0)+1:0;if(S.culRun>=3&&chance(.2)){S.culRun=0;S.awards=(S.awards||0)+1;const fx=apply({fame:2.5,eval:1.5});lines.push({c:'g',t:`석 달 연재가 쌓였다 — 문화 부문 기자상 수상 (${fx})`});}else if(S.culRun)lines.push({c:'',t:`연재 ${S.culRun}달째 · 석 달이 쌓이면 기자상 후보`});}}
   if(f==='spo'){if(!inSeason()){if(chance(.5)){const it=add(makeItem(S.dept,{excl:chance(.6),mult:1.05}));lines.push({c:'g',t:`비시즌 이적 시장 — 「${it.title}」`});}}}
-  if(f==='loc'){if(chance(.22))Q.push(()=>{const ce=typeof cityEnt==='function'?cityEnt():null;openModal('지역 유지의 청탁',`<p class="lede">지역 건설업체 회장이 저녁을 사며 봉투를 내민다. "우리 회사 기사는 좀 살살…"</p>`,[{label:'정중히 거절한다',sub:'신뢰↑ · 지역 권력과 껄끄러워진다',fn:()=>{if(ce)netUp(ce,-8);toast(apply({trust:1.5}));}},{label:'밥만 먹고 봉투는 돌려준다',sub:'관계 유지 · 소문 위험',fn:()=>{if(ce)netUp(ce,3);if(chance(.25))toast(apply({trust:-1.5})+' · 밥자리 소문이 돌았다');else toast('조용히 넘어갔다');}}]);});}}
+  if(f==='loc'){if(!S.simple&&chance(.22))Q.push(()=>{const ce=typeof cityEnt==='function'?cityEnt():null;openModal('지역 유지의 청탁',`<p class="lede">지역 건설업체 회장이 저녁을 사며 봉투를 내민다. "우리 회사 기사는 좀 살살…"</p>`,[{label:'정중히 거절한다',sub:'신뢰↑ · 지역 권력과 껄끄러워진다',fn:()=>{if(ce)netUp(ce,-8);toast(apply({trust:1.5}));}},{label:'밥만 먹고 봉투는 돌려준다',sub:'관계 유지 · 소문 위험',fn:()=>{if(ce)netUp(ce,3);if(chance(.25))toast(apply({trust:-1.5})+' · 밥자리 소문이 돌았다');else toast('조용히 넘어갔다');}}]);});}}
 function deptSigHTML(){if(!deptSigOn())return '';const f=deptFam(),F=DEPT_SIG[f];let st='';
   if(f==='pol')st=polSeason()?'지금은 시즌 — 아이템 폭주':'다음 시즌: 봄 선거(짝수 해) · 10월 국감';if(f==='eco')st=`지수 ${Math.round(S.mkt||2500)}`;if(f==='inv')st=`탐사 진척도 ${S.invP||0}%`;if(f==='spo')st=inSeason()?'시즌 중 · 행동력 +1':'비시즌 · 이적 시장';if(f==='cul'&&S.dept!=='ent')st=`연재 ${S.culRun||0}달째`;
   return `<div class="card rkc sigc"><div class="t">${ic('star')} ${esc(DEPTS[S.dept].n)} · ${esc(F[0])}${st?` <small>${esc(st)}</small>`:''}</div><p class="hint" style="margin:4px 0 0">${esc(F[1])}</p></div>`;}
