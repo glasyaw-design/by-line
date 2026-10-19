@@ -2151,7 +2151,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='6.4';
+const VERSION='6.5';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -3732,7 +3732,7 @@ function compDecide(c,ctx){const sc={};const lead=ctx.leader===c;const behindMe=
     if(c.cash>15&&['invest','digital','scoop'].includes(k))v+=Math.min(1.2,(c.cash-15)/12);
     if(c.share!=null&&c.share<ctx.avg*.7&&['scoop','digital','poach'].includes(k))v+=.6;
     // 내 매체의 약점을 노린다: 신뢰가 흔들리면 사설, 사기가 낮으면 영입, 단독이 잦으면 받아쓰기
-    if(k==='editorial'&&S.trust<40)v+=.6;
+    if(k==='editorial'&&S.trust<40&&S.trust>=20)v+=.6;if(k==='editorial'&&S.turn-(c.edT??-99)<24)v-=1;
     sc[k]=v;}
   return Object.entries(sc).sort((a,b)=>b[1]-a[1])[0][0];}
 function compMonth(lines){if(!S.comp)initComp();S.comp=S.comp.map(compFix);const o=OUT();
@@ -3741,17 +3741,19 @@ function compMonth(lines){if(!S.comp)initComp();S.comp=S.comp.map(compFix);const
   const myBig=(S.bigScoops||0)>(S._bs0||0);S._bs0=S.bigScoops||0;const ctx={myBig,lge:(S.lge||[]).some(e=>!e.done),fresh:(S.closedOut||[]).length>(S._co0||0),myShare:prevShare,myDelta:prevShare-(S.myShare0??prevShare),myQ:S.co.q,myScoop,avg:100/(S.comp.length+1),leader:S.comp.slice().sort((a,b)=>b.pw-a.pw)[0]};
   S._co0=(S.closedOut||[]).length;S.myShare0=prevShare;S.cHit=Math.max(0,(S.cHit||0)*.6);const news=[];
   ctx.drift=S.compDrift||0;S.comp.forEach(c=>{compFix(c);const pw0=c.pw;c._pw0=pw0;const k=compDecide(c,ctx);const m=C_MOVES[k];c.cash-=Math.max(0,m.cost);if(m.cost<0)c.cash-=m.cost;c.rep=c.last===k?(c.rep||1)+1:1;c.last=k;const n=cName(c);
-    if(k==='invest'){c.q=clamp(c.q+R(2,4),30,90);}
+    if(k==='invest'){c.q=clamp(c.q+R(2,4)*clamp((92-c.q)/30,.15,1),30,90);}
     if(k==='scoop'){if(chance(.25+c.q/250)){c.pw*=1.07;c.buzz=3;news.push([c,`[${n}] 대형 단독으로 포털 1위`,1]);if(S.items.some(i=>i.excl))S.items.filter(i=>i.excl).slice(0,1).forEach(i=>i.heat-=1);}else c.q+=1;}
     if(k==='abuse'){c.pw*=1.04;c.pen+=1;c.q-=1;if(c.pen>=4&&chance(.5)){c.pw*=.8;c.pen=0;news.push([c,`${n}, 포털 제휴 등급 강등`,0]);}}
     if(k==='lgebid'){const e=(S.lge||[]).find(x=>!x.done&&!x.rv);if(e){e.rv=c.id;e.fees=(e.fees||1)*.9;e.spons=(e.spons||1)*.92;news.push([c,`${n}, 우리 「${e.n}」와 같은 시기에 맞불 행사`,1]);}}
-    if(k==='pricecut'){const tgt=ENTS.find(e=>e[2]==='corp'&&S.net&&S.net[e[0]]&&(S.net[e[0]].cut>0||(S.arc&&S.arc[e[0]])));if(tgt&&chance(.5)){S.net[tgt[0]].cut=(S.net[tgt[0]].cut||0)+6;netUp(tgt[0],-4);news.push([c,`${n}, 우리와 틀어진 ${tgt[1]} 광고를 낚아챘다`,2]);}const pc=c.pcN||0;c.pcN=pc+1;c.cash-=.15*pc;c.pw*=1+.05/(1+pc*.6);S.cHit=Math.min(.08,(S.cHit||0)+.008*(1+Math.max(0,(S.adRate||1)-1)*2)/(1+pc*.4));if(pc===0&&S.turn-(c.pcNT??-99)>=24){c.pcNT=S.turn;news.push([c,`${n}, 광고 단가 30% 인하 공세`,1]);}else if(pc%6===0)news.push([c,`${n}, 광고 단가 덤핑 ${Math.round(pc)}개월째`,1]);c.aggro+=pc?1:4;}
+    if(k==='pricecut'){const tgt=ENTS.find(e=>e[2]==='corp'&&S.net&&S.net[e[0]]&&(S.net[e[0]].cut>0||(S.arc&&S.arc[e[0]])));if(tgt&&chance(.5)){S.net[tgt[0]].cut=(S.net[tgt[0]].cut||0)+6;netUp(tgt[0],-4);news.push([c,`${n}, 우리와 틀어진 ${tgt[1]} 광고를 낚아챘다`,2]);}const pc=c.pcN||0;c.pcN=pc+1;c.cash-=.15*pc;c.pw*=1+.05/(1+pc*.6);S.cHit=Math.min(.08,(S.cHit||0)+.008*(1+Math.max(0,(S.adRate||1)-1)*2)/(1+pc*.4));if(pc===0&&S.turn-(c.pcNT??-99)>=24){c.pcNT=S.turn;news.push([c,`${n}, 광고 단가 30% 인하 공세`,1]);}else if(pc%12===0)news.push([c,`${n}, 광고 단가 덤핑 ${Math.round(pc)}개월째`,1]);c.aggro+=pc?1:4;}
     if(k!=='pricecut')c.pcN=0;
     if(k==='digital'){c.dig++;c.pw*=1.03;if(c.dig===3)news.push([c,`${n}, 디지털 구독 전환 성공`,0]);}
-    if(k==='poach'){c.q+=2;if(S.team&&S.team.length>4&&S.rank>=2&&chance(clamp(.35*(1+(60-(S.wMood??60))/80)*clamp((c.pay||1)/(S.payLv||1),.7,1.4),.08,.8))){const t=poachPick();S.team=S.team.filter(x=>x!==t);if(S.co)S.co.staff=Math.max(1,S.co.staff-1);S.co.q-=1;news.push([c,`${n}, 우리 ${t.name} 기자 영입`,2]);log(`${t.name} 기자, ${n}로 이적`);}else news.push([c,`${n}, 경력기자 대거 영입`,0]);}
+    if(k==='poach'){c.q+=2*clamp((92-c.q)/30,.15,1);if(S.team&&S.team.length>4&&S.rank>=2&&S.turn-(S.poachT??-99)>=12&&S.turn-(c.poachT??-99)>=24&&chance((DF()===DIFF.easy?.6:DF()===DIFF.hard?1.15:1)*clamp(.35*(1+(60-(S.wMood??60))/80)*clamp((c.pay||1)/(S.payLv||1),.7,1.4),.08,.8))){const t=poachPick();S.poachT=S.turn;c.poachT=S.turn;S.team=S.team.filter(x=>x!==t);if(S.co)S.co.staff=Math.max(1,S.co.staff-1);S.co.q-=1;news.push([c,`${n}, 우리 ${t.name} 기자 영입`,2]);log(`${t.name} 기자, ${n}로 이적`);}else news.push([c,`${n}, 경력기자 대거 영입`,0]);}
     if(k==='follow'&&myScoop){c.pw*=1.02;S.cHit=Math.min(.06,(S.cHit||0)+.006);news.push([c,`${n}, 우리 단독 받아쓰기 + 후속 공세`,1]);}
-    if(k==='editorial'){c.aggro+=6;const caught=(S.corrLog||[]).some(x=>x.caught&&x.t>S.turn-YW);if(chance(caught?.7:.4)){S.trust=Math.max(0,S.trust-(caught?1.2:.6));news.push([c,caught?`${n}, 우리 「몰래 수정」 논란을 사설로 저격`:`${n} 사설, 우리 보도를 정면 비판`,2]);}}
-    if(k==='cut'){c.q-=4;c.pw*=.94;news.push([c,`${n}, 희망퇴직 단행`,0]);}
+    if(k==='editorial'){c.aggro+=6;const caught=(S.corrLog||[]).some(x=>x.caught&&x.t>S.turn-YW);if(S.turn-(c.edT??-99)>=24&&chance(caught?.7:.4)){c.edT=S.turn;S.trust=Math.max(0,S.trust-(caught?1.2:.6)*(S.trust<25?.5:1));news.push([c,caught?`${n}, 우리 「몰래 수정」 논란을 사설로 저격`:`${n} 사설, 우리 보도를 정면 비판`,2]);}}
+    if(k==='cut'){c.q-=4;c.pw*=.94;news.push([c,`${n}, 희망퇴직 단행 — 빈자리만큼 우리 독자가 늘었다`,1]);if(!S.founder||S.co)coBump(.006,.01);}
+    // 오래 적자를 못 벗어난 매체는 새 대주주에게 넘어가 전략을 바꾼다
+    c.bad=c.cash<0?(c.bad||0)+1:0;if(c.bad>=6){c.bad=0;const ns=pick(Object.keys(C_STRAT).filter(x=>x!==c.strat));c.strat=ns;c.base=compBase(ns);c.w=Object.assign({},c.base);c.cash=Math.max(4,c.pw/8);c.q=Math.max(c.q,52);c.pcN=0;c.aggro=30;news.push([c,`${n}, 새 대주주 인수 — ${C_STRAT[ns][0]} 전략으로 전환`,1]);}
     c.q=clamp(c.q+R(-2,2)+(55-c.q)*.04,30,90);c.pw=Math.max(5,c.pw*(1+(c.q-55)/700)+R(-1,1));{const xo=OUTLETS.find(y=>y.id===c.id);if(xo){const T0=Math.max(1,xo.p)*12,T=T0*(.7+c.q/170)*.78;c.pw+=(T-c.pw)*.15;c.pw=clamp(c.pw,T0*.5,T0*1.6);}}if(c.buzz>0){c.buzz--;}
     // 수입: 점유율만큼 돈이 들어온다
     if(month()===1&&S.turn%4===0&&c.rkY!==S.turn){c.rkY=S.turn;c.rk=R(1,3)+(c.strat==='talent'?2:0);c.q-=1;c.rkT=S.turn+16;}if(c.rkT&&S.turn>=c.rkT){const stay=Math.round((c.rk||0)*.6);c.q+=Math.min(3,stay)*.6;if((c.rk||0)-stay>0&&chance(.3))news.push([c,`${n} 수습 ${(c.rk||0)-stay}명 중도 퇴사`,0]);c.rkT=null;}
@@ -4194,6 +4196,12 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['6.5','경쟁의 균형',[
+  '조정|경쟁사가 우리 기자를 너무 자주 빼 가던 문제: 같은 회사가 연달아 데려가지 못하고, 쉬움 난이도에선 덜 노린다',
+  '조정|경쟁사 품질이 끝없이 올라 최상위에 붙어 있던 문제: 높아질수록 투자 효과가 줄어든다',
+  '조정|경쟁사 사설 공격이 신뢰가 낮을 때 연달아 몰아치던 악순환을 막았다. 같은 회사의 사설 공세엔 간격이 있고, 신뢰가 바닥일 땐 타격이 줄어든다',
+  '주요|경쟁사의 흥망: 경쟁사가 구조조정을 하면 빈자리만큼 우리 독자가 늘고, 오래 적자를 못 벗어난 매체는 새 대주주에게 넘어가 전략을 바꾼다',
+  '조정|경쟁사 덤핑 소식이 뜨는 빈도를 줄였다'],'2026.10.19',['경쟁사 AI']],
  ['6.4','사장실의 시간',[
   '주요|사장 임기가 두 배로 길어졌다. 임기가 끝나면 이사회가 연임을 심사한다: 이사회 KPI·신임·신뢰도·회사 자금이 좋으면 연임해 세 번까지, 정년까지 사장실을 지킬 수 있다. 할 일 화면에 몇 기 사장인지와 남은 임기가 보인다',
   '조정|경쟁사 AI: 매체마다 전략 색깔이 뚜렷해졌다. 특종형은 탐사에, 품질형은 기자 교육에, 디지털형은 디지털 투자에, 인재형은 영입에 힘을 쏟는다(예전엔 대부분 광고 단가 덤핑만 되풀이했다). 같은 수만 반복하지 않고, 돈이 남으면 투자하고, 밀리면 승부수를 던지고, 우리 신뢰가 흔들리면 사설로 공격한다',
