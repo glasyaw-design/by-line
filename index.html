@@ -823,6 +823,7 @@ b,strong{font-weight:600}
 .invnb{border:1px dashed var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:13px}.invnb .t{font-weight:700;margin-bottom:4px}.invnb ul{margin:0;padding-left:16px}.invnb li{margin:2px 0;line-height:1.45}.invnb b{color:var(--siren);margin-right:4px;font-weight:600}
 .clip .cq{margin:6px 0 4px;padding-left:10px;border-left:3px solid var(--siren);font-style:italic;font-size:13px;line-height:1.5}.clip .cq small{font-style:normal;opacity:.7}
 .paperv .pvq{position:absolute;font-style:normal;font-family:'Noto Serif KR','Noto Serif CJK KR',serif;font-size:clamp(9px,2.6vw,13px);color:#2b2b2b;text-align:center;line-height:1.35;padding:.25em .4em;background:#f1ead9;border-radius:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dmemo{border:1px dashed color-mix(in srgb,var(--siren) 60%,var(--line));background:color-mix(in srgb,var(--siren) 7%,transparent);border-radius:12px;padding:8px 12px;margin:8px 0 10px;font-size:13px}.dmemo .t{font-weight:700;margin-bottom:4px;color:var(--siren)}.dmemo ul{margin:0;padding-left:0;list-style:none}.dmemo li{margin:3px 0;line-height:1.45}.dmemo i{font-style:normal;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-right:6px;opacity:.85}
 </style>
 
 <div class="wrap">
@@ -1951,7 +1952,8 @@ const fw=f=>f.key?3:(f.k==='d'||f.k==='n'?2:1);
 
 // ================= 아이템 =================
 function vars(){return{star:pick(STARS),group:pick(GROUPS_K),agency:pick(AGENCIES),drama:pick(DRAMAS),show:pick(SHOWS),movie:pick(MOVIES),place:pick(PLACES),org:pick(ORGS),corp:pick(CORPS),team:pick(TEAMS),country:pick(COUNTRIES),city:pick(CITIES),party:pick(PARTIES),univ:pick(UNIVS),app:pick(APPS),n:R(3,90),m:R(12,400)};}
-function fixWon(s){return String(s).replace(/(\d+)천만/g,(m,n)=>{n=+n;if(n<10)return n+'천만';const e=Math.floor(n/10),r=n%10;return e+'억'+(r?' '+r+'천만':'');});}
+function wonE(v){const j=Math.floor(v/10000),r=v%10000;return [j?j+'조':'',r?(r%1000===0?(r/1000)+'천억':r+'억'):''].filter(Boolean).join(' ');}
+function fixWon(s){return String(s).replace(/(\d+)(천|백)억/g,(m,n,u)=>wonE(+n*(u==='천'?1000:100))).replace(/(\d+)천만/g,(m,n)=>{n=+n;if(n<10)return n+'천만';const e=Math.floor(n/10),r=n%10;return e+'억'+(r?' '+r+'천만':'');});}
 function filler(v){return s=>fixWon(s.replace(/\{(\w+)\}/g,(x,k)=>v[k]??x));}
 function parseFacts(str,f){
   const fs=str.split('|').map(x=>{const k=x[0];let t=x.slice(2);const key=t[0]==='*';if(key)t=t.slice(1);return{t:f(t),k,key,conf:0,via:[]};});
@@ -2879,14 +2881,14 @@ function jo2(w,a,b){const c=String(w||'').trim().slice(-1);const k=c.charCodeAt(
 function ro2(w){const c=String(w||'').trim().slice(-1);const k=c.charCodeAt(0);if(k>=44032&&k<=55203){const b=(k-44032)%28;return w+(b===0||b===8?'로':'으로');}if(/[0-9]/.test(c))return w+('1378'.includes(c)?'로':'으로');return w+'로';}
 function bat2(w){const k=String(w||'').trim().slice(-1).charCodeAt(0);return k>=44032&&k<=55203&&(k-44032)%28>0;}
 function qGo(q){return /다$/.test(q)?`"${q}"고`:bat2(q)?`"${q}"이라고`:`"${q}"라고`;}
-function deskFactSent(f){const t=f.t;const m=/^(.{0,16}?)\s*"([^"]{2,40})"\s*$/.exec(t);
+function deskFactSent(f){const t=String(f.t).replace(/\s*(확인|입수|존재|확보)$/,'');const m=/^(.{0,16}?)\s*"([^"]{2,40})"\s*$/.exec(t);
   if(m){const who=m[1].trim()||'한 관계자';return `${jo2(who,'은','는')} ${/다$/.test(m[2])?`"${m[2]}"라고`:qGo(m[2])} 말했다.`;}
   if(f.k==='d')return `취재팀이 입수한 문건에서도 ${jo2(t,'이','가')} 확인됐다.`;
-  if(f.k==='n')return `관련 자료를 분석했더니 「${t}」${bat2(t)?'이라는':'라는'} 결과가 나왔다.`;
+  if(f.k==='n')return /\d/.test(t)?`관련 자료를 분석했더니 「${t}」${bat2(t)?'이라는':'라는'} 결과가 나왔다.`:`취재팀은 ${t} 자료도 확보했다.`;
   if(f.k==='s')return `취재진이 현장을 찾아가 보니 ${jo2(t,'이','가')} 눈에 띄었다.`;
   return `취재 결과 ${jo2(t,'이','가')} 확인됐다.`;}
 function deskFlaws(d){const S0=d.subj||'해당 기관';const L=[];const fx=d.fx||[];
-  const nf=fx.find(f=>/\d/.test(f.t));if(nf){const tm=/\d+\s*(개월|년|일|세|시간|주|분|차|회)/.test(nf.t);const bad=nf.t.replace(/(\d+)/,(m)=>String(tm?(+m+R(2,9)):+m*10));const fs=deskFactSent({t:bad,k:nf.k});L.push({t:fs,e:`취재 메모에는 "${nf.t}"${ro2(nf.t).slice(nf.t.length)} 적혀 있다. 숫자를 옮겨 적다 틀렸다.`,src:nf.t});}
+  const NRE=/\d+(?![\d,.])(?!\s*대)/;const nf=fx.find(f=>f.k==='n'&&NRE.test(f.t));if(nf){const tm=/\d+\s*(개월|년|일|세|시간|주|분|차|회)/.test(nf.t);const bad=nf.t.replace(NRE,(m)=>String(tm?(+m+R(2,9)):+m*10));const fs=deskFactSent({t:bad,k:nf.k});L.push({t:fs,e:`취재 메모에는 "${nf.t}"${ro2(nf.t).slice(nf.t.length)} 적혀 있다. 숫자를 옮겨 적다 틀렸다.`,src:nf.t});}
   const mo=pick([[2,30],[2,31],[4,31],[6,31],[9,31],[11,31]]);L.push({t:`${jo2(S0+' 측','은','는')} ${mo[0]}월 ${mo[1]}일까지 해명 자료를 내기로 했다.`,e:`${mo[0]}월에는 ${mo[1]}일이 없다.`});
   {const a=R(4,9)*10,b=a+a/2;L.push({t:`관련 신고는 지난해 ${a}건에서 올해 ${b}건으로 ${a/2}% 늘었다.`,e:`${a}건에서 ${b}건이면 50% 증가다. 늘어난 건수를 퍼센트로 착각했다.`});}
   {const n=R(3,6)*40;L.push({t:`응답자 ${n}명 중 ${n/4}명, 즉 3분의 1이 같은 경험을 했다고 답했다.`,e:`${n/4}/${n}은 4분의 1이다.`});}
@@ -2897,9 +2899,10 @@ function deskFlaws(d){const S0=d.subj||'해당 기관';const L=[];const fx=d.fx|
   L.push({t:`관련 손실은 약 ${R(2,9)*10}여억 원으로 추산된다.`,e:'"약"과 "여"를 겹쳐 썼다. 둘 중 하나만.'});
   L.push({t:'이는 본지가 국내 최초로 확인한 사실이다.',e:'확인할 수 없는 "최초" 주장. 근거 없는 과장.'});
   return [L[0]].concat(shuffle(L.slice(1)));}
+function deskMemo(d){const fx=d.fx&&d.fx.length?d.fx:[{t:d.f0,k:'d'}];return `<div class="dmemo"><div class="t">${esc(d.w||'기자')} 기자 취재 메모 · 확인된 사실</div><ul>${fx.map(f=>`<li><i>${FK[f.k]||'사실'}</i>${esc(f.t)}</li>`).join('')}</ul></div>`;}
 function deskSents(d,nb,nok){const S0=d.subj||'해당 기관';const fx=(d.fx&&d.fx.length?d.fx:[{t:d.f0,k:'d'}]);
   const FL=deskFlaws(d).slice(0,nb);const srcT=(FL.find(x=>x.src)||{}).src;
-  const ok=[`${jo2(S0,'을','를')} 둘러싼 의혹이 본지 취재로 확인됐다.`].concat(fx.filter(f=>f.t!==srcT).slice(0,3).map(deskFactSent),[`${jo2(S0+' 측','은','는')} ${qGo(pick(['사실관계를 확인 중','절차에 따라 진행했다','일부 사실과 다르다']))} 해명했다.`,pick([`관계 당국은 다음 주 조사 결과를 발표할 예정이다.`,`본지는 ${S0} 측에 여러 차례 입장을 물었으나 답변을 받지 못했다.`,'관계 부처는 실태 조사에 착수했다고 밝혔다.'])]);
+  const ok=[`본지 취재팀이 ${jo2(S0,'을','를')} 둘러싼 사안을 취재했다.`].concat(fx.filter(f=>f.t!==srcT).slice(0,3).map(deskFactSent),[chance(.6)?`${jo2(S0+' 측','은','는')} ${qGo(pick(['사실관계를 확인 중','따로 밝힐 입장이 없다','일부 내용은 사실과 다르다']))} 밝혔다.`:`본지는 ${S0} 측에 여러 차례 입장을 물었으나 답변을 받지 못했다.`,'취재팀은 후속 취재를 이어 갈 예정이다.']);
   const okS=ok.slice(0,1).concat(shuffle(ok.slice(1))).slice(0,nok).map(t=>({t,bad:0}));
   const badS=FL.map(f=>({t:f.t,e:f.e,bad:1}));
   return {ss:[okS[0]].concat(shuffle(okS.slice(1).concat(badS))),bad:badS};}
@@ -2925,7 +2928,7 @@ function bjDeskQuick(){const Q=S.dq.slice().sort((a,b)=>a.due-b.due).slice(0,2);
     lines.push(`<li class="${miss?'':'g'}">${esc(d.w)} · 「${esc(d.t)}」 → 완성도 ${d.q}→${q} · ${esc(c.place||'')}${miss?` · 놓친 문제 ${miss}곳`:''}</li>`);});
   const t=apply({eval:.5,kno:.2});openModal('빠른 데스킹 결과',`<ul class="feed">${lines.join('')}</ul><p class="hint">빨리 넘기면 시간은 벌지만 후배는 덜 큰다.</p>${fxLine(t)}`);}
 function bjDeskFull(d){const nb=d.fl,nok=S.simple?3:4;const DS=deskSents(d,nb,nok);const bad=DS.bad,ss=DS.ss;
-  openModal(`데스킹 1/3 · ${d.w} 기자 초고`,`<p class="lede">「${esc(d.t)}」 · 초고 완성도 ${d.q}</p><p>문제가 있는 문장 <b>${nb}개</b>를 골라 지워라. 멀쩡한 문장을 자르면 후배가 상처받는다.</p>${ss.map((x,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(x.t)}</button>`).join('')}`,[{label:'다음: 제목',fn:()=>{
+  openModal(`데스킹 1/3 · ${d.w} 기자 초고`,`<p class="lede">「${esc(d.t)}」 · 초고 완성도 ${d.q}</p>${deskMemo(d)}<p>취재 메모와 대조해 문제가 있는 문장 <b>${nb}개</b>를 골라 지워라. 숫자가 메모와 다르거나, 있을 수 없는 날짜, 계산이 틀린 비율, 근거 없는 단정·과장, 겹친 표현, 제보자 노출, 맞춤법 오류를 찾는다. 멀쩡한 문장을 자르면 후배가 상처받는다.</p>${ss.map((x,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(x.t)}</button>`).join('')}`,[{label:'다음: 제목',fn:()=>{
     const sel=[...document.querySelectorAll('#mb .sent')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>+b.dataset.i);let hit=0,fal=0;sel.forEach(i=>ss[i].bad?hit++:fal++);const miss=bad.length-hit;
     const fb=bad.map(b=>`<li class="${sel.includes(ss.indexOf(b))?'g':'r'}">${esc(b.t)}<br><small>${esc(b.e)}</small></li>`).join('');
     bjDeskHead(d,{hit,fal,miss,fb});return false;}},{label:'그만두기',cls:'ghost'}]);
@@ -2954,7 +2957,7 @@ RUN.desk=function(){if(bjDeskOn())return bjDeskOpen();
   const it=makeItem(S.rank>=4?pick(Object.keys(DEPTS)):S.dept);
   const subj=(it.subj||'').replace(/ 측$/,'');const nb=S.simple?1:S.rank>=4?3:2;const nok=S.simple?3:S.rank>=4?4:3;
   const DS=deskSents({subj,t:it.title,fx:it.facts.map(f=>({t:f.t,k:f.k})),f0:(it.facts[0]||{t:''}).t},nb,nok);const bad=DS.bad,ss=DS.ss;const writer=S.team.length?pick(S.team).name:rname();
-  openModal(`데스킹 · ${writer} 기자 초고`,`<p class="lede">「${esc(it.title)}」 초고다. 문제가 있는 문장 ${nb}개를 골라 지워라.</p>${ss.map((s,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(s.t)}</button>`).join('')}`,[{label:'데스킹 완료',fn:()=>{
+  openModal(`데스킹 · ${writer} 기자 초고`,`<p class="lede">「${esc(it.title)}」 초고다.</p>${deskMemo({w:writer,fx:it.facts.map(f=>({t:f.t,k:f.k})),f0:(it.facts[0]||{t:''}).t})}<p>취재 메모와 대조해 문제가 있는 문장 ${nb}개를 골라 지워라. 숫자가 메모와 다르거나, 있을 수 없는 날짜, 계산이 틀린 비율, 근거 없는 단정·과장, 겹친 표현, 제보자 노출, 맞춤법 오류를 찾는다.</p>${ss.map((s,i)=>`<button type="button" class="sent" data-i="${i}" aria-pressed="false">${esc(s.t)}</button>`).join('')}`,[{label:'데스킹 완료',fn:()=>{
     const sel=[...document.querySelectorAll('#mb .sent')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>+b.dataset.i);
     let hit=0,fal=0;sel.forEach(i=>ss[i].bad?hit++:fal++);
     const miss=bad.length-hit;S.flags.desked=(S.flags.desked||0)+1;
@@ -4155,7 +4158,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.2','숨 고르기',[
   '수정|채용 후보 명단을 공짜로 무한히 새로 받을 수 있던 문제: 이제 한 달에 한 번만 새로 받는다',
-  '수정|데스킹 초고가 기사 주제와 상관없는 문장(보이스피싱 기사에 교육청 일정, 정치 기사에 환율 계산 등)으로 채워지던 문제: 이제 초고는 그 기사의 증언·문건·현장 사실과 상대 해명으로 짓고, 문제 문장도 그 기사 안에서 나온다(취재 메모와 다른 숫자, 없는 날짜, 침묵을 인정으로 해석, 제보자 신원 노출 등). 어색했던 제목 후보와 조사("민원는") 오류도 고쳤다',
+  '수정|데스킹 초고가 기사 주제와 상관없는 문장(보이스피싱 기사에 교육청 일정, 정치 기사에 환율 계산 등)으로 채워지던 문제: 이제 초고는 그 기사의 증언·문건·현장 사실과 상대 해명으로 짓고, 문제 문장도 그 기사 안에서 나온다(취재 메모와 다른 숫자, 없는 날짜, 침묵을 인정으로 해석, 제보자 신원 노출 등). 어색했던 제목 후보와 조사("민원는") 오류도 고쳤다. 초고 위에 기자의 취재 메모가 함께 떠서, 모든 문제 문장을 화면에 보이는 정보만으로 찾을 수 있다',
   '주요|취재 개편 — 단서가 단서를 부른다: 사실을 확인하면 가끔 새 단서(결재란의 이름, "그날 트럭이 들어왔다"는 말, 돈이 흘러간 업체…)가 나오고, 단서를 따라가면 다른 경로로 확인한 것으로 인정된다',
   '주요|취재 개편 — 막혀도 다른 길: 전화를 안 받으면 집 앞 뻗치기, 현장이 막히면 밤에 다시 가거나 근처 CCTV를 부탁하는 식으로 실패한 자리에서 새 선택지가 열린다',
   '주요|취재 개편 — 상대의 반격: 취재가 깊어지면 상대도 움직인다. 증거 인멸, 선제 해명 보도자료, 변호사 내용증명, 취재원 입막음에 어떻게 맞설지 고른다. 내용증명을 받고 반론 없이 쓰면 소송이 걸릴 수 있다',
