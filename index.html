@@ -2137,7 +2137,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='6.0';
+const VERSION='6.1';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -3551,7 +3551,7 @@ function compDecide(c,ctx){const sc={};const lead=ctx.leader===c;const behindMe=
     sc[k]=v;}
   return Object.entries(sc).sort((a,b)=>b[1]-a[1])[0][0];}
 function compMonth(lines){if(!S.comp)initComp();S.comp=S.comp.map(compFix);const o=OUT();
-  const my=o.p*12*(.7+S.co.q/170)*(.8+S.fame/250)*portalMult()*(1-(S.cHit||0));if(S.myPw0==null)S.myPw0=my;
+  const famE=S.founder||S.rank>=4?S.fame:30+((S.fame||0)-30)*[.2,.25,.3,.4][S.rank||0];const my=o.p*12*(.7+S.co.q/170)*(.8+famE/250)*portalMult()*(1-(S.cHit||0))*(S.coPwK||1);if(S.myPw0==null)S.myPw0=my;
   const prevShare=S.myShare||0;const recent=(S.clips||[]).filter(c=>c.turn>S.turn-4);const myScoop=recent.some(c=>c.excl&&(c.imp||0)>=30);
   const myBig=(S.bigScoops||0)>(S._bs0||0);S._bs0=S.bigScoops||0;const ctx={myBig,lge:(S.lge||[]).some(e=>!e.done),fresh:(S.closedOut||[]).length>(S._co0||0),myShare:prevShare,myDelta:prevShare-(S.myShare0??prevShare),myQ:S.co.q,myScoop,avg:100/(S.comp.length+1),leader:S.comp.slice().sort((a,b)=>b.pw-a.pw)[0]};
   S._co0=(S.closedOut||[]).length;S.myShare0=prevShare;S.cHit=Math.max(0,(S.cHit||0)*.6);const news=[];
@@ -3990,6 +3990,9 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['6.1','경영진의 머리',[
+  '조정|경영진 AI 개편: 내가 사장이 아닐 때 회사는 매달 무조건 품질에 돈을 붓던 것을 그만두고, 분기마다 상황을 읽어 전략을 고른다 — 보도 품질 방어 · 디지털 전환 · 광고 영업 강화(경쟁사 단가 공세 방어) · 비용 절감(적자일 때) · 내실 다지기. 분기 전략과 연말 결산이 월말 보고에 뜬다',
+  '수정|평기자 한 명의 업계 평판이 회사 전체 영향력·광고 점유율을 좌우하던 문제: 이제 직급이 낮을수록 내 평판이 회사 점유율에 주는 영향이 작고, 부국장 이상부터 온전히 반영된다'],'2026.10.19',['경영진 AI']],
  ['6.0','편집국의 얼굴',[
   '조정|기사 제목 개편: 후보가 전부 "아이템 제목+꼬리말"이던 것을, 확인한 핵심 사실·증언·숫자를 살린 제목으로 바꿨다. 1단계에서 잡은 야마가 제목 후보로 나오고(현장형·탐사형·사람 이야기형·해설형 등), 기사에 맞는 야마로 제목까지 맞추면 완성도 보너스. "논란 논란" 같은 중복도 정리',
   '수정|엉뚱한 주제가 섞이던 문제: 취재 중 반전·대특종 후속이 같은 부서의 다른 사안을 끌어오던 것을 원래 사안에서 이어지게 고쳤고, 연예·스포츠·문화·국제 기사에 엉뚱한 공통 사실(감사 보고서 등)이 붙던 것을 분야 전용 사실로 바꿨다. 광고주 보복 맞대응 후속도 그 회사 이야기로',
@@ -6477,15 +6480,27 @@ function oBase(o){if(!o._b)o._b={p:o.p,ad:o.ad,subs:o.subs,tr:o.tr,staff:o.staff
 function oModSave(o){S.oMod=S.oMod||{};S.oMod[o.id]={p:o.p,p0:o.p0,ad:o.ad,subs:o.subs,tr:o.tr,staff:o.staff,pay:o.pay,b:o._b};}
 function oReset(){OUTLETS.forEach(o=>{if(o._b&&!o.custom){Object.assign(o,{p:o._b.p,ad:o._b.ad,subs:o._b.subs,tr:o._b.tr,staff:o._b.staff,pay:o._b.pay});}});}
 function oModApply(s){const M=s&&s.oMod;if(!M)return;Object.keys(M).forEach(id=>{const o=OUTLETS.find(x=>x.id===id);const v=M[id];if(!o||!v)return;if(!o._b)o._b=v.b||{p:o.p,ad:o.ad,subs:o.subs,tr:o.tr,staff:o.staff,pay:o.pay};Object.assign(o,{p:v.p,p0:v.p0,ad:v.ad,subs:v.subs,tr:v.tr,staff:v.staff,pay:v.pay});});}
+// ===== 6.1 경영진 AI: 내가 사장이 아니면 회사는 분기마다 상황을 읽고 전략을 바꾼다 =====
+const CO_MODE={defend:'보도 품질 방어',digital:'디지털 전환',adpush:'광고 영업 강화',cost:'비용 절감',steady:'내실 다지기'};
+function coAI(lines,c,l,pr){const cq=S.comp.reduce((a,x)=>a+(x.q||50),0)/S.comp.length;const gap=cq-c.q;const base=S.myShare00||S.myShare||1;const slip=(base-(S.myShare||base))/base;
+  const hist=(S.coPr=(S.coPr||[]).concat([pr]).slice(-3));const mPr=hist.reduce((a,b)=>a+b,0)/hist.length;const cashM=c.cash/Math.max(.1,l.rev);
+  S.coPwK=Math.max(1,(S.coPwK||1)-.002);if(cashM>3&&gap>0)c.q=Math.min(90,c.q+gap*.04);
+  if(!S.coMode||S.turn%12===11){let m='steady';
+    if(mPr<-.03&&cashM<8)m='cost';else if(gap>2||slip>.05)m=gap>=slip*40?'defend':'adpush';else if((S.cHit||0)>.02)m='adpush';else if(c.tr<OUT().tr*1.05&&chance(.5))m='digital';else if(gap>0&&chance(.5))m='defend';
+    if(m!=='cost'&&cashM<2.5)m='steady';
+    S.coMode=m;(S.coModeY=S.coModeY||[]).push(m);if(lines&&m!=='steady')lines.push({c:'',t:`경영진 분기 전략: ${CO_MODE[m]} (회사 품질 ${Math.round(c.q)} · 경쟁사 평균 ${Math.round(cq)} · 점유율 ${f1(S.myShare||0)}%)`});}
+  const m=S.coMode;
+  if(m==='defend'&&c.q<cq+3){c.q=Math.min(90,c.q+.6+Math.max(0,gap)*.2);c.extra+=l.rev*.03;}
+  if(m==='digital'){S.coPwK=Math.min(1.1,(S.coPwK||1)+.006);c.bT+=.003;c.extra+=l.rev*.02;}
+  if(m==='adpush'){S.cHit=(S.cHit||0)*.6;c.adB+=.02;S.coPwK=Math.min(1.1,(S.coPwK||1)+.003);c.extra+=l.rev*.015;}
+  if(m==='cost'){c.extra-=l.rev*.03;c.q=Math.max(30,c.q-.15);}
+  if(month()===12&&S.coModeY&&S.coModeY.length){const cnt={};S.coModeY.forEach(x=>cnt[x]=(cnt[x]||0)+1);if(lines)lines.push({c:'',t:`경영진 올해 전략 결산 — ${Object.entries(cnt).map(([k,v])=>`${CO_MODE[k]} ${v}분기`).join(' · ')} · 광고 점유율 ${f1(S.myShare||0)}%`});S.coModeY=[];}}
 function standMonth(lines){if(S.story||!S.co||S.phase!=='game')return;const o=OUT();if(!o)return;const b=oBase(o);const c=S.co,l=c.last;
   if(S.oMomId!==o.id){S.oMomId=o.id;S.oMom=0;S.myShare00=null;}if(S.myShare00==null&&S.myShare)S.myShare00=S.myShare;
   if(S.founder){oModSave(o);return;}
   const pr=l&&l.rev?clamp(l.profit/l.rev,-.5,.5):0;
   // 경영진(AI)도 경쟁에 대응한다: 경쟁사 품질이 앞서거나 점유율이 밀리면 취재비·인력·디지털에 투자해 품질을 지킨다 (내가 사장이면 내가 정한다)
-  if(S.rank<7&&S.comp&&S.comp.length&&l&&l.rev){const cq=S.comp.reduce((a,x)=>a+(x.q||50),0)/S.comp.length;const gap=cq-c.q;const slip=S.myShare00?(S.myShare00-(S.myShare||S.myShare00))/S.myShare00:0;
-    const need=clamp(gap/6+slip*3+(c.q<52?.5:0),0,1.5);const room=c.cash>l.rev*2&&pr>-.15;
-    if(need>.15&&room){const k=Math.min(need,c.cash>l.rev*8?1.5:1);c.q=Math.min(90,c.q+.35+.35*k+Math.max(0,gap+2)*.2*Math.min(1,k));c.extra+=l.rev*.035*k;if(slip>.08)c.bT+=.002*k;S.coInvN=(S.coInvN||0)+1;
-      if(lines&&S.coInvN%4===1)lines.push({c:'',t:`경영진이 경쟁사에 맞서 보도 품질에 투자했다 (취재비·인력 보강 · 회사 품질 ${Math.round(c.q)}, 경쟁사 평균 ${Math.round(cq)})`});}}
+  if(S.rank<7&&S.comp&&S.comp.length&&l&&l.rev)coAI(lines,c,l,pr);
   const g=clamp(.5*(o.subs>0?c.subs/o.subs-1:0)+.35*(o.tr>0?c.tr/o.tr-1:0)+pr*.8+(S.myShare00?clamp(S.myShare/S.myShare00-1,-.5,.5)*.25:0)+(c.q-55)/110+((S.trust??50)-55)/220,-1,1);
   S.oMom=(S.oMom||0)*.88+g*.12;
   if(o.subs>0)o.subs=Math.max(b.subs*.35,o.subs+(c.subs-o.subs)*.03);if(o.tr>0)o.tr=Math.max(b.tr*.35,o.tr+(c.tr-o.tr)*.03);
