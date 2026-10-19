@@ -3995,6 +3995,7 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.1','경영진의 머리',[
+  '수정|아직 열리지 않은 할 일로만 채울 수 있는 미션·수습 평가 기준(캡과의 관계 등)이 미리 뜨던 문제를 고쳤다. 이제 해당 할 일이 열린 뒤부터 나온다',
   '주요|광고주와의 줄다리기가 다양해졌다: 무마 제안을 보도해 버리거나, "광고와 편집은 별개"라고 선을 긋거나, 보복당한 광고 자리를 다른 광고주로 메우는 선택지가 생겼다. 같은 선택이라도 상대 성향과 내 능력에 따라 결과가 갈리고, 한 번 무마를 받아 준 광고주는 다음에도 돈부터 내민다',
   '수정|위기 시스템 추가로 광고주 반응(무마·화해·보복)이 나오지 않던 문제를 고쳤다',
   '조정|모바일 하단 메뉴를 한 손으로 쓰기 편하게 바꿨다. 가장 자주 쓰는 할 일이 가운데로 왔다. 설정 → 하단 메뉴 순서에서 원하는 대로 바꿀 수 있다(왼손 배치·예전 배치도 있다)',
@@ -6386,15 +6387,16 @@ function relGlance(){if(!S.simple||!S.net)return '';const K=ENTS.filter(e=>S.net
 // 기간: ★1~2 3개월 · ★3~4 4개월 · ★5 6개월. 기준: 큰 곳일수록 평가 문턱이 높고, 매체 성격마다 보는 게 다르다.
 function rookieWeeks(o){o=o||OUT();const w=o.p>=5?24:o.p>=3?16:12;return S&&S.simple?Math.max(8,w-(o.p>=5?8:4)):w;}
 function rookieEv(o){o=o||OUT();return Math.round(({1:40,2:42,3:45,4:48,5:52}[o.p]||45)+(DF().need||0)/2);}
+function reqOpen(ids){return ids.some(id=>{const w=lockReason(id);return !w||/아이템/.test(w);});}
 function rookieReqs(o){o=o||OUT();if(S.story)return [];const mo=rookieWeeks(o)/4;const L=[{t:`수습 평가 ${Math.round(S.eval)}/${rookieEv(o)}`,ok:S.eval>=rookieEv(o)}];
   const rep=Math.max(2,Math.round(mo*(o.p>=4?1.5:1.2)*(S.simple?.6:1)));L.push({t:`정보보고 ${S.rkRep||0}/${rep}회`,ok:(S.rkRep||0)>=rep});
   const T=o.type;
   if(['daily','econ','local','weekly'].includes(T)){const n=Math.max(2,Math.round(mo*1.5*(S.simple?.6:1)));L.push({t:`${cat1(S.dept)==='spo'?'구장 돌기':'사쓰마와리'} ${S.rkSasu||0}/${n}회`,ok:(S.rkSasu||0)>=n});}
   if(T==='wire')L.push({t:`속도 ${Math.round(S.st.spd)}/24 (통신사는 1보가 생명)`,ok:S.st.spd>=24});
   if(['tv','jp','ch'].includes(T))L.push({t:`방송감 ${Math.round(S.st.brd)}/15 (리포트 훈련)`,ok:S.st.brd>=15});
-  if(T==='online')L.push({t:`출고 기사 ${S.totalArticles||0}/2건`,ok:(S.totalArticles||0)>=2});
+  if(T==='online'&&reqOpen(['write']))L.push({t:`출고 기사 ${S.totalArticles||0}/2건`,ok:(S.totalArticles||0)>=2});
   if(['sports'].includes(T)){const n=Math.max(2,Math.round(mo*1.5));L.push({t:`구장 돌기 ${S.rkSasu||0}/${n}회`,ok:(S.rkSasu||0)>=n});}
-  if(o.p>=4&&!S.simple){const cp=colBy('cap');L.push({t:`캡과의 관계 ${cp?Math.round(cp.rel):0}/30`,ok:!!cp&&cp.rel>=30});}
+  if(o.p>=4&&!S.simple&&reqOpen(['colleague','drink'])){const cp=colBy('cap');L.push({t:`캡과의 관계 ${cp?Math.round(cp.rel):0}/30`,ok:!!cp&&cp.rel>=30});}
   if(o.p>=5&&!S.simple)L.push({t:`캡 미션 완수 ${S.rkMiss||0}/2달`,ok:(S.rkMiss||0)>=2});
   return S.simple?L.slice(0,2):L;}
 // ===== 수습 건너뛰기 =====
@@ -6648,7 +6650,8 @@ const MIS_DEF={
  fnewsx:{h:'품질·편집력을 올리고 기자에게 단독 아이템을 맡기자',v:x=>(S.fNewsX||0)-x.b},
  trustUp:{h:'정정에 솔직하고 확인된 기사로',v:x=>Math.round((S.trust-x.b)*10)/10}};
 function misMake(){const r=S.rank,sim=!!S.simple,acts=rankActs();const can=id=>acts.includes(id)&&ACT[id]&&(['write','pitch','invest'].includes(id)?(!why(id)||/아이템/.test(why(id))):!why(id));const hasIt=(S.items||[]).length>0,hasEx=(S.items||[]).some(i=>i.excl);const L=[];
-  const add=(k,g,t,o={})=>{if(L.some(x=>x.k===k))return;const x={k,g,t,h:o.h||(MIS_DEF[k]&&MIS_DEF[k].h)||'',rel:!!o.rel,b:o.b??0,...(o.x||{})};L.push(x);};
+  const rel=k=>[...(ACT[k]?[k]:[]),...(MIS_TAG[k]||[])].filter(id=>acts.includes(id));
+  const add=(k,g,t,o={})=>{if(L.some(x=>x.k===k))return;const ra=rel(k);if(ra.length&&!ra.some(can))return;const x={k,g,t,h:o.h||(MIS_DEF[k]&&MIS_DEF[k].h)||'',rel:!!o.rel,b:o.b??0,...(o.x||{})};L.push(x);};
   const pool=[];const P=(w,f)=>pool.push([w,f]);
   if(S.founder){if(can('write'))P(2,()=>add('art',1,'대표 이름으로 기사 1건 출고',{h:'아이템 발굴 → 취재 나가기 → 기사 쓰기 (기자에게 맡긴 기사는 제외)'}));P(2.5,()=>add('profit',1,'이번 달 흑자 내기',{rel:true}));if(S.co)P(1.5,()=>add('subs',sim?1:2,`구독자 ${sim?1:2}% 늘리기`,{b:S.co.subs,rel:true}));P(1.2,()=>add('trustUp',1,'신뢰도 1 올리기',{b:S.trust,rel:true}));if(can('fsales'))P(2,()=>add('fsales',1,'광고·후원 영업 1건 따내기',{h:'광고·후원 영업'}));if(can('fassign'))P(1.6,()=>add('fassign',1,'기자에게 취재 1번 맡기기',{h:'기자에게 취재 맡기기'}));P(1.2,()=>add('fnewsx',1,'편집국 단독 1건',{b:S.fNewsX||0}));}
   else if(r===0){P(3,()=>add('sasu',sim?1:2,`사쓰마와리 ${sim?1:2}번 돌기`,{h:'사쓰마와리 (두 번째부터 "평소처럼 돌기")'}));P(2.5,()=>add('bigrep',1,'메모 2건 이상 모아 정보보고 1번',{b:S.bigRep||0}));P(2,()=>add('src',1,'새 취재원 1명 사귀기',{b:(S.sources||[]).length}));
