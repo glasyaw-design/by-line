@@ -3693,7 +3693,7 @@ function endWeek(){
       if(S.rank<7)apply({eval:(perf-56)/12});}
     const vals=[];if(S.monthQ.length)vals.push(avg(S.monthQ));if(perf!==null)vals.push(perf);
     S.co.q=S.co.q*.75+(vals.length?avg(vals):50+R(-5,5))*.25;S._mqA=S.monthQ.slice();S.monthQ=[];
-    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);arcTick(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
+    fin=coMonth();compMonth(lines);try{if(S.founder)fNewsroom(lines);}catch(e){console.error(e);}try{slTick();}catch(e){console.error(e);}try{mediaYear(lines);}catch(e){console.error(e);}try{standMonth(lines);standYear(lines);}catch(e){console.error(e);}try{rankMonth(lines);}catch(e){console.error(e);}try{deptSigMonth(lines);styleMonth(lines);metaMonth();legendTick(lines);crisisTick(lines);}catch(e){console.error(e);}if(S.portal&&S.portal.demote>0)S.portal.demote=Math.max(0,S.portal.demote-4);S.profitStreak=fin.profit>0?(S.profitStreak||0)+1:0;
     if(t%24===23)portalReview(lines);
     if(S.founder){founderStatMonth(lines);founderMonth(lines,fin);fMixMonth(lines);founderOtrMonth(lines);}gadMonth(lines);try{wageMonth(lines);npcLife(lines);rkMonth(lines);traineeMonth(lines);alumniMonth(lines);staffBalance(lines);owePay(lines);}catch(e){console.error(e);}corrMonth(lines);
     if(S.rank>=6)S.trust=clamp(S.trust+(S.co.q-55)/25+(55-S.trust)*.03,0,100);
@@ -3995,6 +3995,8 @@ function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
  ['6.1','경영진의 머리',[
+  '주요|광고주와의 줄다리기가 다양해졌다: 무마 제안을 보도해 버리거나, "광고와 편집은 별개"라고 선을 긋거나, 보복당한 광고 자리를 다른 광고주로 메우는 선택지가 생겼다. 같은 선택이라도 상대 성향과 내 능력에 따라 결과가 갈리고, 한 번 무마를 받아 준 광고주는 다음에도 돈부터 내민다',
+  '수정|위기 시스템 추가로 광고주 반응(무마·화해·보복)이 나오지 않던 문제를 고쳤다',
   '조정|모바일 하단 메뉴를 한 손으로 쓰기 편하게 바꿨다. 가장 자주 쓰는 할 일이 가운데로 왔다. 설정 → 하단 메뉴 순서에서 원하는 대로 바꿀 수 있다(왼손 배치·예전 배치도 있다)',
   '주요|위기 아크: 몇 달에 걸쳐 단계별로 이어지는 위기가 생겼다. 초반엔 가로채인 단독·위협받는 취재원·첫 오보 논란, 중반엔 부서원 조작 기사·광고주 삭제 요구·번아웃이 찾아온다. 고른 길이 다음 고비와 결말을 바꾸고, 잘 넘기면 칭호가 남지만 잘못 고르면 자리를 잃을 수도 있다',
   '주요|후반 대위기: 정권의 언론 탄압, 사주 일가 비리, 간판 특종 조작 의혹, 적대적 인수, 1000억 소송. 간부가 되면 커리어를 건 선택이 기다린다',
@@ -6304,22 +6306,51 @@ function arcTick(Qx){if(!S.arc)return;const D=DF();for(const id in S.arc){const 
   w.hit*=D===DIFF.hard?1.4:D===DIFF.easy?.7:1;w.make*=D===DIFF.easy?1.3:1;if(E.kind==='gov')w.pay*=.4;
   let t=(w.pay+w.make+w.hit)*Math.random();const k=(t-=w.pay)<0?'pay':(t-=w.make)<0?'make':'hit';delete S.arc[id];Qx.push(()=>arcEvent(id,k,fol,a));return;}}
 // 보도 후 반응 가중치: 무마·화해·보복이 대체로 3분의 1씩. 성향·관계·보도 강도·후속 여부로 기운다
-function arcW(E,tr,e,a,age,fol){return {pay:1.1+(fol?1.8:0)+(tr.press?.9:0)+(E.kind==='corp'?.7:0),make:.65+(tr.open?.8:0)+(e.rel>-15?.45:0)+(age>24?.35:0)+(a.d<8?.3:0),hit:.95+(tr.press?.7:0)+(tr.lit?.9:0)+(a.d>12?.8:0)+(e.rel<-40?.5:0)};}
+function arcW(E,tr,e,a,age,fol){return {pay:1.1+(e.payer?1.5:0)+(fol?1.8:0)+(tr.press?.9:0)+(E.kind==='corp'?.7:0),make:.65+(tr.open?.8:0)+(e.rel>-15?.45:0)+(age>24?.35:0)+(a.d<8?.3:0),hit:.95+(tr.press?.7:0)+(tr.lit?.9:0)+(a.d>12?.8:0)+(e.rel<-40?.5:0)};}
 function arcAmt(id,mul){const o=OUT();return +Math.max(.005,o.ad*(ENT[id].w||.01)*mul*(S.adRate||1)).toFixed(3);}
-function arcEvent(id,k,fol,a){const E=ENT[id],e=S.net[id];const nm=entName(id);const me=S.founder||S.rank>=4;const via=me?'':'광고국장이 데스크를 통해 전해 왔다. ';const head=a.head?`「${esc(a.head)}」 이후 `:'';
-  if(k==='pay'){const amt=arcAmt(id,R(6,12));openModal('광고로 무마 제안',`<p class="lede">${head}${via}${esc(nm)} 쪽에서 "올해 광고를 ${adAmt(amt)} 더 집행하겠다"고 한다. ${fol?`조건은 후속 「${esc(fol.title)}」을 접어 달라는 것.`:'조건은 "앞으로 잘 부탁한다"는 것.'}</p><p class="hint">실제 업계에서 흔한 방식이다. 돈은 되지만 들키면 신뢰가 크게 다친다.</p>`,[
-    {label:fol?'받고 후속을 접는다':'광고를 받는다',risk:true,sub:`회사 자금 +${adAmt(amt)} · 관계 크게↑ · 신뢰↓`,fn:()=>{S.co.cash+=amt;e.cut=0;netUp(id,25);if(fol)S.items=S.items.filter(x=>x!==fol);toast(apply({trust:-2,eval:me?0:.5}));log(`${E.n} 광고 ${adAmt(amt)} — 후속 보도 무마`);if(chance(.2*(DF().risk||1)))S.pending.push({type:'err',title:`${E.n} 광고 받고 기사 뺀 의혹`,due:S.turn+R(6,20)});}},
-    {label:'광고는 받되 기사는 쓴다',sub:'반반 — 상대가 발을 뺄 수도',fn:()=>{if(chance(.5)){S.co.cash+=amt*.5;netUp(id,5);toast(`절반만 집행됐다 · +${adAmt(amt*.5)}`);}else{netUp(id,-10);e.cut=Math.max(e.cut||0,8);toast('"그럼 없던 일로 하죠." 광고가 다시 끊겼다');}}},
-    {label:'거절한다',rec:true,sub:'신뢰↑ · 광고 중단이 길어진다',fn:()=>{netUp(id,-5);if(E.kind==='corp')e.cut=(e.cut||0)+8;toast(apply({trust:.8}));}}]);return;}
-  if(k==='make'){const up=+(1.15+Math.random()*.2).toFixed(2);openModal('화해의 손짓',`<p class="lede">${head}${esc(nm)} 홍보 책임자가 점심을 청했다. "그때는 저희도 서운했습니다. 이제 좋게 가시죠."</p><p class="hint">화해하면 광고가 다시 붙고, 한동안 예전보다 많이 집행된다.</p>`,[
-    {label:'화해한다',rec:true,sub:`광고 재개 · 1년간 광고 ×${up} · 관계↑`,fn:()=>{e.cut=0;e.block=0;netUp(id,20);e.boost=up;e.boostT=S.turn+YW;toast(`${E.n}와 화해 · 광고가 늘어난다`);log(`${E.n}와 화해 — 광고 증액`);}},
-    {label:'밥만 먹고 거리를 둔다',sub:'관계 조금↑',fn:()=>{netUp(id,8);toast('적당한 거리를 두기로 했다');}},
-    {label:'만나지 않는다',sub:'신뢰 조금↑ · 관계 그대로',fn:()=>toast(apply({trust:.3}))}]);return;}
+function arcRes(t,txt,fx){openModal(t,`<p class="lede">${txt}</p>${fx?fxLine(fx):''}`,[{label:'확인'}]);}
+function arcEvent(id,k,fol,a){const E=ENT[id],e=S.net[id];const nm=entName(id);const me=S.founder||S.rank>=4;const via=me?'':'광고국장이 데스크를 통해 전해 왔다. ';const head=a.head?`「${esc(a.head)}」 이후 `:'';const tr=entTrait(id);const corp=E.kind==='corp';
+  const nt=(S.st&&S.st.net)||40,ver=(S.st&&S.st.ver)||40;
+  if(k==='pay'){const amt=arcAmt(id,R(6,12));const again=e.payer?`<p class="hint">${esc(E.n)}은(는) 전에도 광고로 기사를 막은 적이 있다. 이번엔 더 대놓고 나왔다.</p>`:'';
+    openModal('광고로 무마 제안',`<p class="lede">${head}${via}${esc(nm)} 쪽에서 "올해 광고를 ${adAmt(amt)} 더 집행하겠다"고 한다. ${fol?`조건은 후속 「${esc(fol.title)}」을 접어 달라는 것.`:'조건은 "앞으로 잘 부탁한다"는 것.'}</p>${again}<p class="hint">돈은 되지만 들키면 신뢰가 크게 다친다. 어떻게 받느냐에 따라 결과가 달라진다.</p>`,[
+    {label:fol?'받고 후속을 접는다':'광고를 받는다',risk:true,sub:`회사 자금 +${adAmt(amt)} · 관계 크게↑ · 들킬 수 있다`,fn:()=>{S.co.cash+=amt;e.cut=0;netUp(id,25);if(fol)S.items=S.items.filter(x=>x!==fol);log(`${E.n} 광고 ${adAmt(amt)} — 후속 보도 무마`);const r=Math.random(),rk=(DF().risk||1)*(e.payer?1.5:1);
+      if(r<.22*rk){S.pending.push({type:'err',title:`${E.n} 광고 받고 기사 뺀 의혹`,due:S.turn+R(6,20)});arcRes('찜찜한 거래',`광고는 들어왔다. 그런데 편집국 누군가 그날 회의 내용을 메모해 두었다는 말이 돈다.`,apply({trust:-2}));}
+      else if(r<.55){e.payer=1;e.boost=1.15;e.boostT=S.turn+YW;arcRes('맛을 들인 광고주',`${esc(E.n)}은(는) 1년 내내 광고를 늘려 줬다. 대신 "이 정도면 우리 편"이라고 여기는 눈치다. 다음 기사 때도 같은 제안이 올 것이다.`,apply({trust:-1.5,eval:me?0:.5}));}
+      else arcRes('조용한 거래',`광고는 들어왔고, 아무도 묻지 않았다. 아직은.`,apply({trust:-1,eval:me?.3:.6}));return false;}},
+    {label:'광고는 받되 기사는 쓴다',sub:'반반 — 상대 반응에 달렸다',fn:()=>{const r=Math.random();
+      if(r<.2+(tr.open?.2:0)){S.co.cash+=amt;netUp(id,10);arcRes('의외의 수긍',`${esc(E.n)} 홍보실이 "기사 내용은 겸허히 받아들이겠다"며 광고를 그대로 집행했다. 업계에선 "${esc(OUT().n)} 기사는 광고로 못 막는다"는 말이 돌았다.`,apply({trust:1,fame:.5}));}
+      else if(r<.65){S.co.cash+=amt*.5;netUp(id,3);arcRes('절반의 집행',`광고는 절반만 들어왔다. "${fol?'후속은 좀 순하게…':'다음엔 잘 부탁합니다.'}" 미묘한 신호가 남았다.`,`회사 자금 +${adAmt(amt*.5)}`);}
+      else{netUp(id,-10);e.cut=Math.max(e.cut||0,8);arcRes('없던 일로',`"그럼 없던 일로 하죠." 광고가 다시 끊겼다.`,apply({trust:.4}));}return false;}},
+    {label:'거절한다',rec:true,sub:'신뢰↑ · 광고 중단이 길어질 수 있다',fn:()=>{netUp(id,-5);const r=Math.random();
+      if(r<.25){arcRes('소문난 거절',`거절했다는 얘기가 업계에 퍼졌다. 기자협회보에 짧게 실렸다.`,apply({trust:1.5,fame:1}));}
+      else if(r<.4&&corp){e.cut=(e.cut||0)+14;arcRes('경쟁지로 간 광고',`${esc(E.n)}은(는) 광고 예산을 경쟁지로 몽땅 돌렸다. 광고 중단이 길어진다.`,apply({trust:1}));}
+      else{if(corp)e.cut=(e.cut||0)+8;arcRes('거절',`정중히 거절했다. 상대는 아무 말 없이 전화를 끊었다.`,apply({trust:.8}));}return false;}},
+    {label:'제안 사실을 보도한다',risk:true,sub:`대박 아니면 소송 · 검증 능력이 중요하다`,fn:()=>{netUp(id,-25);if(corp)e.cut=(e.cut||0)+16;
+      if(chance(.35+ver/220)){const it=makeItem(cat1(S.dept),{excl:true,mult:1.2,keyConf:true});it.ent=id;it.title=`[단독] ${E.n}, 광고 미끼로 비판 기사 무마 시도`;it.subj=E.n;it.base='bribe_'+id;S.items.push(it);arcRes('미끼를 문 쪽은',`통화 녹취와 광고 제안서가 남아 있었다. 「${esc(it.title)}」 아이템을 잡았다.`,apply({trust:2.5,fame:2}));}
+      else{S.pending.push({type:'suit',ent:id,due:S.turn+R(2,5),title:a.head||E.n});arcRes('증거 부족',`"그런 제안을 한 적이 없다." ${esc(E.n)}이(가) 명예훼손 소송을 예고했다. 녹취가 없었다.`,apply({trust:.5,eval:-1}));}return false;}}]);return;}
+  if(k==='make'){const up=+(1.15+Math.random()*.2).toFixed(2);openModal('화해의 손짓',`<p class="lede">${head}${esc(nm)} 홍보 책임자가 점심을 청했다. "그때는 저희도 서운했습니다. 이제 좋게 가시죠."</p><p class="hint">화해 방식에 따라 광고·관계·뒷말이 달라진다.</p>`,[
+    {label:'화해한다',sub:`광고 재개 · 1년간 광고↑ · 관계↑`,fn:()=>{e.cut=0;e.block=0;netUp(id,20);e.boost=up;e.boostT=S.turn+YW;log(`${E.n}와 화해 — 광고 증액`);const r=Math.random();
+      if(r<.2){e.boost=+(up+.1).toFixed(2);arcRes('조건부 화해',`화해 조건으로 "보도자료는 꼭 실어 달라"는 부탁이 따라붙었다. 광고는 더 늘었다.`,apply({trust:-.6}));}
+      else if(r<.3&&me){arcRes('뒷말',`"${esc(OUT().n)} 간부가 ${esc(E.n)}과(와) 밥 먹고 논조가 바뀌었다"는 글이 미디어 비평 커뮤니티에 올라왔다.`,apply({trust:-1.2}));}
+      else arcRes('화해',`${esc(E.n)}와(과) 화해했다. 광고가 다시 붙고, 한동안 예전보다 많이 들어온다.`,`광고 ×${up} · 1년`);return false;}},
+    {label:'"광고와 편집은 별개"라고 못 박는다',sub:'원칙 · 상대가 받아들이면 최선',fn:()=>{if(tr.open||chance(.45)){e.cut=0;e.block=0;netUp(id,12);e.boost=+(1+(up-1)*.6).toFixed(2);e.boostT=S.turn+YW;arcRes('선을 지킨 화해',`홍보 책임자가 웃었다. "그게 맞죠." 광고는 다시 들어오고, 기사에 대한 간섭은 없기로 했다.`,apply({trust:1}));}
+      else{netUp(id,-4);arcRes('어색한 식사',`"그럼 저희도 생각해 보겠습니다." 분위기가 싸늘하게 식었다.`,apply({trust:.4}));}return false;}},
+    {label:'밥만 먹고 거리를 둔다',sub:'관계 조금↑ · 뜻밖의 수확이 있을 수도',fn:()=>{netUp(id,8);if(chance(.25+nt/300)){const it=makeItem(cat1(S.dept),{excl:true});S.items.push(it);arcRes('밥값',`식사 끝에 상대가 흘리듯 말했다. "경쟁사 얘기 하나 해 드릴까요?" → 「${esc(it.title)}」`,'');}else arcRes('적당한 거리',`적당한 거리를 두기로 했다.`,'관계 조금↑');return false;}},
+    {label:'만나지 않는다',sub:'신뢰 조금↑ · 관계는 식는다',fn:()=>{const t=apply({trust:.3});if(chance(.35)){netUp(id,-6);arcRes('닫힌 문',`거절 소식을 들은 ${esc(E.n)} 쪽이 "괘씸하다"고 했단다.`,t);}else arcRes('거절',`만나지 않았다. 아무 일도 없었다.`,t);return false;}}]);return;}
   const kind=E.kind==='gov'?pick(['자료 거부','정부광고 배정 축소','출입 제한']):pick(['광고 장기 중단','행사 협찬 철회','계열사 광고 동반 중단','법적 대응 예고']);
-  openModal('보복',`<p class="lede">${head}${esc(nm)}이(가) ${kind}에 나섰다.</p>`,[
-    {label:'버틴다',sub:'신뢰↑ · 손실은 감수',fn:()=>{if(E.kind==='corp')e.cut=(e.cut||0)+12;else e.block=(e.block||0)+6;if(kind==='법적 대응 예고'&&chance(.4))S.pending.push({type:'suit',ent:id,due:S.turn+R(2,5),title:a.head||E.n});if(kind==='행사 협찬 철회')S.co.cash-=arcAmt(id,2);toast(apply({trust:.8}));}},
-    {label:'찾아가 오해를 푼다',sub:'관계↑ · 신뢰 조금↓ · 기간 단축',fn:()=>{netUp(id,12);e.cut=Math.max(0,(e.cut||0)-6);e.block=0;toast(apply({trust:-.6}));}},
-    {label:'추가 보도로 맞선다',sub:'단독 후속 아이템 · 관계 더 나빠짐',fn:()=>{const it=makeItem(cat1(S.dept),{excl:true,mult:1.1});it.ent=id;const kind=pick(['내부 문건 입수','하청 갑질 정황','공시 누락 의혹','보복성 광고 중단 내막']);it.title=`[후속] ${E.n}, ${kind}`;it.subj=E.n;it.base='retal_'+id;it.facts=parseFacts(`d:*${E.n} ${kind==='공시 누락 의혹'?'미공시 계약 자료':'내부 문건'}|w:전직 직원 "${kind==='하청 갑질 정황'?'협력사에 떠넘겼다':'윗선 지시였다'}"|n:관련 금액 {m}억 원|s:${E.n} 본사 현장`,filler(vars()));S.items.push(it);netUp(id,-10);toast('후속 아이템을 잡았다');}}]);}
+  openModal('보복',`<p class="lede">${head}${esc(nm)}이(가) ${kind}에 나섰다.</p><p class="hint">맞서는 방식에 따라 독자 반응·손실·관계가 달라진다.</p>`,[
+    {label:'버틴다',sub:'신뢰↑ · 손실은 감수',fn:()=>{if(corp)e.cut=(e.cut||0)+12;else e.block=(e.block||0)+6;if(kind==='법적 대응 예고'&&chance(.4))S.pending.push({type:'suit',ent:id,due:S.turn+R(2,5),title:a.head||E.n});if(kind==='행사 협찬 철회')S.co.cash-=arcAmt(id,2);const r=Math.random();
+      if(r<.3){if(S.co&&S.co.subs)S.co.subs*=1.03;arcRes('독자가 붙었다',`"광고 끊겨도 버티는 언론"이라며 구독·후원 문의가 늘었다.`,apply({trust:1.5,fame:1}));}
+      else if(r<.45){e.cut=Math.max(0,(e.cut||0)-8);e.block=0;netUp(id,6);arcRes('먼저 숙인 쪽',`석 달도 안 돼 ${esc(E.n)}이(가) 먼저 연락해 왔다. "저희가 과했습니다."`,apply({trust:1}));}
+      else arcRes('버티기',`버티기로 했다. 당분간은 손해를 감수해야 한다.`,apply({trust:.8}));return false;}},
+    {label:'찾아가 오해를 푼다',sub:'관계↑ · 신뢰 조금↓ · 성공은 장담 못 한다',fn:()=>{const r=Math.random()-(nt-40)/300;
+      if(r<.55){netUp(id,12);e.cut=Math.max(0,(e.cut||0)-6);e.block=0;arcRes('풀린 오해',`길게 이야기했다. 보복은 거둬들이기로 했다.`,apply({trust:-.6}));}
+      else if(r<.8){netUp(id,15);e.cut=0;e.block=0;arcRes('사과문의 대가',`상대는 "유감 표명"을 조건으로 걸었다. 지면 구석에 짧은 글이 실렸고, 보복은 끝났다.`,apply({trust:-1.8,eval:-.5}));}
+      else{netUp(id,-3);arcRes('문전박대',`로비에서 한 시간을 기다리다 돌아왔다.`,apply({men:-1}));}return false;}},
+    {label:'추가 보도로 맞선다',sub:'단독 후속 아이템 · 관계 더 나빠짐 · 소송 위험',fn:()=>{const it=makeItem(cat1(S.dept),{excl:true,mult:1.1});it.ent=id;const kd=pick(['내부 문건 입수','하청 갑질 정황','공시 누락 의혹','보복성 광고 중단 내막']);it.title=`[후속] ${E.n}, ${kd}`;it.subj=E.n;it.base='retal_'+id;it.facts=parseFacts(`d:*${E.n} ${kd==='공시 누락 의혹'?'미공시 계약 자료':'내부 문건'}|w:전직 직원 "${kd==='하청 갑질 정황'?'협력사에 떠넘겼다':'윗선 지시였다'}"|n:관련 금액 {m}억 원|s:${E.n} 본사 현장`,filler(vars()));S.items.push(it);netUp(id,-10);
+      if(chance(tr.lit?.45:.2)){S.pending.push({type:'suit',ent:id,due:S.turn+R(3,6),title:it.title});arcRes('맞불',`후속 아이템을 잡았다. ${esc(E.n)}은(는) 소송 준비에 들어갔다는 소문이다. → 「${esc(it.title)}」`,'');}
+      else arcRes('맞불',`후속 아이템을 잡았다. → 「${esc(it.title)}」`,'');return false;}},
+    ...(corp?[{label:'다른 광고주로 빈자리를 메운다',sub:'영업력·인맥이 좋을수록 잘 메운다',fn:()=>{const k=clamp(.3+nt/150+(S.styT==='net'?.2:0),.3,1);const g=arcAmt(id,R(3,6))*k;S.co.cash+=g;if(chance(k)){arcRes('메운 빈자리',`발품을 팔아 새 광고주를 데려왔다. 빈자리를 대부분 메웠다.`,`회사 자금 +${adAmt(g)}`);}else arcRes('반쯤 메운 자리',`몇 곳은 붙었지만 큰손의 빈자리는 컸다.`,`회사 자금 +${adAmt(g)}`);e.cut=(e.cut||0)+10;return false;}}]:[])]);}
 
 // ===== 관계망 · 사내 관계 화면 =====
 function relPill(r,lo=-100,hi=100,good=40,bad=-25){const c=r>=good?'var(--good)':r<=bad?'var(--red)':'var(--siren)';return `<span class="rpill" style="--c:${c}"><i style="width:${clamp((r-lo)/(hi-lo)*100,2,100)}%"></i><b>${Math.round(r)}</b></span>`;}
@@ -7116,7 +7147,7 @@ const A2=[
 ];
 function arcPick(){const late=!S.founder&&(S.rank>=4||years()>=15);const tier=S.founder?3:late?2:S.rank>=2?1:0;const done=S.arcDone||[];
   const el=A2.filter(a=>(a.tier===tier||(tier===2&&a.tier===1&&chance(.25)))&&!done.includes(a.id)&&(()=>{try{return a.c();}catch(e){return false;}})());return el.length?pick(el):null;}
-function arcTick(lines){if(!S||S.phase!=='game'||S.story)return;const a=S.arc2;
+function crisisTick(lines){if(!S||S.phase!=='game'||S.story)return;const a=S.arc2;
   if(a){if(S.turn>=a.due)Q.push(()=>arcShow());return;}
   if((S.arcCool||0)>S.turn||(S.calmT||0)>S.turn)return;const late=!S.founder&&(S.rank>=4||years()>=15);
   const bc=S.bigCrisis||0;let p=S.founder?.035:late?(bc>=2?.004:bc?(S.simple?.004:.012):(years()>=18?(S.simple?.05:.08):.03)):S.rank>=2?.045:S.rank>=1?.035:0;if(S.simple)p*=.6;p*=(DF().crisis||1);if(!chance(p))return;
