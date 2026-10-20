@@ -3557,7 +3557,7 @@ function suitEvent(p){const E=ENT[p.ent];openModal('명예훼손 고소',`<p cla
 // --- 광고·협찬 영업 ---
 const adCorps=()=>ENTS.filter(e=>e[2]==='corp'&&S.net[e[0]]&&S.net[e[0]].known).sort((a,b)=>b[4]-a[4]).slice(0,10).map(e=>e[1]);
 // 내 반기 목표 = 내 몫(직급·회사 규모·부서 배정) + 내 밑 차장 이상 기자들 목표의 절반 (그들 실적의 절반이 내 실적으로도 잡힌다)
-function quotaOwn(){if(!S.co||S.founder)return 0;const dk=S.rank<=5&&DEPTS[S.dept]?clamp(deptAd(S.dept),.5,1.6):1;return [0,.23,.32,.29,.35,.4,.6,0][S.rank]*(SL_PK[OUT().p]||.4)*dk*.5*2*adSizeK()*(S.rank<=5&&DEPTS[S.dept]?goalK(S.dept):1)*(S.simple?.75:1);}
+function quotaOwn(){if(!S.co||S.founder)return 0;const dk=S.rank<=5&&DEPTS[S.dept]?deptAdQ(S.dept)*.84:1;return [0,.23,.32,.29,.35,.4,.6,0][S.rank]*(SL_PK[OUT().p]||.4)*dk*.5*2*adSizeK()*(S.rank<=5&&DEPTS[S.dept]?goalK(S.dept):1)*(S.simple?.75:1);}
 function deptShared(){return !S.founder&&!!DEPTS[S.dept]&&((S.rank>=2&&S.rank<=5)||(S.rank===1&&S.turn>=3*YW));}
 // 7.1 편집국장은 부서가 없다: 전 부서 광고·협찬 실적 합계가 곧 내 목표다 (내가 직접 딴 실적도 더한다)
 function nrAll(){return !!(S&&S.co&&!S.founder&&!S.story&&S.rank===6);}
@@ -4030,6 +4030,8 @@ function salesPush(){return S&&S.founder?1:(S.salesPush||1);}
 // 문화·연예·스포츠는 행사·공연 협찬, IT·의료·교육은 업계 광고, 정치·외교·사회·사건·법조·탐사는 가볍다 (편집권과 거리가 먼 부서일수록 영업이 적다)
 const DEPT_AD={eco:1.6,ind:1.7,fin:1.6,stock:1.4,estate:1.5,it:1.3,med:1.1,edu:.9,cul:1,ent:1,culspo:1,spo:.9,base:.9,foot:.9,nat:.9,city:1.1,sigun:1.3,loc:1.3,pol:.5,diplo:.3,int:.4,soc:.6,court:.4,case:.3,inv:.2};
 function deptAd(d){return DEPT_AD[d]??.8;}
+// 7.2 광고 목표 배정용 부서 가중치: 광고 많은 부서가 더 지되, 부서 간 차이는 통상 수준으로 (작은 연예·문화·체육부에 몰리던 쏠림 완화)
+function deptAdQ(d){return Math.pow(deptAd(d),.4);}
 // ===== 7.1 창간 모드 기사력: 좋은 기사와 좋은 기자가 광고·평판·회사 위신을 끌어올린다 =====
 // 부서마다 기자 실력과 이번 달 기사(완성도·단독·파급력)로 '기사력'이 쌓인다(천천히 오르내림).
 // 기사력이 높은 부서는 광고주가 먼저 찾아와 영업 역량이 커지고, 회사 전체 기사력은 광고 매출·대표 평판·성장 점수(매체 위상)를 올린다.
@@ -4060,7 +4062,7 @@ function fAdOn(){return !!(S&&S.founder&&S.co&&!S.story);}
 function fAdDepts(){try{return OUT().depts.filter(d=>DEPTS[d]);}catch(e){return [];}}
 function fAdHK(t=S.turn){return Math.floor(t/(4*QM));}
 function fAdA(){const o=OUT(),c=S.co;return Math.max(o.ad,c&&c.adEma||o.ad)*(1+(econ()-1)*.5);}
-function fAdPer(m,d){return fAdA()*.0055*clamp((m.skill||48)/55,.6,1.4)*[1,1.1,.85,.75][Math.min(3,m.r||0)]*deptAd(d)/1.05*fNPk(d);}
+function fAdPer(m,d){return fAdA()*.0055*clamp((m.skill||48)/55,.6,1.4)*[1,1.1,.85,.75][Math.min(3,m.r||0)]*deptAdQ(d)*.84*fNPk(d);}
 function fAdUnnamed(){const ds=fAdDepts();const T=(S.team||[]).filter(m=>m&&m.name);return ds.length?Math.max(0,((S.co.staff||1)-1-T.length))/ds.length*.5:0;}
 function fAdElig(d){return (S.team||[]).filter(m=>m&&m.name&&(m.d||S.dept)===d&&slOk(m));}
 function fAdHead(d){return fAdElig(d).length+fAdUnnamed();}
@@ -4144,7 +4146,7 @@ function npcSales(o,infl){if(S.founder&&S.co&&!S.story)return fAdSales();let L=[
 // 6.8 부서 광고 할당: 회사가 반기마다 부서별 광고·협찬 목표를 내리고, 차장 이상 기자는 각자 몫을 채우려 뛴다
 // 7.0 회사가 커지면(광고 매출이 늘면) 반기 광고 목표도 따라 커진다. 대신 완만하게 (매출 두 배 → 목표 약 1.5배)
 function adSizeK(){try{const o=OUT(),c=S.co;if(!c||!o.ad)return 1;if(!c.adEma||!c.adEma0)return 1;return clamp(Math.pow(c.adEma/c.adEma0,.6),.6,1.7);}catch(e){return 1;}}
-function npcSaleV(m,d,o){o=o||OUT();const k=o.ad*.0042*salesPush()*(1+(econ()-1)*.5)*adSizeK();return k*clamp((m.skill||50)/55,.6,1.4)*(1+Math.max(1,m.r||0)*.15)*deptAd(d)/1.05;}
+function npcSaleV(m,d,o){o=o||OUT();const k=o.ad*.0042*salesPush()*(1+(econ()-1)*.5)*adSizeK();return k*clamp((m.skill||50)/55,.6,1.4)*(1+Math.max(1,m.r||0)*.15)*deptAdQ(d)*.84;}
 // 실적은 계약 총액(광고·협찬·포럼 후원) 기준으로 잡는다. 이 가운데 광고국 몫과 겹치지 않는 순증분만 회사 매출에 더해진다 (회사 손익은 그대로)
 const SL_FEE=.03,SL_G=5,SL_PK={5:1.5,4:1.15,3:.7,2:.4,1:.3};
 // 영업 대상: 차장 이상 + 입사 3년 이상 평기자 (3년 차 미만은 영업하지 않는다)
@@ -4793,7 +4795,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '대규모|창간 모드 부서별 광고·사업 목표: 대표가 부서마다 반기 목표를 자동이나 수동으로 정한다. 자동은 영업할 수 있는 기자 수와 실력에 맞추고 실적에 따라 완만하게 오르내린다. AI 기자들은 페이스에 맞춰 광고와 사업(포럼 후원·행사·용역)을 따 오고, 목표를 채우면 기사로 돌아간다. 역량에 비해 터무니없는 목표는 사기·신뢰·보도 품질을 깎고 퇴사나 광고 강매 논란을 부른다. 영업 수당과 편집·영업 분리 원칙으로 조절할 수 있다. 사람 탭 "광고 영업"에서 부서별 진행을 본다',
   '주요|창간 모드 기사력: 좋은 기사와 실력 있는 기자가 쌓일수록 부서 기사력이 오른다. 기사력이 높으면 광고주가 먼저 찾아와 영업과 광고 매출이 늘고, 대표 평판과 매체 위상(성장 점수)도 오른다. 스타 기자는 그 자체로 광고와 위신에 보탬이 된다. 영업을 몰아붙이면 기사력이 떨어진다',
   '주요|창간 모드 취재 지시: 대표도 쥔 아이템 여러 건을 기자에게 한꺼번에 맡기거나, 새 기획 취재를 시킬 수 있다. 맡긴 기사가 잘 나오면 기자가 크게 성장하고 대표 평판도 오른다. 관련 미션도 생겼다',
-  '조정|광고 목표 몫: 연차가 쌓인 평기자와 차장이 영업의 중심이 되도록 몫을 늘리고, 데스크를 보는 부장·부국장·국장의 부담은 크게 줄였다. 편집국장은 부서가 없으므로 전 부서 광고 실적 합계가 목표가 되고, 부서별 실적을 한눈에 보며 전 부서 영업을 독려할 수 있다. AI 편집국장도 편집국 페이스가 처지면 부장단을 독려하고, 직접 큰 광고·협찬을 따 와 처지는 부서를 메운다. 영업은 여전히 연차가 어느 정도 쌓인 기자부터',
+  '조정|광고 목표 몫: 연차가 쌓인 평기자와 차장이 영업의 중심이 되도록 몫을 늘리고, 데스크를 보는 부장·부국장·국장의 부담은 크게 줄였다. 부서별 배정도 광고가 많은 부서가 조금 더 지는 정도로 고르게 바꿔, 사람 적은 연예·문화·체육부 같은 부서에 몰리던 쏠림을 줄였다. 편집국장은 부서가 없으므로 전 부서 광고 실적 합계가 목표가 되고, 부서별 실적을 한눈에 보며 전 부서 영업을 독려할 수 있다. AI 편집국장도 편집국 페이스가 처지면 부장단을 독려하고, 직접 큰 광고·협찬을 따 와 처지는 부서를 메운다. 영업은 여전히 연차가 어느 정도 쌓인 기자부터',
   '개선|AI 기자 영업: 자기 몫 대비 페이스를 보고 더 뛰거나 늦추고, 부서가 처지면 앞선 기자도 거든다. 한 사람이 혼자 몫을 크게 넘기던 쏠림을 없앴고, 연차가 쌓인 평기자의 영업도 회사 매출에 반영된다',
   '조정|능력만큼 채우는 영업: AI 기자·AI 편집국장·창간 모드 부서 모두 목표를 기계적으로 딱 맞추지 않는다. 실력·영업 성향·컨디션(창간 모드는 부서 기사력까지)에 따라 잘하는 쪽은 조금 넘기고 약한 쪽은 조금 못 채운다. 편집국장이 따 온 큰 건도 처지는 부서를 메울 만큼만 얹는다',
   '수정|부서장 누락: 내가 평기자·차장일 때 우리 부서에 부장이 없어 광고 목표와 부서 명단에서 빠지던 문제',
