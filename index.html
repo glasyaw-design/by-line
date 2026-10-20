@@ -331,9 +331,12 @@ details.more>summary::before{content:"＋ ";color:var(--sodium)}details.more[ope
 .hcopy h1{margin:14px 0 10px;font-family:var(--f-display);font-weight:400;font-size:clamp(38px,6.4vw,64px);line-height:1.08;letter-spacing:-.01em;text-wrap:balance}
 .hcopy h1 em{font-style:normal;background:linear-gradient(90deg,var(--sodium),#ff7d6b);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hcopy p{margin:0 0 16px;color:var(--mute);max-width:56ch;font-size:15.5px}
-.live{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin-top:12px}
+.live{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:13px;line-height:1;color:var(--mute);margin-top:12px}
+.live:empty{display:none}
+.live .lv{display:inline-flex;align-items:baseline;gap:3px;white-space:nowrap}
+.live .sep{width:1px;height:12px;background:var(--line,rgba(255,255,255,.18))}
 .live .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(90,212,155,.6);animation:pulse 1.8s infinite}
-.live b{color:var(--fg);font-family:var(--f-pix)}
+.live b{color:var(--fg);font-family:inherit;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;margin:0 1px}
 @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(90,212,155,0)}100%{box-shadow:0 0 0 0 rgba(90,212,155,0)}}
 @media (prefers-reduced-motion:reduce){.live .dot{animation:none}}
 .stats4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -5899,7 +5902,7 @@ function helpCenter(k='start'){const keys=Object.keys(HELP);openModal(`도움말
 // ================= 동시 접속자 (웹 배포에서만) =================
 function inArtifact(){try{return !!(window.claude&&(window.claude.hot||window.claude.complete))||/claude\.ai|claudeusercontent|anthropic/.test(location.hostname);}catch(e){return false;}}
 let LIVE=null;
-function liveHTML(){return LIVE&&LIVE.online!=null?`<span class="dot"></span>지금 <b>${LIVE.online.toLocaleString('ko-KR')}</b>명 플레이 중${LIVE.total?` · 누적 <b>${LIVE.total.toLocaleString('ko-KR')}</b>명`:''}`:'';}
+function liveHTML(){return LIVE&&LIVE.online!=null?`<span class="dot"></span><span class="lv">지금<b>${LIVE.online.toLocaleString('ko-KR')}</b>명 플레이 중</span>${LIVE.total?`<span class="sep"></span><span class="lv">누적<b>${LIVE.total.toLocaleString('ko-KR')}</b>명</span>`:''}`:'';}
 // 7.1 접속자 수는 관리자만: 주소 뒤에 ?admin=비밀키 를 한 번 붙여 열면 이 브라우저에 기억된다 (?admin=off 로 해제)
 function adminKey(){try{const q=new URLSearchParams(location.search),a=q.get('admin');if(a!=null){if(a==='off'||a==='')localStorage.removeItem('byline-admin');else localStorage.setItem('byline-admin',a.slice(0,80));q.delete('admin');const qs=q.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash);}return localStorage.getItem('byline-admin')||'';}catch(e){return '';}}
 function presenceStart(){if(inArtifact()||location.protocol!=='https:')return;const ak=adminKey();let id;try{id=localStorage.getItem('byline-pid');if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('byline-pid',id);}}catch(e){id=Math.random().toString(36).slice(2);}
