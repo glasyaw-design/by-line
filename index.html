@@ -5911,7 +5911,9 @@ let LIVE=null;
 function liveHTML(){return LIVE&&LIVE.online!=null?`<span class="dot"></span>지금 <b>${LIVE.online.toLocaleString('ko-KR')}</b>명 플레이 중${LIVE.total?` · 누적 <b>${LIVE.total.toLocaleString('ko-KR')}</b>명`:''}`:'';}
 function presenceStart(){if(inArtifact()||location.protocol!=='https:')return;let id;try{id=localStorage.getItem('byline-pid');if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('byline-pid',id);}}catch(e){id=Math.random().toString(36).slice(2);}
   const beat=(ev)=>fetch('/api/presence',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,ev:ev||'beat'}),keepalive:true}).then(r=>r.ok?r.json():null).then(d=>{if(d){LIVE=d;const el=$('#live');if(el)el.innerHTML=liveHTML();}}).catch(()=>{});
-  window.__presence=beat;beat('open');setInterval(()=>{if(!document.hidden)beat();},30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)beat();});}
+  window.__presence=beat;let last=Date.now();const go=ev=>{last=Date.now();beat(ev);};beat('open');
+  // 7.1 신호는 10분마다 한 번 (화면이 보일 때만). 다른 탭에 있다 돌아오면, 마지막 신호가 5분 넘게 지났을 때만 한 번 더
+  setInterval(()=>{if(!document.hidden)go();},600000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-last>300000)go();});}
 
 // ================= 사운드: BGM · 효과음 (Web Audio로 직접 합성) =================
 const AU={ctx:null,on:{bgm:true,sfx:true},vol:{bgm:.5,sfx:.7},mood:null,bus:null,step:0,next:0,timer:null,noise:null,mel:null,bar:0};
