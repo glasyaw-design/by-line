@@ -1,17 +1,8 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="수습기자에서 사장까지, 내 언론사 창간까지. 한국 기자 커리어 시뮬레이션 웹게임 바이라인.">
-<meta property="og:title" content="바이라인 — 기자 커리어 시뮬레이션">
-<meta property="og:image" content="/og.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0e1220">
 <title>바이라인</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: 마스트헤드(이름·HUD) → 2D 장면 + 뉴스 티커 → 책상(할 일) | 수첩(탭) 2단, 폰에서는 1단 */
 :root{
@@ -5909,8 +5900,10 @@ function helpCenter(k='start'){const keys=Object.keys(HELP);openModal(`도움말
 function inArtifact(){try{return !!(window.claude&&(window.claude.hot||window.claude.complete))||/claude\.ai|claudeusercontent|anthropic/.test(location.hostname);}catch(e){return false;}}
 let LIVE=null;
 function liveHTML(){return LIVE&&LIVE.online!=null?`<span class="dot"></span>지금 <b>${LIVE.online.toLocaleString('ko-KR')}</b>명 플레이 중${LIVE.total?` · 누적 <b>${LIVE.total.toLocaleString('ko-KR')}</b>명`:''}`:'';}
-function presenceStart(){if(inArtifact()||location.protocol!=='https:')return;let id;try{id=localStorage.getItem('byline-pid');if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('byline-pid',id);}}catch(e){id=Math.random().toString(36).slice(2);}
-  const beat=(ev)=>fetch('/api/presence',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,ev:ev||'beat'}),keepalive:true}).then(r=>r.ok?r.json():null).then(d=>{if(d){LIVE=d;const el=$('#live');if(el)el.innerHTML=liveHTML();}}).catch(()=>{});
+// 7.1 접속자 수는 관리자만: 주소 뒤에 ?admin=비밀키 를 한 번 붙여 열면 이 브라우저에 기억된다 (?admin=off 로 해제)
+function adminKey(){try{const q=new URLSearchParams(location.search),a=q.get('admin');if(a!=null){if(a==='off'||a==='')localStorage.removeItem('byline-admin');else localStorage.setItem('byline-admin',a.slice(0,80));q.delete('admin');const qs=q.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash);}return localStorage.getItem('byline-admin')||'';}catch(e){return '';}}
+function presenceStart(){if(inArtifact()||location.protocol!=='https:')return;const ak=adminKey();let id;try{id=localStorage.getItem('byline-pid');if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('byline-pid',id);}}catch(e){id=Math.random().toString(36).slice(2);}
+  const beat=(ev)=>fetch('/api/presence',{method:'POST',headers:Object.assign({'content-type':'application/json'},ak?{'x-admin-key':ak}:{}),body:JSON.stringify({id,ev:ev||'beat'}),keepalive:true}).then(r=>r.ok?r.json():null).then(d=>{if(d&&ak){LIVE=d;const el=$('#live');if(el)el.innerHTML=liveHTML();}}).catch(()=>{});
   window.__presence=beat;let last=Date.now();const go=ev=>{last=Date.now();beat(ev);};beat('open');
   // 7.1 신호는 10분마다 한 번 (화면이 보일 때만). 다른 탭에 있다 돌아오면, 마지막 신호가 5분 넘게 지났을 때만 한 번 더
   setInterval(()=>{if(!document.hidden)go();},600000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-last>300000)go();});}
