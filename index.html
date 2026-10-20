@@ -8478,7 +8478,7 @@ function commentsV2(q,W,risky,it,imp,place){const out=[];const add=(t,k,lk)=>out
 function cmHTML(cm){window.__cmTips=[];return `<div class="cmbox"><div class="cmh">댓글 ${cm.length}</div><ul class="cmts">${cm.map(c=>{let tipB='';if(c.tip){window.__cmTips.push(c.tip);tipB=`<button type="button" class="achip" data-cmtip="${window.__cmTips.length-1}" style="--c:var(--sodium);margin-top:5px">이 사람에게 연락해 본다 · 체력 조금</button>`;}
   return `<li class="cm-${c.k}"><span>${esc(c.n)}${c.best?' <b class="cmbest">BEST</b>':''}</span>${esc(c.t)} <small class="cmlk">♥ ${c.lk.toLocaleString('ko-KR')}</small>${tipB}</li>`;}).join('')}</ul></div>`;}
 function cmBind(){setTimeout(()=>{document.querySelectorAll('#mb [data-cmtip]').forEach(b=>b.onclick=()=>{const t=(window.__cmTips||[])[+b.dataset.cmtip];if(!t||b.disabled)return;document.querySelectorAll('#mb [data-cmtip]').forEach(x=>{x.disabled=true;});cmContact(t,b);});},0);}
-function cmContact(t,b){S.hp=clamp(S.hp-3,0,100);const dd=catOf(S.dept).includes(t.d)?t.d:S.dept;
+function cmContact(t,b){S.hp=clamp(S.hp-2,0,100);const dd=catOf(S.dept).includes(t.d)?t.d:S.dept;
   if(t.real){const it=makeItem(dd,{excl:true,mult:clamp(.9+t.imp/200,.9,1.25),src:'댓글 제보자'});const f=it.facts.find(x=>!fOK(x)&&!x.key);if(f)f.conf=f.need;S.items.push(it);if(chance(.5))addSource(dd,22);
     b.textContent=`제보자와 통화했다 → 「${it.title}」`;log(`댓글 제보: 「${it.title}」`);toast('진짜 내부자였다 — 새 단독 아이템');}
   else if(chance(.5)){const it=makeItem(dd,{excl:true,hoax:true,src:'댓글 제보자'});S.items.push(it);b.textContent=`그럴듯한 얘기를 들었다 → 「${it.title}」 (확인해 봐야 안다)`;toast('얘기는 들었는데… 확인이 필요하다');}
