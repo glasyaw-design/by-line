@@ -6227,12 +6227,12 @@ function drawInterview(){
 }
 const SCENES={newsroom:drawNewsroom,police:drawPolice,field:drawPolice,meet:drawMeet,office:drawOffice,press:drawPress,interview:drawInterview,briefing:drawBriefing};
 function capText(){const sc=S?S.scene:'newsroom';const o=S&&S.outlet&&OUT()?OUT().n:'바이라인';
-  const ik=(typeof sceneImgKey==='function')?sceneImgKey():null;const IKN={roof:'옥상 · 잠깐 숨 돌리기',pub:'저녁 · 술자리',chair:S&&S.founder?'대표실':'사장실',exec:'임원 회의실',print:'윤전실 · 내일 자 1면',rain:'취재 현장 · 비 오는 밤',crime:'사건 현장 · 감식 중',court:'법정',gov:'청사 앞 · 취재진',lobby:'기업 본사 로비',airport:'공항 · 출국장',region:'지역 · 주재지',assembly:'국회 본회의장',briefing:'브리핑룸'};if(ik&&IKN[ik])return IKN[ik];
+  {const sb=(S&&S.phase==='game'&&typeof sceneSub==='function')?sceneSub(sc):null;if(sb)return sb.cap;}const ik=(typeof sceneImgKey==='function')?sceneImgKey():null;if(S&&S.phase==='game'&&sc==='field'&&typeof sceneDept==='function'){const SD=sceneDept();if(SD==='ent'&&ik==='lobby')return '기획사 앞 · 취재진';if(SD==='spo'&&ik==='briefing')return '경기장 · 인터뷰실';if(SD==='spo'&&ik==='rain')return '경기장 밖 · 비 오는 밤';}const IKN={roof:'옥상 · 잠깐 숨 돌리기',pub:'저녁 · 술자리',chair:S&&S.founder?'대표실':'사장실',exec:'임원 회의실',print:'윤전실 · 내일 자 1면',rain:'취재 현장 · 비 오는 밤',crime:'사건 현장 · 감식 중',court:'법정',gov:'청사 앞 · 취재진',lobby:'기업 본사 로비',airport:'공항 · 출국장',region:'지역 · 주재지',assembly:'국회 본회의장',briefing:'브리핑룸'};if(ik&&IKN[ik])return IKN[ik];
   return {newsroom:`${o} ${isTV()?'보도국':'편집국'}`,police:'새벽 2시 · 경찰서 라인',field:'취재 현장',meet:'저녁 · 취재원과 한 끼',office:S&&S.rank===7?'사장실':'임원 회의실',press:isTV()?'부조정실 · 메인뉴스':'윤전실 · 내일 자 1면',interview:'언론고시 · 면접장',briefing:'브리핑룸'}[sc]||'';}
 // 5.7 장면 일러스트: 행동·부서·직급에 맞는 그림을 고른다. 그림이 없는 장면(경찰서·면접장·방송 부조정실)은 기존 그림으로
 function sceneImgKey(){if(!S)return null;if(S.phase==='title')return 'title';if(S.phase==='end')return 'roof';if(S.phase!=='game')return null;const sc=S.scene,a=S._curAct,alt=(Math.floor((S.turn||0)/4)&1);const dn=(DEPTS[S.dept]||{}).n||'';
   const G=/법조/.test(dn)?'law':/사건|사회|의료|교육|탐사/.test(dn)?'soc':/정치|외교|자치/.test(dn)?'pol':/경제|산업|금융|증권|부동산|IT/.test(dn)?'eco':/국제/.test(dn)?'int':/전국|지역|시·군|주재/.test(dn)?'loc':'cul';
-  if(['rest','life','job','found','deptreq'].includes(a)&&(sc==='newsroom'||sc==='office'))return 'roof';
+  if(['rest','life','job','found','deptreq'].includes(a)&&(sc==='newsroom'||sc==='office'))return 'roof';{const sb=sceneSub(sc);if(sb)return sb.img;}const SD=sceneDept();if(sc==='field'&&SD==='ent')return 'lobby';if(sc==='field'&&SD==='spo')return alt?'briefing':'rain';
   if(sc==='newsroom')return (a==='drink'||a==='colleague')?'pub':'newsroom';
   if(sc==='meet')return 'pub';
   if(sc==='office')return (S.rank>=7||S.founder)?'chair':'exec';
@@ -10770,6 +10770,11 @@ function netItemFor(E,o){let first=null;for(let i=0;i<30;i++){const it=makeItem(
 function evCount(){let n=0;const L=n=>{try{return (typeof n==='function'?n():n)||[];}catch(e){return [];}};
   [()=>EVENTS,()=>NET_EVENTS,()=>COL_EVENTS,()=>F_EVENTS,()=>CRISES,()=>D_EV,()=>RIVAL_EV,()=>SL,()=>NR_EV,()=>A2].forEach(f=>{n+=L(f).length;});
   try{n+=Object.values(STORY_BEATS).reduce((a,x)=>a+Object.keys(x).length,0);}catch(e){}return n;}
+// --- 장면 그림: 수습 라인과 부서에 맞는 그림·자막 ---
+const SASU_IMG={sports:'briefing',wire:'newsroom',tv:'crime',econ:'lobby',local:'region',eng:'gov',online:'newsroom',weekly:'newsroom',edu:'region',med:'lobby',tech:'lobby',law:'court',star:'lobby'};
+const SASU_CAP={sports:'구장 · 경기 뒤 인터뷰실',wire:'자정 · 야간 속보 당번',tv:'현장 수습 · 카메라 기자와',econ:'여의도 · 증권가',local:'시·군청 · 아침 순회',eng:'대사관 앞 · 외신 라인',online:'밤 10시 · 커뮤니티 모니터링',weekly:'자료실 · 기획 자료 뒤지기',edu:'학교 앞 · 학원가',med:'병원·제약사 로비',tech:'판교 · 테크노밸리',law:'서초동 · 법원 앞',star:'방송사 로비'};
+function sceneSub(sc){try{if(sc!=='police')return null;const k=sasuKey();return SASU_IMG[k]?{img:SASU_IMG[k],cap:SASU_CAP[k]}:null;}catch(e){return null;}}
+function sceneDept(){const dn=(DEPTS[S.dept]||{}).n||'';return /연예/.test(dn)?'ent':/체육|야구|축구/.test(dn)?'spo':/문화/.test(dn)?'cul':'';}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
