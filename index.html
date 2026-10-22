@@ -2572,7 +2572,7 @@ RUN.special=function(){
   item({pre:1},'부서 고유 업무를 챙겼다');
 };
 
-function doAction(id){if(why(id))return;if(S.opScoop===1&&S.phase==='game'&&!S.founder&&!S.story&&S.rank===0&&S.turn<12&&!['life','rest','job'].includes(id)){S.opN=(S.opN||0)+1;if(S.opN>=2){S.opScoop=2;Q.push(opScoopEv);}}MSTACK=[];S._mc=false;if(ACT[id]&&!actCost(id)){S._mc=true;try{misCount(id);}catch(e){}}try{snapStart(id);}catch(e){}S._curAct=id;S._sur=false;try{fMixAdd(id);}catch(e){}if(id==='gad')S.gadUsed=1;if(S.founder&&FST_GAIN[id]&&!/^f[a-z]/.test(id))fgain(FST_GAIN[id],.25);S.scene=ACT[id].sc;drawScene();S.tipSeen=S.tipSeen||{};if(S.tipsOn!==false&&!S.tipSeen[id]&&TIPS[id]&&!(S.unl&&S.unl[S.rank+':'+id+':shown'])){S.tipSeen[id]=1;openModal(`처음 해 보는 일 · ${actName(id)}`,`<p class="lede">${TIPS[id]}</p>`,[{label:'시작하기',fn:()=>{const t0=mTok;RUN[id]();return mTok!==t0?false:undefined;}},{label:'앞으로 팁 끄기',cls:'ghost',fn:()=>{S.tipsOn=false;const t0=mTok;RUN[id]();return mTok!==t0?false:undefined;}}]);return;}RUN[id]();}
+function doAction(id){if(why(id))return;if(S.opScoop===1&&S.phase==='game'&&!S.founder&&!S.story&&S.rank===0&&S.turn<12&&!['life','rest','job'].includes(id)){S.opN=(S.opN||0)+1;if(S.opN>=2){S.opScoop=2;Q.push(opScoopEv);}}MSTACK=[];S._mc=false;if(ACT[id]&&!actCost(id)){S._mc=true;try{misCount(id);}catch(e){}}try{snapStart(id);}catch(e){}S._curAct=id;S._sur=false;try{fMixAdd(id);}catch(e){}if(id==='gad')S.gadUsed=1;if(S.founder&&FST_GAIN[id]&&!/^f[a-z]/.test(id))fgain(FST_GAIN[id],.25);S.scene=ACT[id].sc;drawScene();S.tipSeen=S.tipSeen||{};if(tipToast(id)){}else if(tipMode()==='on'&&!S.tipSeen[id]&&TIPS[id]&&!(S.unl&&S.unl[S.rank+':'+id+':shown'])){S.tipSeen[id]=1;openModal(`처음 해 보는 일 · ${actName(id)}`,tipBody(TIPS[id]),[{label:'시작하기',fn:()=>{const t0=mTok;RUN[id]();return mTok!==t0?false:undefined;}},{label:'앞으로 팁 끄기',cls:'ghost',fn:()=>{S.tipsOn=false;const t0=mTok;RUN[id]();return mTok!==t0?false:undefined;}}]);return;}RUN[id]();}
 
 // --- 수습 ---
 RUN.sasu=function(){
@@ -5091,6 +5091,10 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '대규모|판매국·종이 부수: 신문사는 판촉·구독료·지국 지원·디지털 전환을 정한다(사장). 지국망과 유가율을 관리하고, 매년 11월 ABC 부수 공사 결과가 다음 해 광고 단가를 정한다. 지국장 요구·용지값 폭등·경쟁지 판촉·절독 운동·독자 늘리기 할당·자매지 공동 인쇄. 기본 정책은 이전과 똑같고, 어떤 정책도 공짜가 아니다. 사장이 아니면 AI 판매국장이 회사 사정에 맞춰 정한다',
   '대규모|기사 삭제 요청: 무죄 확정·오래된 일반인 기사·피해자 신원·기업·정치인·연예인이 지난 기사를 지워 달라고 한다. 지우기·비식별 처리·후속 보도·그대로 두기 가운데 고르고, 버티면 언론중재위 조정과 소송이 온다. 광고주 기사는 지워 주고 시민 요청은 버티면 이중잣대 비판을 받는다. 편집국장은 회사 지침(원칙·유연·위원회)을 정한다',
   '대규모|재정: 회사 매출이 구독·판매, 광고, 디지털·포털, 사업·행사, 기자 영업, 대주주·계열 지원으로 나뉘어 회사 탭에 보인다. 대기업 계열은 계열사 광고, 사주 일가는 경영 지원, 지역 기업은 지역 광고·협찬, 공영은 수신료·출연금, 재단은 출연금이 들어오고, 대주주와 사이가 나빠지거나 계열사를 건드리면 줄어든다. 자금이 바닥나면 대주주가 증자로 메우지만 사이가 나쁘면 조건이 붙는다',
+  '주요|글 줄이기: 팝업은 첫 문단만 보이고 나머지 설명은 「자세히」에 접힌다. 긴 목록은 좋은 일·나쁜 일 6줄만 먼저 보이고, 선택지 아래 긴 설명 대신 숫자·화살표만 남는다. 설정 → 「글 분량」에서 자세히로 되돌릴 수 있다',
+  '주요|자잘한 일 맡기기: 명절·송년회·결혼식·체육대회처럼 가벼운 일은 성향과 컨디션에 맞춰 알아서 고르고 카드 한 장으로 알린다(설정에서 끌 수 있다)',
+  '개선|처음 하는 일 팁: 빠른 시작이나 두 번째 판부터는 창 대신 한 줄로 뜬다. 창으로 볼 때도 첫 문장만 보이고 나머지는 접힌다. 설정에서 창으로·한 줄 알림·끔을 고른다',
+  '수정|월말 결산 미션 줄이 용어 밑줄 때문에 세 줄로 쪼개지던 문제',
   '주요|취재 지시: 차장(한 달 1건 · B등급 이하)·부장·부국장·국장(한 달 2건). 나보다 직급이 낮거나 연차가 적은 기자에게만 지시할 수 있다. 기자 성향에 따라 꼼꼼하거나 빠르거나 단독을 키운다',
   '주요|편집국장 기획 하명: 부장에게 탐사 기획·어젠다 연계·이슈 총력 대응·대주주·광고주 우호 기획을 내려보낸다. 부서 실력·부장과의 관계·부장 성향이 결과를 가르고, 우호 기획엔 기자들이 반발한다. 내가 부장일 땐 위에서 하명이 내려온다',
   '주요|빠른 시작: 회사를 고른 뒤 부서를 고른다(3년 차·부장은 소속 부서, 국장·편집국장은 출신 부서). 첫 화면에도 빠른 시작이 생겼다',
@@ -5507,7 +5511,9 @@ function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
     {label:`행동력 남김 경고: ${S.warnNext===false?'끔':'켬'}`,sub:'행동력이 남았을 때 다음 달로 넘기기 전에 묻기',fn:()=>{S.warnNext=S.warnNext===false?true:false;toast(S.warnNext===false?'경고를 껐다':'경고를 켰다');settingsMenu();return false;}},
     {label:`결과 창: ${S.resPop===false?'끔':S.simple&&S.resPop!==true?'알림만':'켬'}`,sub:'할 일 결과를 창으로',fn:()=>{S.resPop=S.resPop===false?true:S.resPop===true?false:(S.simple?true:false);toast(S.resPop===false?'결과 창을 껐다':'결과 창을 켰다');settingsMenu();return false;}},
     {label:`월말 결산 창: ${S.monthSumOff?'끔':'켬'}`,sub:'한 달이 끝날 때 평가·통장·미션·광고 목표를 한 장으로 보여 주기 (끄면 알림 한 줄)',fn:()=>{S.monthSumOff=!S.monthSumOff;toast(S.monthSumOff?'월말 결산 창을 껐다':'월말 결산 창을 켰다');settingsMenu();return false;}},
-    {label:`처음 하는 일 팁: ${S.tipsOn===false?'끔':'켬'}`,sub:'할 일마다 나오는 설명',fn:()=>{S.tipsOn=S.tipsOn===false;toast(`팁 ${S.tipsOn?'켜짐':'꺼짐'}`);settingsMenu();return false;}},
+    {label:`글 분량: ${S.longTxt?'자세히':'짧게'}`,sub:'짧게: 첫 문단만 보이고 설명은 「자세히」에 접힌다 · 긴 목록은 6줄만',fn:()=>{S.longTxt=!S.longTxt;toast(`글 분량: ${S.longTxt?'자세히':'짧게'}`);settingsMenu();return false;}},
+    {label:`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`,sub:'명절·회식·결혼식 같은 가벼운 일은 성향대로 알아서 고르고 카드로 알린다',fn:()=>{S.minorAuto=S.minorAuto===false;toast(`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`);settingsMenu();return false;}},
+    {label:`처음 하는 일 팁: ${tipLbl()}`,sub:'할 일마다 나오는 설명 (창으로 → 한 줄 알림 → 끔)',fn:()=>{const m=tipMode();S.tipsOn=m==='on'?'toast':m==='toast'?false:true;toast(`팁: ${tipLbl()}`);settingsMenu();return false;}},
     {label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
     ...(newbie()||fNewbie()?[{label:'모든 기능 바로 열기',sub:'경험자용',fn:()=>{setVet();toast('모든 기능을 열었다');}}]:[]),
     {label:'← 메뉴',cls:'ghost',fn:()=>{gameMenu();return false;}}]);}
@@ -11774,6 +11780,38 @@ function asgPropose(){if(S.founder||S.story||S.op||S.rank<2||S.rank>5||!asgLeft(
   Q.push(()=>openModal('후배의 발제',`<p class="lede">${esc(m.name)} ${MR[Math.min(3,m.r||0)]}: "${pf==='scoop'?'이거 단독 될 것 같습니다. 제가 붙어 봐도 될까요?':pf==='fact'?'자료를 좀 모아 봤는데, 제대로 확인해 보고 싶습니다.':pf==='buzz'?'오늘 반응 올 만한 거 하나 있습니다. 바로 치겠습니다!':'아는 분이 귀띔해 준 게 있는데요.'}"</p><p>「${esc(it.title)}」 · ${gradeOf(it)}등급 · 파급력 ${it.imp}${it.excl?' · 단독 가능':''}</p><p class="hint">받아 주면 이번 달 취재 지시 1건을 쓴다 (남은 ${asgLeft()}건). 후배가 스스로 가져온 일이라 더 열심히 한다.</p>`,[
    {label:'해 보라고 한다',rec:true,sub:'취재 지시 1건 · 후배 관계↑ · 성공 가능성↑',fn:()=>{const h={who:m.name,kind:'부서원',ref:m.id,col:false,title:it.title,imp:it.imp,excl:it.excl,sk:(m.skill||45)+12,due:S.turn+R(4,8),rival:false,sub:true,mode:'order'};asgAI(m,h);S.handoffs=(S.handoffs||[]).concat([h]);asgUse(1);S.mAct=S.mAct||{};S.mAct.assign=(S.mAct.assign||0)+1;try{misCheck();}catch(e){}mRel(m,4,'발제를 받아 줌');log(`후배 발제 수락: 「${it.title}」 → ${m.name}`);}},
    {label:'다음에 하자고 한다',sub:'후배 관계 조금↓',fn:()=>{mRel(m,-2,'발제 반려');}}]));}
+// ===== 1.31 글 줄이기 =====
+// ① 짧게 보기(기본): 첫 문단만 보이고 나머지 설명은 「자세히」에 접는다 · 긴 목록은 6줄만 · 선택지 아래 긴 설명 칩은 숨기고 숫자·화살표 칩만
+// ② 자잘한 일 맡기기(기본): 명절·회식·결혼식 같은 가벼운 이벤트는 내 성향대로 알아서 고르고 카드 한 장으로 알린다
+// ⑤ 처음 하는 일 팁: 빠른 시작·두 번째 판부터는 한 줄 알림으로 · 창으로 볼 때도 첫 문장만
+function shortOn(){return !!(S&&S.phase==='game'&&S.longTxt!==true);}
+const SHORT_SKIP=/튜토리얼|도움말|업데이트|설정|메뉴|엔딩|저장|개발자|용어|기록|도감|결과 보기|커리어 관리|빠른 시작/;
+function firstSent(t){t=String(t||'');const m=/^(.+?(?:다|요|까|라|자)[.!?]["”」』]?)(\s|$)/.exec(t);return m?m[1]:t;}
+function shortify(title){if(SHORT_SKIP.test(title||''))return;const root=$('#mb');if(!root)return;
+  // 긴 목록: 좋은 일·나쁜 일을 먼저 6줄, 나머지는 접는다
+  root.querySelectorAll('ul.feed').forEach(ul=>{const L=[...ul.children];if(L.length<=7)return;const pri=li=>li.classList.contains('g')||li.classList.contains('r')?0:1;const keep=L.slice().sort((a,b)=>pri(a)-pri(b)).slice(0,6);const rest=L.filter(x=>!keep.includes(x));const d=document.createElement('details');d.className='more';d.innerHTML=`<summary>나머지 ${rest.length}건 보기</summary>`;const u2=document.createElement('ul');u2.className='feed';rest.forEach(x=>u2.appendChild(x));d.appendChild(u2);ul.after(d);});
+  // 문단: 첫 문단(lede)·효과(fx)·경고는 남기고, 설명 문단은 「자세히」로
+  const kids=[...root.children];const tot=(root.textContent||'').replace(/\s+/g,' ').length;if(tot>=170){let first=kids.find(e=>e.tagName==='P'&&e.classList.contains('lede'))||kids.find(e=>e.tagName==='P');
+    const mov=kids.filter(e=>e.tagName==='P'&&e!==first&&!e.classList.contains('fx')&&!e.classList.contains('warn')&&!e.querySelector('input,button,select,textarea')&&!e.classList.contains('r')&&(e.textContent||'').trim().length>0);
+    const mt=mov.reduce((a,e)=>a+(e.textContent||'').length,0);if(mov.length&&mt>=50){const d=document.createElement('details');d.className='more';d.innerHTML='<summary>자세히</summary>';const at=mov[mov.length-1].nextSibling;mov.forEach(e=>d.appendChild(e));if(at&&at.parentNode===root)root.insertBefore(d,at);else root.appendChild(d);}}
+  // 선택지: 긴 설명 칩은 숨긴다 (숫자·화살표·확률이 있는 칩은 남긴다)
+  document.querySelectorAll('#mc .chips').forEach(cs=>{const C=[...cs.querySelectorAll('i.cp')];if(C.length<2)return;C.forEach(x=>{const t=x.textContent||'';if(t.length>15&&!/[↑↓%0-9＋－+]/.test(t))x.classList.add('cpx');});if(C.every(x=>x.classList.contains('cpx')))C[0].classList.remove('cpx');});
+  document.querySelectorAll('#mc .ch>.cs').forEach(x=>{if(!x.closest('.mfoot')&&(x.textContent||'').length>48){x.title=x.textContent;x.textContent=firstSent(x.textContent.split(' · ')[0]);}});}
+// 자잘한 이벤트
+const MINOR_RE=/^(추석 연휴|설 연휴|송년회|시무식|폭염|한파|동기의 결혼식|수능|사내 체육대회|송별회|건강검진|부서 회식|수습 동기 단톡방|편집국 순시 · 야식|창립기념일|봄 인사 이동철|장마)$/;
+function minorOK(t,b,c){return S&&S.phase==='game'&&S.minorAuto!==false&&MINOR_RE.test(t||'')&&Array.isArray(c)&&c.filter(x=>x&&x.cls!=='ghost'&&!x.disabled).length>=2&&!String(b||'').includes('<input');}
+function minorPick(c){const L=c.filter(x=>x&&x.cls!=='ghost'&&!x.disabled&&x.fn);let best=null,bv=-1e9;L.forEach((x,i)=>{const s=String(x.sub||'');let v=(s.match(/↑/g)||[]).length-(s.match(/↓/g)||[]).length*1.2-(x.risk?2:0)+(x.rec?3:0)-i*.05;if(/통장 -|체력 -|-\d/.test(s))v-=.5;
+  // 성향: 체력이 바닥이면 쉬는 쪽, 동료 관계를 중시하면 함께하는 쪽
+  if(S.hp<35&&/쉰|집|빠진|불참|일찍/.test(x.label))v+=2;if((S.traits||[]).includes('insider')&&/간다|끝까지|함께|참석/.test(x.label))v+=1;if((S.traits||[]).includes('lone')&&/빠진|불참|일찍/.test(x.label))v+=1;if(v>bv){bv=v;best=x;}});return best;}
+function minorAuto(t,b,c){const x=minorPick(c);if(!x)return false;let r;const t0=mTok;try{r=x.fn();}catch(e){console.error(e);}if(mTok!==t0)return true;
+  try{showCard(t,`${b||''}<p class="fx">알아서 했다 → ${esc(String(x.label).replace(/<[^>]+>/g,''))}</p><p class="hint">자잘한 일은 설정에서 직접 고르게 바꿀 수 있다</p>`,[{label:'확인'}]);}catch(e){}return true;}
+{const _omS=openModal;openModal=function(t,b,c){try{if(minorOK(t,b,c)&&minorAuto(t,b,c))return;}catch(e){console.error(e);}const r=_omS.call(this,t,b,c);try{if(shortOn()&&!$('#modal').hidden)shortify(t);}catch(e){console.error(e);}try{if(window.__tipPend&&!$('#modal').hidden){const d=document.createElement('p');d.className='tipline';d.textContent='팁 · '+window.__tipPend;$('#mb').prepend(d);window.__tipPend=null;}}catch(e){}return r;};}
+// 팁
+function tipMode(){if(!S)return 'on';if(S.tipsOn===false)return 'off';if(S.tipsOn===true)return 'on';if(S.tipsOn==='toast')return 'toast';let vet=false;try{vet=(META&&META.runs&&META.runs.length>=1);}catch(e){}return S.smode==='quick'||vet?'toast':'on';}
+function tipToast(id){if(tipMode()!=='toast'||!TIPS[id])return false;S.tipSeen=S.tipSeen||{};if(S.tipSeen[id])return false;S.tipSeen[id]=1;window.__tipPend=firstSent(TIPS[id]);setTimeout(()=>{if(window.__tipPend){try{toast(`팁 · ${window.__tipPend}`);}catch(e){}window.__tipPend=null;}},400);return true;}
+function tipBody(t){const f=firstSent(t);const rest=String(t||'').slice(f.length).trim();return `<p class="lede">${f}</p>${rest?`<details class="more"><summary>자세히</summary><p>${rest}</p></details>`:''}`;}
+function tipLbl(){return {off:'끔',on:'창으로',toast:'한 줄 알림'}[tipMode()];}
+(function(){const st=document.createElement('style');st.textContent=`details.more{margin:6px 0 2px}details.more>summary{cursor:pointer;color:var(--mute,#9aa2bb);font-size:13px;list-style:none;padding:4px 0}details.more>summary::before{content:'＋ ';}details.more[open]>summary::before{content:'－ ';}details.more>summary::-webkit-details-marker{display:none}#mc .cp.cpx{display:none}.mis .misr>span{display:block!important}.misr>span .gl,.misr>span span.gl{display:inline!important;margin:0!important;padding:0!important}.tipline{font-size:13px;color:#ffcf86;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.25);border-radius:10px;padding:6px 10px;margin:0 0 8px}`;document.head.appendChild(st);})();
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
