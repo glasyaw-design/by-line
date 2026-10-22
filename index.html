@@ -5109,6 +5109,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '개선|할 일 아이콘 75개를 원본 해상도로 다시 뽑아 선명하게 했다',
   '개선|인사권 행사·기자 채용처럼 여러 명을 고르는 화면: 얼굴·이름·실력 막대·꼬리표만 담은 2열 카드로 줄이고, 긴 설명은 접었다. 고른 사람 수와 실행 버튼이 아래에 붙어 있어 목록이 길어도 바로 누를 수 있다',
   '조정|인건비: 기자마다 다르게 나간다 — 수습 약 600만, 기자 900만, 10년 차 이상 1,200만, 스타 기자 1,500만 원(월급·4대 보험·취재비 포함). 채용 후보 카드에 월 인건비가 보인다',
+  '수정|지원자 프로필: 능력치 미리보기에 나이 효과(상식·친화력·체력)가 빠져 있던 문제. 나이를 고르면 바뀌는 능력치가 바로 보인다',
   '수정|팝업이 화면보다 길면 아래쪽이 잘려 버튼을 누를 수 없던 문제(총무국 등)',
 ],'2026.10.22',['새 화면과 그림 300여 장','팝업 새 디자인','데스킹 보강']],
  ['1.31','신문의 목소리',[
@@ -12483,7 +12484,8 @@ try{Object.assign(IMG,{"cr_exam": "data:image/webp;base64,UklGRoYrAABXRUJQVlA4IH
 // ===== 1.32 지원자 프로필 (GPT 시안): 왼쪽 캐릭터 · 오른쪽 그림 카드 =====
 const CR_SM=[['exam','언론고시','원하는 매체 4곳에 지원해 서류·필기·면접을 본다'],['smb','중소 매체','수시 채용으로 바로 입사 · 작은 곳에서 크는 길'],['quick','빠른 시작','3년 차·부장·국장·편집국장으로 바로'],['found','창간','발행인으로 내 언론사를 세운다']];
 const CR_RADAR=[['inv','취재'],['wri','문장'],['ver','검증'],['net','인맥'],['sta','체력'],['kno','상식']];
-function crRadar(){const b=bonusOf();const v=CR_RADAR.map(([k])=>clamp((ST0[k]+(b[k]||0))/70,.08,1));const cx=110,cy=100,R=78;const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI*2/6;return [cx+Math.cos(a)*R*r,cy+Math.sin(a)*R*r];};
+function crBonus(){const b=Object.assign({},bonusOf());const a=S.age0||(S.smode==='found'?40:26);const ad=(k,v)=>{v=Math.round(v);if(v)b[k]=(b[k]||0)+v;};if(S.smode==='found'){Object.keys(STN).forEach(k=>ad(k,14));const d=a-35;ad('net',d*.5);ad('kno',d*.4);ad('sta',-d*.4);}else{const d=a-23;ad('kno',d*.8);ad('cha',d*.4);ad('sta',-d*.3);}return b;}
+function crRadar(){const b=crBonus();const v=CR_RADAR.map(([k])=>clamp((ST0[k]+(b[k]||0))/70,.08,1));const cx=110,cy=100,R=78;const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI*2/6;return [cx+Math.cos(a)*R*r,cy+Math.sin(a)*R*r];};
   const ring=r=>CR_RADAR.map((_,i)=>pt(i,r).join(',')).join(' ');
   return `<svg class="crrad" viewBox="0 0 220 200" aria-hidden="true">${[.33,.66,1].map(r=>`<polygon points="${ring(r)}" fill="none" stroke="rgba(150,170,230,.28)" stroke-width="1"/>`).join('')}${CR_RADAR.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(i,1)[0]}" y2="${pt(i,1)[1]}" stroke="rgba(150,170,230,.18)"/>`).join('')}
    <polygon points="${v.map((r,i)=>pt(i,r).join(',')).join(' ')}" fill="rgba(255,184,77,.55)" stroke="#ffd27a" stroke-width="2"/>${v.map((r,i)=>`<circle cx="${pt(i,r)[0]}" cy="${pt(i,r)[1]}" r="3.2" fill="#fff3d1"/>`).join('')}
@@ -12493,7 +12495,7 @@ function crCard(attr,on,img,name,desc,cls){return `<button type="button" class="
   const sm=S.smode||'exam';const F=sm==='found';const ageL=F?[35,38,40,43,45,48,50,55]:[23,24,25,26,27,28,29];if(S.age0==null||(F&&S.age0<35)||(!F&&(S.age0<23||S.age0>29)))S.age0=F?40:26;
   const face=IMG[`me_${(typeof meG==='function'?meG():'m')}0_1`]||IMG.me_m0_1||'';
   const nextL=sm==='story'?'다음: 스토리 고르기':F?'다음: 창간 준비':sm==='smb'?'다음: 수시 채용':sm==='quick'?'다음: 경력 고르기':'다음: 언론고시 지원';
-  const b=bonusOf();const top=Object.keys(STN).map(k=>[k,ST0[k]+(b[k]||0),b[k]||0]);
+  const b=crBonus();const top=Object.keys(STN).map(k=>[k,ST0[k]+(b[k]||0),b[k]||0]);
   const MJ=MAJORS[S.major]||MAJORS[0],SP=SPECS[S.spec]||SPECS[0];const fx=o=>Object.entries(o.b).map(([k,v])=>`${STN[k]} ${v>0?'+':''}${v}`).join(' · ');
   const step=(i,ic,n)=>`<a class="crstep" href="#crs${i}"><i>${ic}</i><span>${n}</span></a>`;
   return `<section class="cr25" style="--crbg:url(${IMG.tt_pc||''})">
@@ -12508,7 +12510,7 @@ function crCard(attr,on,img,name,desc,cls){return `<button type="button" class="
     <button type="button" class="crquick" data-go="quick"><b>바로 시작하기 ›</b><span>처음이라면 이걸로 · 시험 없이 추천 매체 3곳 중 하나로 바로 입사</span></button>
     <div class="crsec" id="crs1"><h4>시작 방식</h4><div class="crgrid g4">${CR_SM.map(([k,n,d])=>crCard(`data-smode="${k}"`,sm===k,'cr_'+k,n,d)).join('')}</div></div>
     <div class="crsec" id="crs2"><h4>플레이 방식 <small>시작하고 2년이 지나야 메뉴에서 바꿀 수 있다</small></h4><div class="crgrid g2">${crCard('data-simple="0"',!S.simple,'cr_full','정통 모드','모든 기능 · 사실 교차 확인 · 기사 5단계 · 관계망','wide')}${crCard('data-simple="1"',!!S.simple,'cr_simple','간소화 모드','핵심만 · 기사는 제목만 · 승진 두 배 빠르게','wide')}</div></div>
-    <div class="crsec" id="crs3"><h4>나이 <small>${F?'창간 대표는 35세 이상':'늦게 들어올수록 상식·친화력↑ 체력↓'}</small></h4><div class="cragech">${IMG.cr_age?`<img src="${IMG.cr_age}" alt="">`:''}${ageL.map(a=>`<button type="button" class="chip agc" data-age="${a}" aria-pressed="${S.age0===a}">${a}세</button>`).join('')}</div>
+    <div class="crsec" id="crs3"><h4>나이 <small>${(()=>{const a=S.age0,d=F?a-35:a-23;if(!d)return F?'창간 대표는 경력이 있어 모든 능력치 +14 · 35세 기준, 나이가 많을수록 인맥·상식↑ 체력↓':'23세 기준 · 늦게 들어올수록 상식·친화력↑ 체력↓';return F?`${a}세 — 인맥 +${Math.round(d*.5)} · 상식 +${Math.round(d*.4)} · 체력 ${-Math.round(d*.4)}`:`${a}세 — 상식 +${Math.round(d*.8)} · 친화력 +${Math.round(d*.4)} · 체력 ${-Math.round(d*.3)}`;})()}</small></h4><div class="cragech">${IMG.cr_age?`<img src="${IMG.cr_age}" alt="">`:''}${ageL.map(a=>`<button type="button" class="chip agc" data-age="${a}" aria-pressed="${S.age0===a}">${a}세</button>`).join('')}</div>
      <h4>난이도</h4><div class="crgrid g3">${Object.keys(DIFF).map((k,i)=>crCard(`data-diff="${k}"`,S.diff===k,['cr_easy','cr_norm','cr_hard'][i]||'cr_norm',DIFF[k].n,({easy:'승진이 빠르고 오보 위험이 낮다',normal:'현실에 가까운 속도 · 실수 한 번은 버틴다',hard:'승진이 느리고 실수 하나가 커리어를 흔든다'})[k]||DIFF[k].d,'wide')).join('')}</div></div>
     <div class="crsec" id="crs4"><h4>전공 <small>${esc(MJ.n)} — ${esc(MJ.t)} · ${fx(MJ)}</small></h4><div class="crgrid gm">${MAJORS.map((m,i)=>crCard(`data-major="${i}"`,S.major===i,'cr_m'+i,m.n,'','tile')).join('')}</div>
      <h4>대표 스펙 <small>${esc(SP.n)} — ${esc(SP.t)} · ${fx(SP)}</small></h4><div class="crgrid gm">${SPECS.map((m,i)=>crCard(`data-spec="${i}"`,S.spec===i,'sp_'+i,m.n,'','tile')).join('')}</div></div>
