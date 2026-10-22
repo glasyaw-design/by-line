@@ -5108,7 +5108,9 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '조정|사장의 신뢰: 회사 보도 품질이 받쳐 주는 바닥을 조금 더 올렸다',
   '개선|할 일 아이콘 75개와 인물 얼굴 160여 개(주인공·역할·동료)를 원본 해상도로 다시 뽑아 선명하게 했다',
   '개선|인사권 행사·기자 채용처럼 여러 명을 고르는 화면: 얼굴·이름·실력 막대·꼬리표만 담은 2열 카드로 줄이고, 긴 설명은 접었다. 고른 사람 수와 실행 버튼이 아래에 붙어 있어 목록이 길어도 바로 누를 수 있다',
+  '대규모|배경 음악을 새로 만든 8곡으로 바꿨다: 메인 테마·편집국의 하루·새벽 라인·마감 30분 전·속보 대기·국장실의 오후·도약·마지막 바이라인. 직급·모드·상황(기사 쓰기·속보·소송·새벽 취재 등)에 따라 부드럽게 넘어간다. 곡을 못 불러오면 예전 합성 음악이 나온다',
   '수정|창간 대표(사장)나 부국장 이상인데 탐사보도팀장이 「우리 팀에 올 생각 없어?」라며 스카우트하거나, 데스크가 속보 담당으로 차출하던 문제',
+  '수정|수습 첫날 캡의 말: 경제지·지역지·인터넷 매체에서도 「오늘부터 너는 경찰서에서 산다」고 하던 것을, 매체마다 실제로 도는 현장(여의도·군청·커뮤니티·구장 등)에 맞게 바꾸고 수습 기간과 마칠 기준을 깔끔하게 정리했다',
   '주요|수습 기간: 매체 규모와 상관없이 3개월(간소화 2개월)로 통일했다. 기간이 짧아진 만큼 정보보고·사쓰마와리 기준 횟수와 수습 평가 문턱(38~48)도 낮췄다. 뽑은 수습 기자도 3개월 뒤 발령된다',
   'AI|캡 코칭: 수습 기간에 캡이 남은 시간에 비해 가장 뒤처진 기준을 매달 콕 집어 말해 준다. 같은 부서에 실력 65 이상 선배가 있으면 수습 기자를 붙잡고 가르쳐 더 빨리 큰다',
   '수정|수습 기자 인건비: 수습이 있는 달마다 할인이 쌓여 회사 고정비가 영영 줄어들던 문제. 이제 수습 기간에만 싸고(약 600만), 발령되면 일반 기자 인건비로 돌아간다',
@@ -5834,7 +5836,7 @@ function join(o){
   S.outlet=o.id;S.co=initCo(o);S.dept=o.depts.find(d=>d==='case')||o.depts.find(d=>catOf(d).includes('spo')&&o.type==='sports')||o.depts.find(d=>cat1(d)==='soc')||o.depts[0];S.phase='game';S.rank=0;S.inRank=0;S.atOutlet=0;S.history=[o.id];S.scene='police';S.rival=makeRival();
   initColleagues(true);initNet(null);initPortal(o);initComp();S.ap=apBase();log(`${o.n} ${TYPES[o.type].n} 입사. 수습 생활 시작`);tick(`${o.n}, 수습기자 입사식`,1);
   const rv=S.rival;
-  openModal('수습기자 첫날',`<p class="lede">${o.n} 편집국. ${S.capName} 캡이 휴대폰 번호를 찍어주며 말했다. "오늘부터 너는 ${cat1(S.dept)==='spo'?'구장':'경찰서'}에서 산다. 보고는 하루 세 번."</p><p>${DEPTS[S.dept].n} 수습. ${rookieWeeks()/4}개월 동안 ${ro2(sasuN())} 단서와 취재원을 모으고 정보보고로 평가를 쌓자. 수습 평가 기준: ${rookieReqs().map(x=>x.t.replace(/ \d+\//,' ')).join(' · ')}.</p><p>같은 라인을 도는 ${OUTLETS.find(x=>x.id===rv.outlet).n} 수습 ${jo2(rv.name,'이','가')} 인사를 건넨다. 앞으로 계속 마주칠 얼굴이다.</p><p class="hint">한 턴은 한 달. 이번 달 행동력은 ${apBase()}이고, 다 쓰면 '다음 달로 넘기기'. 난이도: ${DF().n}. 할 수 있는 일은 몇 달에 걸쳐 하나씩 열린다.</p>`,[{label:'30초 안내 보고 시작',sub:'3쪽 · 한 달 흐름 · 미션 · 취재와 기사',rec:true,fn:()=>{checkUnlocks();tutShort(0);return false;}},{label:'바로 시작',fn:()=>{checkUnlocks();}}]);
+  openModal('수습기자 첫날',`<p class="lede">${o.n} ${['tv','jp','ch'].includes(o.type)?'보도국':'편집국'}. ${S.capName} 캡이 휴대폰 번호를 찍어 주며 말했다. "${rkCapLine()}"</p><p><b>${DEPTS[S.dept].n} 수습 ${rookieWeeks()/4}개월.</b> ${esc(sasuCfg().d)}. 거기서 단서와 취재원을 찾고 정보보고로 평가를 쌓자.</p><p class="hint">수습을 마치려면: ${rookieReqs().map(x=>x.t.replace(/ \d+\//,' ').replace(/\s*\(.*\)/,'')).join(' · ')}</p><p>같은 라인을 도는 ${OUTLETS.find(x=>x.id===rv.outlet).n} 수습 ${jo2(rv.name,'이','가')} 인사를 건넨다. 앞으로 계속 마주칠 얼굴이다.</p><p class="hint">한 턴은 한 달. 이번 달 행동력은 ${apBase()}이고, 다 쓰면 '다음 달로 넘기기'. 난이도: ${DF().n}. 할 수 있는 일은 몇 달에 걸쳐 하나씩 열린다.</p>`,[{label:'30초 안내 보고 시작',sub:'3쪽 · 한 달 흐름 · 미션 · 취재와 기사',rec:true,fn:()=>{checkUnlocks();tutShort(0);return false;}},{label:'바로 시작',fn:()=>{checkUnlocks();}}]);
 }
 
 // ================= 개발자 모드 =================
@@ -7823,7 +7825,7 @@ function rookieReqs(o){o=o||OUT();if(S.story)return [];const mo=rookieWeeks(o)/4
   if(T==='online'&&reqOpen(['write']))L.push({t:`출고 기사 ${S.totalArticles||0}/2건`,ok:(S.totalArticles||0)>=2});
   if(['sports'].includes(T)){const n=Math.max(2,Math.round(mo*1.3));L.push({t:`${sasuN()} ${S.rkSasu||0}/${n}회`,ok:(S.rkSasu||0)>=n});}
   if(o.p>=4&&!S.simple&&reqOpen(['colleague','drink'])){const cp=colBy('cap');L.push({t:`캡과의 관계 ${cp?Math.round(cp.rel):0}/25`,ok:!!cp&&cp.rel>=25});}
-  if(o.p>=5&&!S.simple)L.push({t:`캡 미션 2개 이상 달성 ${S.rkMiss||0}/2달`,ok:(S.rkMiss||0)>=2});
+  if(o.p>=5&&!S.simple)L.push({t:`캡 미션 달성 ${S.rkMiss||0}/2달`,ok:(S.rkMiss||0)>=2});
   return S.simple?L.slice(0,2):L;}
 // ===== 수습 건너뛰기 =====
 // 남은 수습 기간을 자동으로 보낸다. 직접 할 때보다 능력치·취재원·캡 관계·돈이 조금 덜 쌓인다.
@@ -12705,6 +12707,66 @@ function capCoach(){if(S.rank!==0||S.story||S.founder||S.phase!=='game')return n
   const tip=/정보보고/.test(nm)?'정보보고를 더 올려':/평가/.test(nm)?'단독 단서 하나라도 물어 와':/캡과의 관계/.test(nm)?'술자리라도 한번 같이 가자':/캡 미션/.test(nm)?'이번 달 미션은 꼭 채워':/속도/.test(nm)?'1보부터 빨리 쳐':/방송감/.test(nm)?'스탠딩 연습 더 해':'현장을 더 돌아';
   return {c:'r',t:`${S.capName||'캡'} 캡: "${nm} 모자라다. 남은 ${moTxt(left)} — ${tip}."`};}
 {const _rk2=rkMonth;rkMonth=function(lines){_rk2(lines);try{const t=capCoach();if(t&&lines)lines.push(t);}catch(e){}};}
+// ===== 수습 첫날 캡의 한마디: 도는 현장에 맞게 =====
+function rkCapLine(){const k=(typeof sasuKey==='function')?sasuKey():'police';const n=rookieWeeks()/4;const m=['','한','두','석','넉'][n]||n;
+  const L={police:`딱 ${m} 달이다. 오늘부터 너는 경찰서에서 산다. 보고는 하루 세 번, 전화는 신호 두 번 안에 받아.`,
+   sports:`${m} 달 동안 너는 구장에서 산다. 경기 전 브리핑 하나도 놓치지 말고, 보고는 하루 세 번.`,
+   wire:`${m} 달 동안 밤은 네 거다. 상황실 전화 돌리고, 뭐든 터지면 1보부터 쳐.`,
+   tv:`${m} 달 동안 중계차가 네 집이다. 카메라 따라 현장 뛰고, 스탠딩 한 줄이라도 매일 연습해.`,
+   econ:`${m} 달 동안 너는 여의도에서 산다. 장 열리기 전에 증권가 한 바퀴, 보고는 하루 세 번.`,
+   local:`${m} 달 동안 군청 기자실이 네 자리다. 읍사무소·군의회·장터까지 발로 돌고, 보고는 하루 세 번.`,
+   eng:`${m} 달 동안 외신 기자클럽과 대사관 거리를 돈다. 브리핑은 원문으로 받아 와.`,
+   online:`${m} 달 동안 커뮤니티가 네 출입처다. 뜨는 글 보이면 먼저 확인하고, 그다음에 보고해.`,
+   weekly:`${m} 달 동안 자료실과 판결문 열람실에서 산다. 남들이 안 읽는 걸 읽어 와.`,
+   edu:`${m} 달 동안 교육청과 학원가를 돈다. 학부모 단톡방 얘기까지 귀 열어 둬.`,
+   med:`${m} 달 동안 병원과 제약사를 돈다. 응급실 당직 의사랑 먼저 친해져.`,
+   tech:`${m} 달 동안 판교와 전자상가를 돈다. 협력사 사람들이 제일 먼저 안다.`,
+   law:`${m} 달 동안 서초동에서 산다. 법정 방청석 맨 앞이 네 자리다.`,
+   star:`${m} 달 동안 방송가를 돈다. 공항 출국장과 시사회장, 하나도 빼먹지 마.`};
+  return L[k]||L.police;}
+
+// ===== 1.4 BGM: Suno로 만든 8곡 (bgm/ 폴더의 mp3) · 못 불러오면 예전 합성 음악으로 =====
+const BGMF={theme:'밤의 편집국',daily:'편집국의 하루',night:'새벽 라인',deadline:'마감 30분 전',crisis:'속보 대기',power:'국장실의 오후',rise:'도약',ending:'마지막 바이라인'};
+const BGM_OLD={title:'theme',exam:'deadline',police:'night',newsroom:'daily',office:'power',tycoon:'rise',drama:'daily',tense:'crisis',ending:'ending'};
+const BGM_NEW2OLD={theme:'title',daily:'newsroom',night:'police',deadline:'exam',crisis:'tense',power:'office',rise:'tycoon',ending:'ending'};
+const BF={ok:true,key:null,cur:null,ovr:null,pin:null,vol:.9};
+// 상황 → 곡
+{const _bm=bgmMood;bgmMood=function(){const now=Date.now();if(BF.pin&&BF.pin.u>now)return BF.pin.k;
+  const old=_bm();if(!S||old==='title')return 'theme';if(old==='exam')return 'deadline';if(old==='ending')return 'ending';if(old==='tense')return 'crisis';
+  if(BF.ovr&&BF.ovr.u>now)return BF.ovr.k;
+  try{if(S.founder){if(S.co&&S.co.cash<0)return 'crisis';const y=(typeof fYr==='function')?fYr():1;return y<2?'rise':'power';}}catch(e){}
+  if(S.rank===0)return 'night';
+  if((S.trust||50)<22)return 'crisis';
+  if(S.rank>=1&&(S.inRank||0)<4&&S.turn>8)return 'rise';
+  return S.rank>=4?'power':'daily';};}
+function bfStart(k,fade){const c=AU.ctx;const a=new Audio();a.crossOrigin='anonymous';a.preload='auto';a.src='bgm/bgm_'+k+'.mp3';
+  const src=c.createMediaElementSource(a);const g=c.createGain();g.gain.value=0;src.connect(g);g.connect(AU.bgmG);const d={a,g,src,k};
+  a.addEventListener('error',()=>{if(BF.cur!==d)return;BF.ok=false;BF.cur=null;BF.key=null;bfStop(d,0);bgmUpdate();});
+  a.addEventListener('timeupdate',()=>{if(BF.cur===d&&!d.x&&a.duration&&a.currentTime>a.duration-5){d.x=1;bfSwap(k,3);}});
+  if(AU.on.bgm&&!document.hidden){const p=a.play();if(p&&p.catch)p.catch(()=>{});}
+  const t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(BF.vol,t+fade);return d;}
+function bfStop(d,fade){if(!d)return;try{const t=AU.ctx.currentTime;d.g.gain.cancelScheduledValues(t);d.g.gain.setValueAtTime(d.g.gain.value,t);d.g.gain.linearRampToValueAtTime(0,t+fade);}catch(e){}
+  setTimeout(()=>{try{d.a.pause();d.a.removeAttribute('src');d.a.load();d.src.disconnect();d.g.disconnect();}catch(e){}},fade*1000+250);}
+function bfSwap(k,fade){const old=BF.cur;BF.cur=bfStart(k,fade);bfStop(old,fade);}
+{const _bu=bgmUpdate;bgmUpdate=function(){if(!AU.ctx)return;const m=bgmMood();const k=BGMF[m]?m:(BGM_OLD[m]||'daily');
+  if(!BF.ok){const keep=bgmMood;bgmMood=()=>BGM_NEW2OLD[k];try{_bu();}finally{bgmMood=keep;}return;}
+  if(BF.key===k)return;BF.key=k;
+  if(AU.bus){const ob=AU.bus;try{ob.gain.setTargetAtTime(0,AU.ctx.currentTime,.3);}catch(e){}setTimeout(()=>{try{ob.disconnect();}catch(e){}},2000);AU.bus=null;}AU.mood=null;
+  bfSwap(k,BF.cur?2.5:1.5);const el=$('#sndnow');if(el)el.textContent=BGMF[k];};}
+// 소리 끄기·탭 숨김 → 멈춤, 다시 켜면 이어서
+function bfSync(){const d=BF.cur;if(!d)return;const want=AU.on.bgm&&!document.hidden;if(want&&d.a.paused){const p=d.a.play();if(p&&p.catch)p.catch(()=>{});}else if(!want&&!d.a.paused)d.a.pause();}
+{const _av=auVol;auVol=function(){_av();try{bfSync();}catch(e){}};}
+{const _au=auUnlock;auUnlock=function(){_au();try{bfSync();}catch(e){}};}
+document.addEventListener('visibilitychange',()=>{try{bfSync();}catch(e){}});
+// 팝업 내용에 따라 잠깐 곡을 바꾼다 (최소 45초 유지)
+const BF_OVR=[[/기사 쓰기|초고|데스킹|편집 회의|편집회의|발제|1면|마감|필기시험|면접/,'deadline'],[/속보|소송|오보|정정보도|압수수색|위기|파업|해킹|고발|제재|논란|폭로|검찰 수사/,'crisis'],[/새벽|사쓰마와리|하리꼬미|뻗치기|야간/,'night']];
+{const _om31=openModal;openModal=function(t,b,c){const r=_om31.apply(this,arguments);try{if(S&&S.phase==='game'){const hit=BF_OVR.find(x=>x[0].test(String(t)));if(hit){BF.ovr={k:hit[1],u:Date.now()+45000};bgmUpdate();}}}catch(e){}return r;};}
+setInterval(()=>{try{if(AU.ctx)bgmUpdate();}catch(e){}},5000);
+// 소리 설정: 새 곡 목록
+{const _sm=soundMenu;soundMenu=function(){_sm();try{const el=$('#sndnow');if(el&&BF.ok&&BF.key)el.textContent=BGMF[BF.key];
+  const bt=$('#mb .btns');if(bt&&BF.ok)bt.innerHTML=Object.keys(BGMF).map(k=>`<button class="btn sm" data-try31="${k}">${BGMF[k]}</button>`).join('');
+  document.querySelectorAll('#mb [data-try31]').forEach(x=>x.onclick=()=>{auUnlock();BF.pin={k:x.dataset.try31,u:Date.now()+90000};bgmUpdate();});
+  const h=[...document.querySelectorAll('#mb p.hint')].find(p=>/BGM은/.test(p.textContent));if(h&&BF.ok)h.textContent='BGM은 상황에 따라 바뀐다. 메인 테마·일상·새벽·마감·위기·경영·도약·엔딩 8곡. 곡을 누르면 1분 30초 동안 그 곡을 들려준다.';}catch(e){}};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
