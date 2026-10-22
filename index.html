@@ -5109,6 +5109,8 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '개선|할 일 아이콘 75개와 인물 얼굴 160여 개(주인공·역할·동료)를 원본 해상도로 다시 뽑아 선명하게 했다',
   '개선|인사권 행사·기자 채용처럼 여러 명을 고르는 화면: 얼굴·이름·실력 막대·꼬리표만 담은 2열 카드로 줄이고, 긴 설명은 접었다. 고른 사람 수와 실행 버튼이 아래에 붙어 있어 목록이 길어도 바로 누를 수 있다',
   '수정|휴대폰 같은 좁은 화면에서 「나」 탭 능력치 아이콘이 커서 「제목 감각」 같은 이름이 숫자와 겹치던 문제(아이콘 44→30px, 아주 좁으면 26px), 선택지 그림도 조금 줄였다. 상단 ♪ 소리 버튼이 빈 동그라미로 보이던 문제',
+  '수정|언론고시 지원 화면에서 매체 카드(통신사·방송·일간지 등)의 건물 그림이 안 나오던 문제',
+  '조정|부장 승진 조건: 「출입처 장악도 40 또는 제자」를 「출입처 장악도 55 그리고 제자 6개월 이상 키우기」로 어렵게 했다(간소화는 장악도 45). 이미 다른 부서로 보낸 옛 제자가 있으면 제자 조건은 채운 것으로 친다',
   '대규모|옛 제자: 키우던 제자가 승진·발령으로 다른 부서에 가면 아무 말 없이 관계가 끊기던 것을, 작별 장면과 함께 「옛 제자」로 남게 했다. 옛 제자는 그 부서 소식과 아이템을 물어 오고, 해마다 승진하며, 간부가 되면 1월 인사 때 내 편을 든다(사내 평가↑). 부장까지 크면 업적 「청출어람」, 옛 제자 3명이면 「사단을 이루다」. 제자 카드에 제자를 키우면 좋은 점을 모두 적었다',
   '수정|휴대폰에서 배경 음악이 소리 설정을 열어야만 나오던 문제. 이제 화면을 처음 터치하면 바로 나온다. 메인 테마는 첫 화면에서만 나와서 거의 못 듣던 것을, 게임을 켜면 처음 45초는 메인 테마로 시작하게 했다(지원자 프로필·지원 단계도 메인 테마, 필기시험·면접은 마감 곡)',
   '수정|라이벌: 신문 기자의 라이벌이 공영방송 기자로 나오던 것을, 같은 계열의 비슷한 급 매체에서 고르게 했다. 이직할 때마다 라이벌이 새 사람으로 바뀌던 문제(이제 끝까지 같은 얼굴, 라이벌 회사로 옮길 때만 새 맞수). 라이벌도 수습으로 시작해 석 달 뒤 발령되고, 승진은 한 직급에 최소 2~4년. 같은 회사가 된 라이벌이 경쟁사처럼 내 단독을 가로채던 문제. 「라이벌의 제안」이 석 달 연속 뜨던 문제. 「이현주이」 같은 조사 오류',
@@ -7517,7 +7519,7 @@ function promoSz(){return ({1:.5,2:.6,3:.8,4:1,5:1.2}[OUT().p]||1);}
 function rankArts(){const t0=S.turn-(S.inRank||0);return (S.clips||[]).filter(c=>c.turn>=t0).length;}
 function promoReqs(r){if(S.story||S.founder)return [];const z=promoSz(),n=x=>Math.max(1,Math.round(x*z*(S.simple?.5:1)));const L=[];const errN=y=>(S.errT||[]).filter(t=>t>S.turn-YW*y).length;const bm=Math.max(0,...Object.values(S.beatM||{0:0}));
   if(r===1){L.push({t:`이번 직급 기사 ${rankArts()}/${n(14)}`,ok:rankArts()>=n(14)});L.push({t:`최근 1년 오보 ${errN(1)}/2건 이하`,ok:errN(1)<=2});}
-  if(r===2){L.push({t:`단독 ${S.scoops||0}/${n(2)}`,ok:(S.scoops||0)>=n(2)});L.push({t:`출입처 장악도 40 또는 제자`,ok:bm>=40||!!S.protege});L.push({t:`신뢰 ${Math.round(S.trust)}/45`,ok:S.trust>=45});}
+  if(r===2){L.push({t:`단독 ${S.scoops||0}/${n(2)}`,ok:(S.scoops||0)>=n(2)});L.push({t:`출입처 장악도 ${Math.round(bm)}/${S.simple?45:55}`,ok:bm>=(S.simple?45:55)});L.push({t:pgReqTxt(),ok:pgReqOk()});L.push({t:`신뢰 ${Math.round(S.trust)}/45`,ok:S.trust>=45});}
   if(r===3){L.push({t:`부서 성적 2위 이내 ${S.deptTop||0}/${n(3)}회`,ok:(S.deptTop||0)>=n(3)});L.push({t:'특종 이상 1건 또는 기자상',ok:(S.tokjong||0)>=1||(S.awards||0)>=1});L.push({t:`신뢰 ${Math.round(S.trust)}/50`,ok:S.trust>=50});}
   if(r===4){L.push({t:`1면 대결 ${S.fwWins||0}/${n(3)}승 또는 특종 ${S.tokjong||0}/2`,ok:(S.fwWins||0)>=n(3)||(S.tokjong||0)>=2});L.push({t:`신뢰 ${Math.round(S.trust)}/52`,ok:S.trust>=52});}
   if(r===5){L.push({t:`1면 대결 ${S.fwWins||0}/${n(5)}승 · 특종 ${S.tokjong||0}/3 · 기자상 중 하나`,ok:(S.fwWins||0)>=n(5)||(S.tokjong||0)>=3||(S.awards||0)>=1});L.push({t:`신뢰 ${Math.round(S.trust)}/55`,ok:S.trust>=55});L.push({t:`최근 2년 오보 ${errN(2)}/1건 이하`,ok:errN(2)<=1});}
@@ -12598,7 +12600,7 @@ P21_CH.unshift([/저장·불러오기/,'mn_save'],[/도움말/,'mn_help'],[/튜�
 {const _sk2=p21Skin;p21Skin=function(t){_sk2(t);try{const bx=document.querySelector('#modal .mbx');if(t==='메뉴'&&bx){bx.classList.add('mn26');const f=v19Face('mnface');const p=$('#mb p');if(p&&!$('#mb .mncard'))p.outerHTML=`<div class="mncard"${IMG.sc_newsroom?` style="--bg:url(${IMG.sc_newsroom})"`:''}>${f}<div><b>${esc(S.name)}</b><span>${deptName()} ${rankName()}</span><small>${esc(OUT().n)} · ${years()}년 차</small></div><em>☁ 자동 저장됨</em></div>`;
   document.querySelectorAll('#mc .ch').forEach(b=>{const cl=b.querySelector('.cl');if(cl)cl.innerHTML=cl.innerHTML.replace(/^[^\w가-힣]+\s*/,'');if(/계속하기/.test(b.textContent))b.classList.add('p21ok','mncont');if(/타이틀로/.test(b.textContent))b.classList.add('mnout');});}}catch(e){}};}
 // 언론고시 지원: 매체 카드에 건물 그림
-{const _ah=applyHTML;applyHTML=function(){let h=_ah();try{h=h.replace(/<button class="oc" data-apply="([^"]+)"/g,(m,id)=>{const o=OUTLETS.find(x=>x.id===id);const k=o&&IMG['md_'+o.type];return k?`${m} style="--oimg:url(${IMG[k]})"`:m;});
+{const _ah=applyHTML;applyHTML=function(){let h=_ah();try{h=h.replace(/<button class="oc" data-apply="([^"]+)"/g,(m,id)=>{const o=OUTLETS.find(x=>x.id===id);const k=o&&IMG['md_'+o.type];return k?`${m} style="--oimg:url(${k})"`:m;});
   const n=S.apply.length;h=h.replace('<div class="bb">',`<div class="bb"><div class="ap26" style="--bg:url(${IMG.sc_interview||''})"><b>지원할 매체 고르기</b><span>지원 <em>${n}</em>/4</span>${S.apply.map(id=>{const o=OUTLETS.find(x=>x.id===id);return o?`<i>${esc(o.n)}</i>`:'';}).join('')}</div>`);}catch(e){}return h;};}
 // 회사 탭: 본사 머리 그림
 {const _tb=tabBody;tabBody=function(){let h=_tb();try{if(S.tab==='co'&&IMG.ui_cohq&&S.co){const o=OUT();h=`<div class="co26" style="--bg:url(${IMG.ui_cohq})"><b>${esc(o.n)}</b><span>${'★'.repeat(o.p)}${'☆'.repeat(5-o.p)} · ${TYPES[o.type].n}</span></div>`+h;}}catch(e){}return h;};}
@@ -12850,7 +12852,7 @@ function pgAlumniMonth(lines){const A=S.pgAlumni||[];if(!A.length||S.founder)ret
   try{if(S&&S.phase==='game'&&!S.founder){if(before&&S.protege!==before.name)pgGraduate(before);pgSnap();const L=[];pgAlumniMonth(L);if(L.length){S._pgL=L;L.forEach(x=>log(x.t));try{const fd=document.querySelector('#mb .feed');if(fd&&!$('#modal').hidden)fd.insertAdjacentHTML('beforeend',L.map(x=>`<li class="${x.c}">${esc(x.t)}</li>`).join(''));}catch(e){}}}}catch(e){console.error(e);}return r;};}
 // 제자 카드: 무엇이 좋은지, 옛 제자 명단
 {const _rb33=rankBox;rankBox=function(){let h=_rb33.apply(this,arguments);try{const A=(S.pgAlumni||[]);
-  const ben='매달 실력이 큰다 · 가끔 단독을 내면 내 평판·평가↑ · 출입처 얘기를 먼저 물어 온다 · 차장 승진 조건(출입처 장악도 40 또는 제자) · 경쟁사가 잘 못 빼 간다 · 다른 부서로 가도 옛 제자로 남는다';
+  const ben='매달 실력이 큰다 · 가끔 단독을 내면 내 평판·평가↑ · 출입처 얘기를 먼저 물어 온다 · 부장 승진 조건(제자 6개월 이상 + 출입처 장악도 55) · 경쟁사가 잘 못 빼 간다 · 다른 부서로 가도 옛 제자로 남는다';
   h=h.replace('제자는 매달 조금씩 크고, 가끔 단독을 내면 내 평판도 오른다.',ben).replace('"부서 사람들과"에서 후배를 골라 "제자로 삼는다"를 누르자.','"부서 사람들과"에서 후배를 골라 "제자로 삼는다"를 누르자. '+ben);
   if(A.length&&S.rank>=1&&S.rank<7){const li=A.map(a=>`<span class="tag">${esc(a.name)} · ${a.out?'타사':(DEPTS[a.d]?DEPTS[a.d].n:'')+' '+(MR[a.r]||'기자')} · 관계 ${Math.round(a.rel)}</span>`).join('');
     const card=`<div class="card rkc"><div class="t">옛 제자 ${A.length}명</div><div class="meta">${li}</div><p class="hint" style="margin:4px 0 0">소식과 아이템을 물어 오고, 간부가 되면 1월 인사 때 내 편을 든다. 관계는 조금씩 식는다.</p></div>`;
@@ -12860,7 +12862,7 @@ function pgAlumniMonth(lines){const A=S.pgAlumni||[];if(!A.length||S.founder)ret
 // ===== 1.4 좁은 화면: 아이콘이 글자를 가리지 않게 =====
 soundChip=function(){const on=AU.on.bgm||AU.on.sfx;return `<button class="chip snd" data-go="sound" title="소리 설정" aria-label="소리 설정"><b class="sndi">${on?'♪':'♪̸'}</b><span class="sndt"> 소리</span></button>`;};
 (function(){const st=document.createElement('style');st.textContent=`
-#hud .chip.snd .sndi{font-weight:700}
+#hud .chip.snd .sndi{font-weight:700;font-size:16px!important;line-height:1}#hud .chip.snd .sndt{display:none!important}body:not(.v19) #hud .chip.snd .sndt{display:inline!important;font-size:13px!important}
 @media (max-width:640px){
  #hud .chip.snd{font-size:16px!important;display:grid!important;place-items:center}
  #hud .chip.snd .sndt{display:none}
@@ -12876,6 +12878,10 @@ soundChip=function(){const on=AU.on.bgm||AU.on.sfx;return `<button class="chip s
  body.v19 .stgp .stt{grid-template-columns:26px minmax(0,1fr) auto!important}
  .p21ci{max-width:38px!important;max-height:38px!important}
 }`;document.head.appendChild(st);})();
+// ===== 부장 승진 조건: 출입처 장악도 55 + 제자 6개월 이상 (또는 옛 제자) =====
+function pgMonths(){if(!S.protege||!S.pgCur||S.pgCur.name!==S.protege)return 0;return Math.floor((S.turn-(S.pgCur.t0||S.turn))/4);}
+function pgReqOk(){return pgMonths()>=6||(S.pgAlumni||[]).some(a=>!a.out);}
+function pgReqTxt(){const al=(S.pgAlumni||[]).some(a=>!a.out);return al?'제자 키우기 ✓ (옛 제자)':S.protege?`제자 ${S.protege} 키우기 ${pgMonths()}/6개월`:'제자 키우기 0/6개월 (부서 사람들과 → 제자로 삼는다)';}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
