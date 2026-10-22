@@ -5108,6 +5108,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '조정|사장의 신뢰: 회사 보도 품질이 받쳐 주는 바닥을 조금 더 올렸다',
   '개선|할 일 아이콘 75개와 인물 얼굴 160여 개(주인공·역할·동료)를 원본 해상도로 다시 뽑아 선명하게 했다',
   '개선|인사권 행사·기자 채용처럼 여러 명을 고르는 화면: 얼굴·이름·실력 막대·꼬리표만 담은 2열 카드로 줄이고, 긴 설명은 접었다. 고른 사람 수와 실행 버튼이 아래에 붙어 있어 목록이 길어도 바로 누를 수 있다',
+  '수정|휴대폰에서 배경 음악이 소리 설정을 열어야만 나오던 문제. 이제 화면을 처음 터치하면 바로 나온다',
   '수정|라이벌: 신문 기자의 라이벌이 공영방송 기자로 나오던 것을, 같은 계열의 비슷한 급 매체에서 고르게 했다. 이직할 때마다 라이벌이 새 사람으로 바뀌던 문제(이제 끝까지 같은 얼굴, 라이벌 회사로 옮길 때만 새 맞수). 라이벌도 수습으로 시작해 석 달 뒤 발령되고, 승진은 한 직급에 최소 2~4년. 같은 회사가 된 라이벌이 경쟁사처럼 내 단독을 가로채던 문제. 「라이벌의 제안」이 석 달 연속 뜨던 문제. 「이현주이」 같은 조사 오류',
   'AI|라이벌 AI: 해마다 실력이 늘고, 내가 물먹을수록 더 빨리 큰다. 승진 심사도 실력과 낙종 성적을 본다',
   '조정|선배와 술자리: 늘 똑같던 결과를 바꿨다. 이제 캡·선배 관계가 오르고(설명엔 있었는데 실제로는 안 오르던 문제), 말솜씨가 좋으면 취재원이나 사건 귀띔을 얻는다. 컨디션이 바닥이면 실수해서 오히려 깎인다. 평가는 1.5→0.8(가끔 1.2)',
@@ -12771,6 +12772,8 @@ setInterval(()=>{try{if(AU.ctx)bgmUpdate();}catch(e){}},5000);
   const bt=$('#mb .btns');if(bt&&BF.ok)bt.innerHTML=Object.keys(BGMF).map(k=>`<button class="btn sm" data-try31="${k}">${BGMF[k]}</button>`).join('');
   document.querySelectorAll('#mb [data-try31]').forEach(x=>x.onclick=()=>{auUnlock();BF.pin={k:x.dataset.try31,u:Date.now()+90000};bgmUpdate();});
   const h=[...document.querySelectorAll('#mb p.hint')].find(p=>/BGM은/.test(p.textContent));if(h&&BF.ok)h.textContent='BGM은 상황에 따라 바뀐다. 메인 테마·일상·새벽·마감·위기·경영·도약·엔딩 8곡. 곡을 누르면 1분 30초 동안 그 곡을 들려준다.';}catch(e){}};}
+// 모바일: 첫 터치(누를 때)엔 브라우저가 소리를 막는다 → 손을 뗄 때·클릭 때마다 멈춰 있는 BGM을 다시 튼다
+['pointerup','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{try{const c=auInit();if(c&&c.state==='suspended')c.resume().catch(()=>{});if(!BF.key)bgmUpdate();bfSync();}catch(e){}},{capture:true,passive:true}));
 
 // ===== 1.4 라이벌 바로잡기 =====
 // 1) 라이벌은 같은 계열(신문·방송·온라인…)의 비슷한 급 매체에서 고른다 (신문 기자 라이벌이 공영방송이던 문제)
