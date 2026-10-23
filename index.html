@@ -5096,6 +5096,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   'AI|추천·맡기기 AI: 수익 사업이 회사 덩치보다 커지면 사업을 더 벌이기보다 채용·영업·기사를 권하고, 자금이 몇 달 못 버틸 때는 시설·사업·행사처럼 큰돈 드는 일 대신 영업을 먼저 권한다. 「수익 다변화」 창에는 규모 한도를 반영해 실제로 남는 돈과 회수 기간이 나오고, 가장 빨리 회수되는 사업에 추천이 붙는다',
   '밸런스|창간 회사가 너무 쉽게 큰돈을 벌던 문제: 직원 20명 남짓한 회사가 4년째에 1년 순이익 58억을 남기기도 했다. 이제 수익 사업은 회사 규모(기자 수)만큼만 커지고 사업 원가가 매출의 40%가 든다. 광고도 기자 수 대비 시장 한도를 넘으면 넘친 만큼의 35%만 붙는다',
   '밸런스|창간 회사에 법인세가 생겼다: 흑자면 이익에 지방세 포함 9.9%(연 2억까지)·20.9%(그 위). 적자는 이월결손금으로 쌓였다가 나중 이익에서 먼저 빠진다',
+  '대규모|간결한 화면이 기본이 됐다: 1.4에서 선택지·팝업 머리·할 일 카드에 그림을 넣었더니 휴대폰에서 버튼이 커져 「취재 나가기」의 성공 확률 같은 정보가 화면 밖으로 밀려났다. 이제 기본은 그림 없는 화면 — 선택지는 낮고 촘촘하게, 성공 확률은 선택지 이름 바로 옆에, 할 일 카드는 이름·효과·설명이 한눈에 보이는 글자 카드로. 취재 중에는 쓸 수 있는 기법이 위로, 막힌 기법이 아래로 간다. 사람 얼굴·매체 그림·대화 얼굴은 그대로다. 그림이 좋으면 메뉴 → 「그림 많은 화면으로 보기」',
   '개선|공세 보도가 부서·회사에 맞게: 부장 이하는 내 부서 출입처, 국장단·대표는 우리 회사 부서들이 맡는 분야, 지역 매체는 지역 기관·기업부터 상대 목록에 오른다(예전엔 어느 부서든 광고 큰 대기업·정부 6곳만 나왔다). 상대마다 「내 출입처·우리 지역·다른 분야」와 승산이 보이고, 연속 기획 제목도 분야별로 달라진다(정치=후원금·공천, 지역=수의계약·인허가, 스포츠=폭행 은폐·승부조작, 연예=불공정 계약 등). 출입처를 잘 알수록·매체 체급이 클수록 파급력이 커지고, 방송은 「메인뉴스 톱」, 인터넷은 「메인 톱」에 걸린다. 한 번 공세한 곳은 1년 동안 목록에서 빠진다',
   'AI|윗선의 공세 지시와 부서원이 올리는 광고주 비판 기사도 우리 부서·회사 분야의 상대를 고르고, 공세 상대 목록에서 승산이 가장 나은 곳에 추천이 붙는다',
   '수정|기사 쓰기 제목 만들기에서 「야마를 살려」+「핵심 확인」, 「인용 따옴표」+사람 이야기 야마처럼 고르면 같은 문구가 두 번 들어가던 문제(예: 「…경보기 고장…경보기 고장 확인」). 겹치는 조각은 한 번만 쓰고, 물음표 꼬리도 본문과 겹치지 않는 말로 바꾼다. 야마 단계에서 두 선택지가 같은 사실을 똑같이 내세우던 것, 반론 칸의 「○○ 측 측」, 리드 「현장… 현장은」 중복도 고쳤다',
@@ -5588,7 +5589,7 @@ function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
     {label:`글 분량: ${S.longTxt?'자세히':'짧게'}`,sub:'짧게: 첫 문단만 보이고 설명은 「자세히」에 접힌다 · 긴 목록은 6줄만',fn:()=>{S.longTxt=!S.longTxt;toast(`글 분량: ${S.longTxt?'자세히':'짧게'}`);settingsMenu();return false;}},
     {label:`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`,sub:'명절·회식·결혼식 같은 가벼운 일은 성향대로 알아서 고르고 카드로 알린다',fn:()=>{S.minorAuto=S.minorAuto===false;toast(`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`);settingsMenu();return false;}},
     {label:`처음 하는 일 팁: ${tipLbl()}`,sub:'할 일마다 나오는 설명 (창으로 → 한 줄 알림 → 끔)',fn:()=>{const m=tipMode();S.tipsOn=m==='on'?'toast':m==='toast'?false:true;toast(`팁: ${tipLbl()}`);settingsMenu();return false;}},
-    ...(devOK()?[{label:S.dev?'개발자 모드 끄기':'개발자 모드 켜기',sub:'Claude 아티팩트에서만 보인다 · 개발자 콘솔로 시간·직급·이벤트를 바로 시험',fn:()=>{S.dev=!S.dev;try{localStorage.setItem('byline-dev',S.dev?'1':'0');}catch(e){}render();toast(S.dev?'개발자 모드 켬 · 위쪽 「개발자 콘솔」':'개발자 모드 끔');return false;}}]:[]),{label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
+    ...(devOK()?[{label:S.dev?'개발자 모드 끄기':'개발자 모드 켜기',sub:'Claude 아티팩트에서만 보인다 · 개발자 콘솔로 시간·직급·이벤트를 바로 시험',fn:()=>{S.dev=!S.dev;try{localStorage.setItem('byline-dev',S.dev?'1':'0');}catch(e){}render();toast(S.dev?'개발자 모드 켬 · 위쪽 「개발자 콘솔」':'개발자 모드 끔');return false;}}]:[]),{label:picsOn()?'간결한 화면으로 보기':'그림 많은 화면으로 보기',sub:picsOn()?'지금: 그림 많은 화면 · 선택지·팝업 그림을 끄고 한눈에 보이게':'지금: 간결한 화면 · 선택지·팝업·할 일 카드에 그림을 넣는다',fn:()=>{picsSet(!picsOn());try{render();}catch(e){}}},{label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
     ...(newbie()||fNewbie()?[{label:'모든 기능 바로 열기',sub:'경험자용',fn:()=>{setVet();toast('모든 기능을 열었다');}}]:[]),
     {label:'← 메뉴',cls:'ghost',fn:()=>{gameMenu();return false;}}]);}
 function careerMenu(){
@@ -13295,6 +13296,53 @@ headCompose=function(it,W,c){const P=headParts(it,W);let tag=c.tag&&P.pre?P.pre:
 // 야마 고르기: 같은 사실을 두 선택지가 똑같이 따옴표로 세우지 않게
 {const _yo39=yamaOpt;yamaOpt=function(it,tag){const r=_yo39.apply(this,arguments);try{if(r&&tag==='st'){const key=it.facts.find(f=>f.key)||it.facts[0];if(key&&(key.k==='s'||key.k==='w'))r.l='스트레이트 — 확인한 사실만 짧게';}}catch(e){}return r;};}
 {const _hy39=headYama;headYama=function(it,W,pre){let r=_hy39.apply(this,arguments);try{if(r){const S0=sbjN(it.subj||'당국');if(S0&&r.split(S0).length>2){const i=r.lastIndexOf(S0);r=(r.slice(0,i)+r.slice(i+S0.length)).replace(/…\s+/,'…');}}}catch(e){}return r;};}
+
+// ===== 1.42 간결한 화면 (기본) =====
+// 1.4에서 선택지·팝업 머리·할 일 카드에 그림을 넣었더니, 휴대폰에선 선택지가 커져 성공 확률·설명이 가려지고 한 화면에 몇 개 안 보였다.
+// 이제 기본은 그림 없는 간결한 화면. 설정에서 「그림 많은 화면」으로 바꿀 수 있다 (사람 얼굴·매체 그림·대화 얼굴은 그대로).
+function picsOn(){try{return localStorage.getItem('byline-pics')==='1';}catch(e){return false;}}
+function picsApply(){try{document.body.classList.toggle('cmp42',!picsOn());}catch(e){}}
+function picsSet(v){try{localStorage.setItem('byline-pics',v?'1':'0');}catch(e){}picsApply();toast(v?'그림 많은 화면으로 바꿨다':'간결한 화면으로 바꿨다');}
+picsApply();document.addEventListener('DOMContentLoaded',picsApply);
+{const _r40=render;render=function(){const r=_r40.apply(this,arguments);try{if(document.body.classList.contains('cmp42')===picsOn())picsApply();}catch(e){}return r;};}
+(function(){const st=document.createElement('style');st.textContent=`
+body.cmp42 #mc .ch .p21ci,body.cmp42 #modal .mt .p21b,body.cmp42 #mb .rdiff .rd img,body.cmp42 .i18.xs,body.cmp42 .stt>.i18,body.cmp42 .er18,body.cmp42 .ev18,body.cmp42 .mis .misr .mimg{display:none!important}
+body.cmp42 #mc .ch:has(.p21ci){display:flex!important;flex-direction:column;min-height:0!important;padding:9px 40px 9px 13px!important}
+body.cmp42 #mc .ch{min-height:46px!important;padding:9px 40px 9px 13px!important;border-radius:12px!important;gap:3px}
+body.cmp42 #mc .ch.ghost{padding:9px 13px!important}
+body.cmp42 #mc .ch .cl{font-size:15px!important;line-height:1.35!important}
+body.cmp42 #mc .ch:not(.ghost)::after{width:24px!important;height:24px!important;font-size:16px!important;right:10px!important;border-width:1.5px!important}
+body.cmp42 #mc .ch .chips{margin-top:2px;gap:4px;display:flex;flex-wrap:wrap}
+body.cmp42 #mc .ch .chips .cp{font-size:12px!important;padding:1px 7px!important;white-space:normal}
+body.cmp42 #mc .ch .chips .cp.pct{font-weight:700;order:-1}
+body.cmp42 #mc .ch.p21ok{padding:11px!important;min-height:0!important}
+body.cmp42 #modal .choices{max-height:62dvh!important;padding-top:6px}
+body.cmp42 #mc{gap:6px!important}
+body.cmp42 #modal .mbx.p21plain .mt{background:var(--panel)!important;min-height:0!important;padding-top:12px!important;padding-bottom:10px!important}
+body.cmp42 #modal .mbx.p21plain .mt::after{display:none!important}
+body.cmp42 #mb .rdiff{padding:6px 9px!important;gap:5px!important;margin:6px 0!important}
+body.cmp42 #mb .rdiff .rd{padding:2px 9px!important;font-size:12.5px!important}
+body.cmp42 .mbx.p21grid #mc .ch:not(.ghost){padding:9px!important}
+body.cmp42 #modal .mbx.mn26 #mc .ch .p21ci{display:none!important}
+body.cmp42 #modal .mbx.mn26 #mc .ch:not(.mncont):not(.mnout){padding:12px!important}
+body.cmp42 .act.hasic .aic:has(.aimg){display:none!important}
+body.cmp42 .act.hasic{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:3px!important;padding:10px 12px!important;min-height:76px!important;height:auto!important;aspect-ratio:auto!important;text-align:left!important;overflow:hidden!important;background:linear-gradient(180deg,#1d2338,#171c2e)!important}
+body.cmp42 .act.hasic>*{position:static!important;transform:none!important;inset:auto!important;width:auto!important;max-width:100%!important;margin:0!important}
+body.cmp42 .act.hasic .bdgs{display:flex!important;gap:4px;order:-1}body.cmp42 .act.hasic .bdgs:empty{display:none!important}
+body.cmp42 .act.hasic .an,body.cmp42 .act.hasic .anm{font-size:15px!important;font-weight:700!important;line-height:1.3!important;color:var(--fg)!important;text-shadow:none!important;background:none!important;padding:0!important;white-space:normal!important}
+body.cmp42 .act.hasic .ad{display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;max-height:2.8em!important;padding:0!important;font-size:12px!important;line-height:1.4!important;color:var(--mute)!important;opacity:1!important}
+body.cmp42 .act.hasic .afx{display:flex!important;flex-wrap:wrap;gap:4px;font-size:11.5px!important}
+body.cmp42 .act.hasic .atg{display:none!important}
+body.cmp42 .act.hasic[disabled]{opacity:.5}
+body.cmp42 .co26{min-height:0!important;padding:10px 12px!important;background:var(--panel2)!important}
+body.cmp42 .co26::before,body.cmp42 .co26::after{display:none!important}
+`;document.head.appendChild(st);})();
+(function(){const st=document.createElement('style');st.textContent=`body.cmp42 .mbx:not(.p21grid):not(.mn26):not(.pick28) #mc .ch:not(.p21ok){align-items:flex-start!important;text-align:left!important}body.cmp42 .mbx:not(.p21grid):not(.mn26) #mc .ch:not(.p21ok) .cl{justify-content:flex-start!important;text-align:left!important}`;document.head.appendChild(st);})();
+// 성공 확률은 선택지 이름 줄 오른쪽에 바로 · 취재 중엔 쓸 수 있는 기법이 먼저, 막힌 기법은 아래로
+{const _om40=openModal;openModal=function(t,b,c){try{if(String(t)==='취재 중'&&Array.isArray(c)&&!picsOn()){const head=c.slice(0,1),rest=c.slice(1);const g=x=>x.cls&&/ghost/.test(x.cls)?3:x.disabled?2:/성공/.test(x.sub||'')?0:1;c=head.concat(rest.map((x,i)=>[x,i]).sort((a,b)=>g(a[0])-g(b[0])||a[1]-b[1]).map(x=>x[0]));}}catch(e){}
+  const r=_om40.call(this,t,b,c);try{if(document.body.classList.contains('cmp42'))document.querySelectorAll('#mc .ch').forEach(ch=>{const p=ch.querySelector('.chips .cp.pct');const cl=ch.querySelector('.cl');if(p&&cl&&!cl.querySelector('.pct42')&&/^성공 \d+%$/.test(p.textContent.trim())){cl.insertAdjacentHTML('beforeend',` <b class="pct42">${p.textContent.trim()}</b>`);p.remove();}});}catch(e){}return r;};}
+(function(){const st=document.createElement('style');st.textContent=`body.cmp42 #mc .ch .cl .pct42{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:rgba(119,166,255,.18);color:#a9c6ff;font-size:12.5px;font-weight:700;white-space:nowrap;vertical-align:1px}
+body.cmp42 #mc .ch{padding:7px 38px 7px 12px!important;min-height:44px!important}body.cmp42 #mc .ch .chips:empty{display:none}`;document.head.appendChild(st);})();
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
