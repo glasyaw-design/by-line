@@ -2366,7 +2366,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='1.4';
+const VERSION='1.41';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -3822,8 +3822,8 @@ function quota(){if(!S.co||S.founder)return 0;if(nrAll())return Math.round(nrAdS
   let tm=0;try{if(S.rank>=2&&S.rank<=6)(S.team||[]).forEach(m=>{tm+=npcQuota(m,m.d||S.dept)*.5;});}catch(e){}return Math.round((own+tm)*10)/10;}
 RUN.adsell=function(){
   const corps=shuffle(adCorps()).slice(0,3);if(!corps.length){const u=ENTS.filter(e=>e[2]==='corp');if(u.length){const e0=pick(u);S.net[e0[0]].known=true;corps.push(e0[1]);toast(`광고국 선배가 ${e0[1]} 담당자를 소개해 줬다`);}}
-  const q=quota(),qa=myQ();const L=corps.map(c=>{const ci=corpId(c),ce=S.net[ci];const conflict=S.items.some(i=>!i.pos&&i.title.includes(c))||S.clips.slice(0,10).some(x=>!x.pos&&x.h.includes(c));const warm=posWarm(ci);const p=adP(ce.rel,conflict,ci,'ad')*entRamp(ci);return{c,ci,ce,conflict,p,warm};});const best=L.filter(x=>!x.ce.cut).sort((a,b)=>b.p-a.p)[0];
-  openModal('광고·협찬 영업',`<div class="adq"><div><small>${deptShared()?`${DEPTS[S.dept].n} 반기 실적 (부서 공동)`:'이번 반기 실적'}</small><b>${eok(qa)}</b>${q?`<small> / 목표 ${eok(q)}</small>`:''}</div>${q?bar(Math.min(100,qa/q*100),qa>=q?'var(--good)':'var(--sodium)'):''}<p class="hint" style="margin:4px 0 0">${q?'':'차장은 목표 없이 실적만 쌓인다 · '}실적의 1.5%는 영업 수당 · 회사 자금에는 대행 수수료 20%를 뗀 금액이 들어온다 · 성공률은 인맥·영업력·관계·회사 급으로 정해진다 · 같은 달 여러 번 돌면 떨어지고, 반년 안에 계약한 회사는 예산이 없다</p></div>`,L.map(x=>{if(x.ce.cut)return{label:x.c,tag:'광고 중단',sub:`${wkTxt(x.ce.cut)} 동안 만나 주지 않는다`,disabled:true};return{label:x.c,tag:relLabel(x.ce.rel),rec:x===best&&!x.conflict,risk:x.conflict,sub:`성공 약 ${pct(x.p)} · 광고 ${AD_CAD[entCad(x.ci)||1]} ${adAmt(OUT().ad*ENT[x.ci].w*(entCad(x.ci)||1))}${x.conflict?' · 최근 우리 기사에 나온 회사 — 조건이 붙을 수 있다':''}${x.warm?' · 최근 우리 호재 기사에 나온 회사 — 분위기가 좋다':''}${entRamp(x.ci)<1?' · 새 부서 광고주 — 아직 우리를 잘 모른다':''}`,fn:()=>{adPitch(x.c,x.conflict);return false;}};}).concat(deptShared()?[{label:'부서 광고 할당 현황',sub:'부서원별 실적과 반기 목표 · 부장은 영업 독려',cls:'ghost',fn:()=>{deptAdOpen();return false;}}]:[]).concat([{label:'다음에',cls:'ghost'}]));
+  const q=quota(),qa=myQ();const L=corps.map(c=>{const ci=corpId(c),ce=S.net[ci];const conflict=S.items.some(i=>!i.pos&&i.title.includes(c))||S.clips.slice(0,10).some(x=>!x.pos&&x.h.includes(c));const warm=posWarm(ci);const p=adP(ce.rel,conflict,ci,'ad')*entRamp(ci);return{c,ci,ce,conflict,p,warm};});const best=L.filter(x=>!x.ce.cut).sort((a,b)=>adEV(b)-adEV(a))[0];
+  openModal('광고·협찬 영업',`<div class="adq"><div><small>${deptShared()?`${DEPTS[S.dept].n} 반기 실적 (부서 공동)`:'이번 반기 실적'}</small><b>${eok(qa)}</b>${q?`<small> / 목표 ${eok(q)}</small>`:''}</div>${q?bar(Math.min(100,qa/q*100),qa>=q?'var(--good)':'var(--sodium)'):''}<p class="hint" style="margin:4px 0 0">${q?'':'차장은 목표 없이 실적만 쌓인다 · '}실적의 3.5%는 영업 수당 · 회사 자금에는 대행 수수료 20%를 뗀 금액이 들어온다 · 성공률은 인맥·영업력·관계·회사 급으로 정해진다 · 같은 달 여러 번 돌면 떨어지고, 반년 안에 계약한 회사는 예산이 없다</p></div>`,L.map(x=>{if(x.ce.cut)return{label:x.c,tag:'광고 중단',sub:`${wkTxt(x.ce.cut)} 동안 만나 주지 않는다`,disabled:true};return{label:x.c,tag:relLabel(x.ce.rel),rec:x===best&&!x.conflict,risk:x.conflict,sub:`성공 약 ${pct(x.p)} · 광고 ${AD_CAD[entCad(x.ci)||1]} ${adAmt(OUT().ad*ENT[x.ci].w*(entCad(x.ci)||1))}${x.conflict?' · 최근 우리 기사에 나온 회사 — 조건이 붙을 수 있다':''}${x.warm?' · 최근 우리 호재 기사에 나온 회사 — 분위기가 좋다':''}${entRamp(x.ci)<1?' · 새 부서 광고주 — 아직 우리를 잘 모른다':''}`,fn:()=>{adPitch(x.c,x.conflict);return false;}};}).concat(deptShared()?[{label:'부서 광고 할당 현황',sub:'부서원별 실적과 반기 목표 · 부장은 영업 독려',cls:'ghost',fn:()=>{deptAdOpen();return false;}}]:[]).concat([{label:'다음에',cls:'ghost'}]));
 };
 // 1.0 광고주 규모에 따라 계약 크기가 다르다 (우리 광고주 중간값 대비 · 큰 곳은 더 크게, 작은 곳은 작게, 평균은 그대로)
 function adSz(ci){try{const W=ENTS.filter(e=>e[2]==='corp'&&e[4]).map(e=>e[4]).sort((a,b)=>a-b);const med=W[W.length>>1]||.01;const w=(ENT[ci]&&ENT[ci].w)||med;return clamp(Math.sqrt(w/med),.6,1.7);}catch(e){return 1;}}
@@ -4431,7 +4431,7 @@ function npcSales(o,infl){if(S.founder&&S.co&&!S.story)return fAdSales();let L=[
 function adSizeK(){try{const o=OUT(),c=S.co;if(!c||!o.ad)return 1;if(!c.adEma||!c.adEma0)return 1;return clamp(Math.pow(c.adEma/c.adEma0,.6),.6,1.7);}catch(e){return 1;}}
 function npcSaleV(m,d,o){o=o||OUT();const k=o.ad*.0042*salesPush()*(1+(econ()-1)*.5)*adSizeK()*eraGoal();return k*clamp((m.skill||50)/55,.6,1.4)*(1+Math.max(1,m.r||0)*.15)*deptAdQ(d)*.84;}
 // 실적은 계약 총액(광고·협찬·포럼 후원) 기준으로 잡는다. 이 가운데 광고국 몫과 겹치지 않는 순증분만 회사 매출에 더해진다 (회사 손익은 그대로)
-const SL_FEE=.015,SL_G=5,SL_PK={5:1.5,4:1.15,3:.7,2:.4,1:.3};
+const SL_FEE=.035,SL_G=5,SL_PK={5:1.5,4:1.15,3:.7,2:.4,1:.3};
 // 영업 대상: 차장 이상 + 입사 3년 이상 평기자 (3년 차 미만은 영업하지 않는다)
 function slOk(m){return !!m&&((m.r||0)>=1||myrs(m)>=3);}
 // 7.1 한 사람 몫: 연차 쌓인 평기자와 차장이 영업의 중심, 데스크를 보는 부장 이상은 가볍게
@@ -5086,6 +5086,35 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['1.41','조직과 사람',[
+  '수정|휴대폰 같은 좁은 화면에서 「나」 탭 능력치 아이콘이 커서 「제목 감각」 같은 이름이 숫자와 겹치던 문제(아이콘 44→30px, 아주 좁으면 26px), 선택지 그림도 조금 줄였다. 상단 ♪ 소리 버튼이 빈 동그라미로 보이던 문제',
+  '수정|휴대폰에서 선택지가 두 칸으로 나오는 창(월급 쓰기·부서 사람들과·공세 보도·이직 알아보기·광고 단가·전문 분야 고르기 등)의 글자가 한두 자씩 세로로 쪼개지던 문제 — 좁은 화면에선 한 줄에 하나씩 나온다. 동료 성격 태그·현황판 숫자·관계망 기관 이름·금액이 중간에서 끊기던 문제',
+  '조정|능력치: 리더십·영업력이 1년에 2쯤밖에 안 오르던 것을 1.5배로. 창간 대표는 편집회의·채용·영업·투자 유치를 해도 리더십·영업력이 전혀 안 오르던 문제',
+  '대규모|조직 운영: 인사권 행사에 「부서장(팀장) 배치」가 생겼다. 부서마다 부장과 차장을 직접 고르고, 다른 부서 간부를 데려올 수도 있다. 부서장의 실력·연차·올해 성적이 그 부서의 「부서 전력(S~D)」이 되고, 전력이 높은 부서는 단독을 내고 부서원이 빨리 크며, 낮은 부서는 정정보도 사고를 낸다. 조직 전체 전력은 매달 보도 품질을 올리거나 깎는다. 조직 탭에서 부서마다 부서장·차장·전력을 한눈에 본다',
+  'AI|인사팀 AI: 부서장 후보마다 점수를 매겨 1순위를 추천하고, 부서장 자리가 석 달 비면 알아서 채운다. 밀려난 부서장은 사이가 나쁘면 사표를 내고, 좋으면 새 부장을 돕는다',
+  '수정|승진·강등·부서 이동 인사가 명단을 새로 만들 때(채용·인원 변화·부서 이동) 통째로 사라지던 문제. 이제 한 번 한 인사는 남는다',
+  '개선|매체 그림 리마스터: 통신사·방송·일간지 등 12종 매체 그림을 원본에서 다시 뽑아 선명하게(88→240px). 언론고시 지원 카드에는 가로로 긴 전용 그림을 쓴다',
+  '수정|언론고시 지원 화면에서 매체 카드(통신사·방송·일간지 등)의 건물 그림이 안 나오던 문제',
+  '조정|부장 승진 조건: 「출입처 장악도 40 또는 제자」를 「출입처 장악도 55 그리고 제자 6개월 이상 키우기」로 어렵게 했다(간소화는 장악도 45). 이미 다른 부서로 보낸 옛 제자가 있으면 제자 조건은 채운 것으로 친다',
+  '대규모|옛 제자: 키우던 제자가 승진·발령으로 다른 부서에 가면 아무 말 없이 관계가 끊기던 것을, 작별 장면과 함께 「옛 제자」로 남게 했다. 옛 제자는 그 부서 소식과 아이템을 물어 오고, 해마다 승진하며, 간부가 되면 1월 인사 때 내 편을 든다(사내 평가↑). 부장까지 크면 업적 「청출어람」, 옛 제자 3명이면 「사단을 이루다」. 제자 카드에 제자를 키우면 좋은 점을 모두 적었다',
+  '수정|휴대폰에서 배경 음악이 소리 설정을 열어야만 나오던 문제. 이제 화면을 처음 터치하면 바로 나온다. 메인 테마는 첫 화면에서만 나와서 거의 못 듣던 것을, 게임을 켜면 처음 45초는 메인 테마로 시작하게 했다(지원자 프로필·지원 단계도 메인 테마, 필기시험·면접은 마감 곡)',
+  '수정|라이벌: 신문 기자의 라이벌이 공영방송 기자로 나오던 것을, 같은 계열의 비슷한 급 매체에서 고르게 했다. 이직할 때마다 라이벌이 새 사람으로 바뀌던 문제(이제 끝까지 같은 얼굴, 라이벌 회사로 옮길 때만 새 맞수). 라이벌도 수습으로 시작해 석 달 뒤 발령되고, 승진은 한 직급에 최소 2~4년. 같은 회사가 된 라이벌이 경쟁사처럼 내 단독을 가로채던 문제. 「라이벌의 제안」이 석 달 연속 뜨던 문제. 「이현주이」 같은 조사 오류',
+  'AI|라이벌 AI: 해마다 실력이 늘고, 내가 물먹을수록 더 빨리 큰다. 승진 심사도 실력과 낙종 성적을 본다',
+  '조정|선배와 술자리: 늘 똑같던 결과를 바꿨다. 이제 캡·선배 관계가 오르고(설명엔 있었는데 실제로는 안 오르던 문제), 말솜씨가 좋으면 취재원이나 사건 귀띔을 얻는다. 컨디션이 바닥이면 실수해서 오히려 깎인다. 평가는 1.5→0.8(가끔 1.2)',
+  '수정|수습 종료 부서 배치 화면에서 사회부 칸만 그림이 하나 더 붙어 모양이 깨지던 문제',
+  '대규모|배경 음악을 새로 만든 8곡으로 바꿨다: 메인 테마·편집국의 하루·새벽 라인·마감 30분 전·속보 대기·국장실의 오후·도약·마지막 바이라인. 직급·모드·상황(기사 쓰기·속보·소송·새벽 취재 등)에 따라 부드럽게 넘어간다. 곡을 못 불러오면 예전 합성 음악이 나온다',
+  '수정|창간 대표(사장)나 부국장 이상인데 탐사보도팀장이 「우리 팀에 올 생각 없어?」라며 스카우트하거나, 데스크가 속보 담당으로 차출하던 문제',
+  '수정|수습 첫날 캡의 말: 경제지·지역지·인터넷 매체에서도 「오늘부터 너는 경찰서에서 산다」고 하던 것을, 매체마다 실제로 도는 현장(여의도·군청·커뮤니티·구장 등)에 맞게 바꾸고 수습 기간과 마칠 기준을 깔끔하게 정리했다',
+  '주요|수습 기간: 매체 규모와 상관없이 3개월(간소화 2개월)로 통일했다. 기간이 짧아진 만큼 정보보고·사쓰마와리 기준 횟수와 수습 평가 문턱(38~48)도 낮췄다. 뽑은 수습 기자도 3개월 뒤 발령된다',
+  'AI|캡 코칭: 수습 기간에 캡이 남은 시간에 비해 가장 뒤처진 기준을 매달 콕 집어 말해 준다. 같은 부서에 실력 65 이상 선배가 있으면 수습 기자를 붙잡고 가르쳐 더 빨리 큰다',
+  '수정|수습 기자 인건비: 수습이 있는 달마다 할인이 쌓여 회사 고정비가 영영 줄어들던 문제. 이제 수습 기간에만 싸고(약 600만), 발령되면 일반 기자 인건비로 돌아간다',
+  '조정|지방 매체 생활비: 지역지는 집값·물가가 싸서 생활비가 덜 든다 — 작은 지역지(★1~2) 약 28%, 큰 지역지 약 20% 적게 든다',
+  '조정|광고 영업: 간부일수록 직함·인맥이 붙어 성공률이 오른다(차장 +2.5%p, 부장 +5%p, 부국장 이상 +10%p) — 예전엔 직급이 올라 계약이 커질수록 오히려 실패가 잦았다. 영업 수당은 실적의 1.5%→3.5%(1,300만 원 계약이면 약 45만 원)',
+  '조정|지역 일간지 광고: 지역 기업은 오래 거래한 단골이라 성공률 +10%p, 큰 지역 기업일수록 깎이던 것을 없앴다. 대신 전국 대기업은 지역지에 관심이 적어 -3%p. 계약 금액은 그대로',
+  'AI|광고국 추천: 성공률만 보지 않고 성공률 × 계약 규모(기대 실적)로 1순위를 고르고, 조건이 붙을 회사는 뒤로 미룬다',
+  '조정|광고주마다 계약 규모 차이를 조금 더 벌렸다(0.6~1.7배 → 0.45~2.1배). 작은 광고주는 성공률이 오르고(최대 +7%p), 큰 광고주는 조금 더 깎인다(최대 -3%p 추가)',
+  'AI|광고주 단골: 예전에 계약했던 작은·중간 광고주는 반년 예산 공백이 지나면 다시 만나기 쉽다(+6%p, 큰 곳은 +3%p)',
+],'2026.10.23',['부서장(팀장) 배치','새 배경 음악 8곡','수습 3개월']],
  ['1.4','새 얼굴, 새 화면',[
   '수정|계열사 전출: 자매사 직급 체계에 같은 직급이 없으면 한 단계 낮은 자리로 옮겨지던 문제. 이제 같은 직급 이상 자리가 있을 때만 전출 제안이 온다',
   '조정|평판: 높을수록 덜 오른다(67부터 서서히). 몇 년 만에 100을 찍던 문제를 완화했다',
@@ -5108,26 +5137,6 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '조정|사장의 신뢰: 회사 보도 품질이 받쳐 주는 바닥을 조금 더 올렸다',
   '개선|할 일 아이콘 75개와 인물 얼굴 160여 개(주인공·역할·동료)를 원본 해상도로 다시 뽑아 선명하게 했다',
   '개선|인사권 행사·기자 채용처럼 여러 명을 고르는 화면: 얼굴·이름·실력 막대·꼬리표만 담은 2열 카드로 줄이고, 긴 설명은 접었다. 고른 사람 수와 실행 버튼이 아래에 붙어 있어 목록이 길어도 바로 누를 수 있다',
-  '수정|휴대폰 같은 좁은 화면에서 「나」 탭 능력치 아이콘이 커서 「제목 감각」 같은 이름이 숫자와 겹치던 문제(아이콘 44→30px, 아주 좁으면 26px), 선택지 그림도 조금 줄였다. 상단 ♪ 소리 버튼이 빈 동그라미로 보이던 문제',
-  '대규모|조직 운영: 인사권 행사에 「부서장(팀장) 배치」가 생겼다. 부서마다 부장과 차장을 직접 고르고, 다른 부서 간부를 데려올 수도 있다. 부서장의 실력·연차·올해 성적이 그 부서의 「부서 전력(S~D)」이 되고, 전력이 높은 부서는 단독을 내고 부서원이 빨리 크며, 낮은 부서는 정정보도 사고를 낸다. 조직 전체 전력은 매달 보도 품질을 올리거나 깎는다. 조직 탭에서 부서마다 부서장·차장·전력을 한눈에 본다',
-  'AI|인사팀 AI: 부서장 후보마다 점수를 매겨 1순위를 추천하고, 부서장 자리가 석 달 비면 알아서 채운다. 밀려난 부서장은 사이가 나쁘면 사표를 내고, 좋으면 새 부장을 돕는다',
-  '수정|승진·강등·부서 이동 인사가 명단을 새로 만들 때(채용·인원 변화·부서 이동) 통째로 사라지던 문제. 이제 한 번 한 인사는 남는다',
-  '개선|매체 그림 리마스터: 통신사·방송·일간지 등 12종 매체 그림을 원본에서 다시 뽑아 선명하게(88→240px). 언론고시 지원 카드에는 가로로 긴 전용 그림을 쓴다',
-  '수정|언론고시 지원 화면에서 매체 카드(통신사·방송·일간지 등)의 건물 그림이 안 나오던 문제',
-  '조정|부장 승진 조건: 「출입처 장악도 40 또는 제자」를 「출입처 장악도 55 그리고 제자 6개월 이상 키우기」로 어렵게 했다(간소화는 장악도 45). 이미 다른 부서로 보낸 옛 제자가 있으면 제자 조건은 채운 것으로 친다',
-  '대규모|옛 제자: 키우던 제자가 승진·발령으로 다른 부서에 가면 아무 말 없이 관계가 끊기던 것을, 작별 장면과 함께 「옛 제자」로 남게 했다. 옛 제자는 그 부서 소식과 아이템을 물어 오고, 해마다 승진하며, 간부가 되면 1월 인사 때 내 편을 든다(사내 평가↑). 부장까지 크면 업적 「청출어람」, 옛 제자 3명이면 「사단을 이루다」. 제자 카드에 제자를 키우면 좋은 점을 모두 적었다',
-  '수정|휴대폰에서 배경 음악이 소리 설정을 열어야만 나오던 문제. 이제 화면을 처음 터치하면 바로 나온다. 메인 테마는 첫 화면에서만 나와서 거의 못 듣던 것을, 게임을 켜면 처음 45초는 메인 테마로 시작하게 했다(지원자 프로필·지원 단계도 메인 테마, 필기시험·면접은 마감 곡)',
-  '수정|라이벌: 신문 기자의 라이벌이 공영방송 기자로 나오던 것을, 같은 계열의 비슷한 급 매체에서 고르게 했다. 이직할 때마다 라이벌이 새 사람으로 바뀌던 문제(이제 끝까지 같은 얼굴, 라이벌 회사로 옮길 때만 새 맞수). 라이벌도 수습으로 시작해 석 달 뒤 발령되고, 승진은 한 직급에 최소 2~4년. 같은 회사가 된 라이벌이 경쟁사처럼 내 단독을 가로채던 문제. 「라이벌의 제안」이 석 달 연속 뜨던 문제. 「이현주이」 같은 조사 오류',
-  'AI|라이벌 AI: 해마다 실력이 늘고, 내가 물먹을수록 더 빨리 큰다. 승진 심사도 실력과 낙종 성적을 본다',
-  '조정|선배와 술자리: 늘 똑같던 결과를 바꿨다. 이제 캡·선배 관계가 오르고(설명엔 있었는데 실제로는 안 오르던 문제), 말솜씨가 좋으면 취재원이나 사건 귀띔을 얻는다. 컨디션이 바닥이면 실수해서 오히려 깎인다. 평가는 1.5→0.8(가끔 1.2)',
-  '수정|수습 종료 부서 배치 화면에서 사회부 칸만 그림이 하나 더 붙어 모양이 깨지던 문제',
-  '대규모|배경 음악을 새로 만든 8곡으로 바꿨다: 메인 테마·편집국의 하루·새벽 라인·마감 30분 전·속보 대기·국장실의 오후·도약·마지막 바이라인. 직급·모드·상황(기사 쓰기·속보·소송·새벽 취재 등)에 따라 부드럽게 넘어간다. 곡을 못 불러오면 예전 합성 음악이 나온다',
-  '수정|창간 대표(사장)나 부국장 이상인데 탐사보도팀장이 「우리 팀에 올 생각 없어?」라며 스카우트하거나, 데스크가 속보 담당으로 차출하던 문제',
-  '수정|수습 첫날 캡의 말: 경제지·지역지·인터넷 매체에서도 「오늘부터 너는 경찰서에서 산다」고 하던 것을, 매체마다 실제로 도는 현장(여의도·군청·커뮤니티·구장 등)에 맞게 바꾸고 수습 기간과 마칠 기준을 깔끔하게 정리했다',
-  '주요|수습 기간: 매체 규모와 상관없이 3개월(간소화 2개월)로 통일했다. 기간이 짧아진 만큼 정보보고·사쓰마와리 기준 횟수와 수습 평가 문턱(38~48)도 낮췄다. 뽑은 수습 기자도 3개월 뒤 발령된다',
-  'AI|캡 코칭: 수습 기간에 캡이 남은 시간에 비해 가장 뒤처진 기준을 매달 콕 집어 말해 준다. 같은 부서에 실력 65 이상 선배가 있으면 수습 기자를 붙잡고 가르쳐 더 빨리 큰다',
-  '수정|수습 기자 인건비: 수습이 있는 달마다 할인이 쌓여 회사 고정비가 영영 줄어들던 문제. 이제 수습 기간에만 싸고(약 600만), 발령되면 일반 기자 인건비로 돌아간다',
-  '조정|지방 매체 생활비: 지역지는 집값·물가가 싸서 생활비가 덜 든다 — 작은 지역지(★1~2) 약 28%, 큰 지역지 약 20% 적게 든다',
   '조정|월급·생활비: 직급이 오를수록 월급이 너무 가파르게 오르던 것을 완만하게(사장 2.8배→2.1배, 전체 약 8%↓) 하고, 생활비를 직급에 따라 140만~340만 원(물가에 따라 조금씩 오름)으로 현실화했다. 사장이 매달 1,000만 원 넘게 모으던 문제',
   '조정|인건비: 기자마다 다르게 나간다 — 수습 약 600만, 기자 900만, 10년 차 이상 1,200만, 스타 기자 1,500만 원(월급·4대 보험·취재비 포함). 채용 후보 카드에 월 인건비가 보인다',
   '수정|지원자 프로필: 능력치 미리보기에 나이 효과(상식·친화력·체력)가 빠져 있던 문제. 나이를 고르면 바뀌는 능력치가 바로 보인다',
@@ -5565,7 +5574,7 @@ function settingsMenu(){const lock=S.turn-(S.modeT||0)<96;
     {label:`글 분량: ${S.longTxt?'자세히':'짧게'}`,sub:'짧게: 첫 문단만 보이고 설명은 「자세히」에 접힌다 · 긴 목록은 6줄만',fn:()=>{S.longTxt=!S.longTxt;toast(`글 분량: ${S.longTxt?'자세히':'짧게'}`);settingsMenu();return false;}},
     {label:`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`,sub:'명절·회식·결혼식 같은 가벼운 일은 성향대로 알아서 고르고 카드로 알린다',fn:()=>{S.minorAuto=S.minorAuto===false;toast(`자잘한 일 맡기기: ${S.minorAuto===false?'끔':'켬'}`);settingsMenu();return false;}},
     {label:`처음 하는 일 팁: ${tipLbl()}`,sub:'할 일마다 나오는 설명 (창으로 → 한 줄 알림 → 끔)',fn:()=>{const m=tipMode();S.tipsOn=m==='on'?'toast':m==='toast'?false:true;toast(`팁: ${tipLbl()}`);settingsMenu();return false;}},
-    {label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
+    ...(devOK()?[{label:S.dev?'개발자 모드 끄기':'개발자 모드 켜기',sub:'Claude 아티팩트에서만 보인다 · 개발자 콘솔로 시간·직급·이벤트를 바로 시험',fn:()=>{S.dev=!S.dev;try{localStorage.setItem('byline-dev',S.dev?'1':'0');}catch(e){}render();toast(S.dev?'개발자 모드 켬 · 위쪽 「개발자 콘솔」':'개발자 모드 끔');return false;}}]:[]),{label:'소리 설정',sub:'BGM·효과음',fn:()=>{try{soundMenu();}catch(e){toast('위쪽 ♪ 버튼에서 바꿀 수 있다');}return false;}},
     ...(newbie()||fNewbie()?[{label:'모든 기능 바로 열기',sub:'경험자용',fn:()=>{setVet();toast('모든 기능을 열었다');}}]:[]),
     {label:'← 메뉴',cls:'ghost',fn:()=>{gameMenu();return false;}}]);}
 function careerMenu(){
@@ -12984,6 +12993,59 @@ statHook=function(id){if(!S||!id||S._stH===S.turn+':'+id)return;const h=ST_HOOK[
 function nbFix(root){try{(root||document).querySelectorAll('b,strong,.num').forEach(b=>{if(b.dataset.nb)return;const t=b.textContent.trim();if(t.length&&t.length<=14&&!b.children.length){b.style.whiteSpace='nowrap';}b.dataset.nb=1;});}catch(e){}}
 {const _om36=openModal;openModal=function(){const r=_om36.apply(this,arguments);nbFix(document.getElementById('modal'));return r;};}
 {const _rd36=render;render=function(){const r=_rd36.apply(this,arguments);nbFix(document.getElementById('app')||document.body);return r;};}
+// ===== 개발자 모드: 아티팩트에서만, 첫 화면 왼쪽 위에 다시 =====
+{const _tt36=titleHTML;titleHTML=function(){let h=_tt36.apply(this,arguments);try{if(devOK()&&!window.__devTest){const b=`<button class="ttc ttdev" data-go="devtoggle"><i><em>⚙</em></i><span>${S&&S.dev?'개발자 끄기':'개발자 모드'}</span></button>${S&&S.dev?`<button class="ttc ttdev" data-go="devc"><i><em>▶</em></i><span>개발자 콘솔</span></button>`:''}`;h=h.replace(/(<div class="ttcorner l">)/,'$1'+b);}}catch(e){}return h;};}
+(function(){const st=document.createElement('style');st.textContent=`.ttc.ttdev{border-color:rgba(185,140,255,.6)!important}.ttc.ttdev span{color:#d8c4ff}`;document.head.appendChild(st);})();
+
+// ===== 1.41 광고 영업 조정 =====
+// 1) 간부는 직함·인맥이 붙는다: 차장 +2.5%p, 부장 +5%p … 부국장 이상 +10%p (예전엔 직급이 올라도 성공률이 그대로라 계약이 커질수록 오히려 실패가 잦았다)
+// 3) 지역 일간지: 지역 광고주는 오래 거래한 단골이라 +10%p, 큰 지역 기업일수록 깎이던 것 면제 · 전국 대기업은 지역지에 관심이 적어 -3%p
+{const _adP=adP;adP=function(rel,conflict,ci,kind){let p=_adP(rel,conflict,ci,kind);try{const o=OUT();const E=ENT[ci]||{};
+  if(!S.founder)p+=.025*clamp((S.rank|0)-1,0,4);
+  if(o.type==='local'&&E.kind==='corp'){if(E.c==='loc')p+=.1+Math.max(0,adSz(ci)-1)*.08;else p-=.03;}}catch(e){}return clamp(p,.05,.82);};}
+// 2) 광고주마다 계약 규모 차등을 조금 더 (예전 0.6~1.7배 → 0.45~2.1배). 작은 곳은 성공률이 오르고, 큰 곳은 조금 더 깎인다
+adSz=function(ci){try{const W=ENTS.filter(e=>e[2]==='corp'&&e[4]).map(e=>e[4]).sort((a,b)=>a-b);const med=W[W.length>>1]||.01;const w=(ENT[ci]&&ENT[ci].w)||med;return clamp(Math.pow(w/med,.62),.45,2.1);}catch(e){return 1;}};
+{const _adP2=adP;adP=function(rel,conflict,ci,kind){let p=_adP2(rel,conflict,ci,kind);try{const z=adSz(ci);if(z<1)p+=(1-z)*.12;else p-=(z-1)*.03;
+  // AI 단골: 예전에 계약했던 작은·중간 광고주는 예산 공백(반년)이 지나면 다시 만나기 쉽다. 큰 광고주는 성과를 따져 단골 효과가 작다
+  const hit=(S.adHit||{})[ci];if(hit!=null&&S.turn-hit>=24&&S.turn-hit<96)p+=z<1.2?.06:.03;}catch(e){}return clamp(p,.05,.82);};}
+// AI 광고국 추천: 성공률만 보지 않고 「성공률 × 계약 규모」(기대 실적)로 고르고, 조건이 붙을 회사는 뒤로 미룬다
+function adEV(x){try{return x.p*adSz(x.ci)*(x.conflict?.45:1)*(x.warm?1.1:1);}catch(e){return x.p;}}
+// ===== 개발자 콘솔: 1.3~1.41 기능 바로 시험 =====
+try{if(!DEVSEC.some(x=>x[0]==='new'))DEVSEC.splice(5,0,['new','1.3~1.41 기능']);}catch(e){}
+function devForce(fn){const r0=Math.random;Math.random=()=>.001;try{fn();}finally{Math.random=r0;}}
+{const _ds=devSecHTML;devSecHTML=function(sec){if(sec!=='new')return _ds.apply(this,arguments);if(S.phase!=='game')return '<p class="empty">게임을 시작해야 쓸 수 있다. "빠른 시작"으로 들어가자.</p>';
+  const B=(k,n,a)=>dvBtn(k,n,a);
+  return `<div class="sec">논설위원실</div><div class="btns">${B('op','논설위원 발령',1)}${B('op','논설실장 발령',2)}${B('op','주필 발령',3)}${B('opoffer','논설위원실 제안 팝업')}${B('opleave','편집국 복귀')}</div>
+  <div class="sec">판매국 · 기사 삭제 요청 · 선거</div><div class="btns">${B('circ','판매 전략 회의')}${B('abc','ABC 부수 공사 결과')}${B('delreq','기사 삭제 요청 오기')}${B('elect','편집국장 선거',6)}${B('elect','사장 선임',7)}${B('scout','타사 스카우트 제안')}</div>
+  <div class="sec">조직 (1.41)</div><div class="btns">${B('orgpick','부서장(팀장) 배치')}${B('orgvac','아무 부서 부서장 비우기')}${B('orgmon','조직 한 달 진행')}${B('orgshow','부서 전력 보기')}</div>
+  <div class="sec">제자 · 라이벌 · 수습 (1.41)</div><div class="btns">${B('pgset','제자 들이기')}${B('pggrad','제자 독립시키기')}${B('pgyear','옛 제자 1년 진행')}${B('rvup','라이벌 승진')}${B('rvjoin','라이벌이 우리 회사로')}${B('rvinfo','라이벌 정보')}${B('coach','캡 코칭 보기')}${B('grad','수습 평가 바로')}</div>
+  <div class="sec">광고 영업 (1.41)</div><div class="btns">${B('adsell','광고·협찬 영업 창')}${B('adsim','영업 40번 시뮬레이션')}</div>
+  <div class="sec">배경 음악 (1.4)</div><div class="btns">${Object.keys(BGMF).map(k=>B('bgm',BGMF[k],k)).join('')}${B('bgm','상황대로','')}</div>`;};}
+{const _da=devAct;devAct=function(k,arg){const N={
+  op:()=>devRun(()=>{if(S.rank<4)S.rank=4;S.op=null;opEnter(+arg||1,'개발자');if(Q.length)Q.shift()();}),
+  opoffer:()=>devRun(()=>{S.opOfT=-999;if(S.rank<4||S.rank>5)S.rank=4;S.op=null;devForce(()=>opOffer());if(Q.length)Q.shift()();else toast('조건이 안 맞는다 (부국장·국장, 일반 커리어)');}),
+  opleave:()=>devRun(()=>{if(S.op){opLeave();toast('편집국 복귀');}else toast('논설위원실이 아니다');}),
+  circ:()=>devRun(()=>{if(typeof circS==='function'&&circS())circOpen();else toast('종이 신문사에서만 (일간지·경제지·지역지·스포츠지 등)');}),
+  abc:()=>devRun(()=>{const C=circS&&circS();if(!C){toast('종이 신문사에서만');return;}const L=[];abcRun(C,L);openModal('ABC 부수 공사 (개발자)',`<ul class="feed">${L.map(x=>`<li class="${x.c||''}">${esc(x.t)}</li>`).join('')||'<li>결과 줄 없음</li>'}</ul>`);}),
+  delreq:()=>devRun(()=>{S.delT=-999;const L=[];devForce(()=>delMonth(L));if(Q.length)Q.shift()();else toast(L.length?L[0].t:'지울 만한 기사가 없다 — 기사를 몇 건 출고한 뒤 다시');}),
+  elect:()=>devRun(()=>{try{electStart(+arg||6);}catch(e){toast('지금은 선거를 열 수 없다: '+e.message);}}),
+  scout:()=>devRun(()=>{S.scoutT=-999;S.atOutlet=Math.max(S.atOutlet||0,YW);if(S.rank<1)S.rank=1;const L=[];devForce(()=>scoutMonth(L));if(Q.length)Q.shift()();else toast('조건이 안 맞는다 (평기자~국장)');}),
+  orgpick:()=>{orgPickDept();},
+  orgvac:()=>devRun(()=>{const per=roster();const d=pick(orgDepts());(per[d]||[]).forEach(m=>{if((m.r||0)>=2||m.acting){m.r=1;m.acting=0;}});toast(`${DEPTS[d].n} 부서장을 비웠다`);}),
+  orgmon:()=>devRun(()=>{const L=[];orgMonth(L);openModal('조직 한 달 (개발자)',`<ul class="feed">${L.map(x=>`<li class="${x.c||''}">${esc(x.t)}</li>`).join('')||'<li>변화 없음</li>'}</ul>`);}),
+  orgshow:()=>devRun(()=>{const per=roster();openModal('부서 전력 (개발자)',`<p class="hint">기준점 ${orgBase().toFixed(1)}</p><ul class="feed">${orgDepts().map(d=>{const q=orgDeptQ(d,per);return q?`<li>${DEPTS[d].n} ${orgGrade(q.q)} ${q.q} · 부서장 ${q.h?esc(q.h.name)+' '+orgScore(q.h):'공석'} · 평균 ${q.avg}</li>`:'';}).join('')}</ul>`);}),
+  pgset:()=>devRun(()=>{if(S.rank<2){S.rank=2;S.team=genTeam();}const m=(S.team||[]).find(x=>!x.r&&x.rk==null)||(S.team||[])[0];if(!m){toast('팀원이 없다');return;}S.protege=m.name;m.rel=Math.max(m.rel??20,60);pgSnap();if(S.pgCur)S.pgCur.t0=S.turn-28;toast(`제자: ${m.name} (7개월째로)`);}),
+  pggrad:()=>devRun(()=>{pgSnap();const c=S.pgCur;if(!c){toast('제자가 없다');return;}const m=(S.team||[]).find(x=>x.name===c.name);if(m){m.r=1;m.d=pick(OUT().depts.filter(d=>d!==S.dept&&!isRegD(d)));S.team=S.team.filter(x=>x!==m);}S.protege=null;pgGraduate(c);if(Q.length)Q.shift()();}),
+  pgyear:()=>devRun(()=>{if(!(S.pgAlumni||[]).length){toast('옛 제자가 없다');return;}const L=[];const t0=S.turn;S.turn=S.turn-(S.turn%YW)+YW;pgAlumniMonth(L);S.turn=Math.max(t0,S.turn);openModal('옛 제자 1년 (개발자)',`<ul class="feed">${L.map(x=>`<li class="${x.c||''}">${esc(x.t)}</li>`).join('')||'<li>변화 없음</li>'}</ul>`);}),
+  rvup:()=>devRun(()=>{const rv=S.rival;if(!rv||rv.pub){toast('라이벌이 없다');return;}rv.rk=Math.min(6,(rv.rk||1)+1);rv.rkT=S.turn;toast(`라이벌 ${rv.name} → ${rankName(rv.rk,OUTLETS.find(o=>o.id===rv.outlet))}`);}),
+  rvjoin:()=>devRun(()=>{const rv=S.rival;if(!rv||rv.pub){toast('라이벌이 없다');return;}rv.outlet=S.outlet;S.rival=rivalKeep();toast(`라이벌 ${jo2(rv.name,'이','가')} 우리 회사로 · 새 맞수 ${S.rival.name}`);}),
+  rvinfo:()=>devRun(()=>{const rv=S.rival;if(!rv){toast('라이벌 없음');return;}const ro=OUTLETS.find(o=>o.id===rv.outlet)||{};openModal('라이벌 (개발자)',`<p>${esc(rv.name)} · ${esc(ro.n||'')} · ${rv.pub?'대표':rankName(rv.rk||0,ro)} · 실력 ${Math.round(rv.skill||0)} · 낙종시킨 횟수 ${rv.wins||0}${rv.route?` · ${ROUTE[rv.route.k].n} ${rv.route.lv}단계`:''}</p><p class="hint">${(rv.hist||[]).map(esc).join('<br>')||'기록 없음'}</p>`);}),
+  coach:()=>devRun(()=>{const t=capCoach();toast(t?t.t:'캡 코칭 없음 (수습 둘째 달부터, 기준이 뒤처질 때)');}),
+  grad:()=>devRun(()=>{if(S.rank!==0){toast('수습이 아니다');return;}S.inRank=rookieWeeks();graduateCheck();}),
+  adsell:()=>devRun(()=>{S.ap=Math.max(S.ap,3);S.cd=S.cd||{};S.cd.adsell=0;RUN.adsell();}),
+  adsim:()=>devRun(()=>{const keep=JSON.stringify(S);let ok=0,sum=0,n=40;const r0=S.money;for(let i=0;i<n;i++){const corps=adCorps();const c=corps[0]||(ENTS.find(e=>e[2]==='corp')||[])[1];if(!c)break;const ci=corpId(c);const p=adP(netRel(ci),false,ci,'ad')*entRamp(ci);if(Math.random()<p){ok++;sum+=(SL_PK[OUT().p]||.4)*(1+(S.rank-2)*.2)*adSz(ci)*.68;}}S=JSON.parse(keep);openModal('영업 시뮬레이션 (개발자)',`<p>대표 광고주 기준 성공 ${ok}/${n} · 수당 ${Math.round(SL_FEE*1000)/10}%</p>`);}),
+  bgm:()=>{auUnlock();BF.pin=arg?{k:arg,u:Date.now()+600000}:null;BF.key=null;bgmUpdate();toast(arg?`BGM: ${BGMF[arg]}`:'BGM 상황대로');}};
+  if(N[k]){try{N[k]();}catch(e){console.error(e);toast('실행 못 함: '+e.message);}return;}return _da.apply(this,arguments);};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
