@@ -2366,7 +2366,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='1.41';
+const VERSION='1.42';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -5086,6 +5086,10 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주요|… / 수정|…'],'날짜',['한눈에 보기']] — 주요 사항만 짧게, 새 버전은 맨 위
+ ['1.42','창간의 무게',[
+  '대규모|창간의 리스크와 리턴: 리스크 — 창간 첫해 대표 월급은 260만 원 이하, 적자에 자금이 6개월치도 안 남으면 40% 삭감, 자금이 바닥나면 무급. 리턴 — 회사가 클수록 월급이 오르고(직원 50명 약 560만, 최대 1,000만), 흑자면 해마다 1월에 지난해 이익의 30% × 내 지분을 배당받는다(한도: 직원 수 × 800만 원, 최소 5,000만). 생활비도 사장급이 아니라 아껴 사는 수준(약 240만)에서 시작해 회사가 커질수록 는다. 창간 버튼을 누르면 리스크와 리턴이 먼저 나온다',
+  '조정|독립 언론 창간: 내 돈(자본금) 조건이 생겼다 — 통장에 최소 1억 원(쉬움 6,000만 · 어려움 1.5억)이 있어야 창간할 수 있다. 예전엔 통장이 비어도 창간이 됐다. 할 일 버튼에 지금 얼마가 모자라는지 나온다',
+],'2026.10.23',['창간 자본금 조건','대표 월급·배당','리스크와 리턴']],
  ['1.41','조직과 사람',[
   '수정|휴대폰 같은 좁은 화면에서 「나」 탭 능력치 아이콘이 커서 「제목 감각」 같은 이름이 숫자와 겹치던 문제(아이콘 44→30px, 아주 좁으면 26px), 선택지 그림도 조금 줄였다. 상단 ♪ 소리 버튼이 빈 동그라미로 보이던 문제',
   '수정|휴대폰에서 선택지가 두 칸으로 나오는 창(월급 쓰기·부서 사람들과·공세 보도·이직 알아보기·광고 단가·전문 분야 고르기 등)의 글자가 한두 자씩 세로로 쪼개지던 문제 — 좁은 화면에선 한 줄에 하나씩 나온다. 동료 성격 태그·현황판 숫자·관계망 기관 이름·금액이 중간에서 끊기던 문제',
@@ -13046,6 +13050,34 @@ function devForce(fn){const r0=Math.random;Math.random=()=>.001;try{fn();}finall
   adsim:()=>devRun(()=>{const keep=JSON.stringify(S);let ok=0,sum=0,n=40;const r0=S.money;for(let i=0;i<n;i++){const corps=adCorps();const c=corps[0]||(ENTS.find(e=>e[2]==='corp')||[])[1];if(!c)break;const ci=corpId(c);const p=adP(netRel(ci),false,ci,'ad')*entRamp(ci);if(Math.random()<p){ok++;sum+=(SL_PK[OUT().p]||.4)*(1+(S.rank-2)*.2)*adSz(ci)*.68;}}S=JSON.parse(keep);openModal('영업 시뮬레이션 (개발자)',`<p>대표 광고주 기준 성공 ${ok}/${n} · 수당 ${Math.round(SL_FEE*1000)/10}%</p>`);}),
   bgm:()=>{auUnlock();BF.pin=arg?{k:arg,u:Date.now()+600000}:null;BF.key=null;bgmUpdate();toast(arg?`BGM: ${BGMF[arg]}`:'BGM 상황대로');}};
   if(N[k]){try{N[k]();}catch(e){console.error(e);toast('실행 못 함: '+e.message);}return;}return _da.apply(this,arguments);};}
+// ===== 1.41 독립 언론 창간: 내 돈(자본금) 조건 =====
+function manW(n){n=Math.round(n);return n>=10000?`${+(n/10000).toFixed(1)}억${n%10000&&n%1000?' '+(n%10000).toLocaleString('ko-KR')+'만':''}`:`${n.toLocaleString('ko-KR')}만`;}
+function foundNeed(){return ({easy:6000,normal:10000,hard:15000})[S.diff||'normal']||10000;}
+try{UNLOCK.found=Object.assign({},UNLOCK.found||{rw:12},{c:()=>S.money>=foundNeed()});Object.defineProperty(UNLOCK.found,'why',{configurable:true,get(){return S.inRank<(UNLOCK.found.rw||12)?'국장 부임 넉 달째부터':`창간 자금(내 돈) ${manW(foundNeed())} 원부터 · 지금 ${manW(S.money)} 원`;}});
+  ACT.found.d=`회사를 나와 내 언론사를 세운다 (창간 모드로 전환) · 내 돈 ${(foundNeed()/10000).toFixed(foundNeed()%10000?1:0)}억 원 이상`;}catch(e){}
+{const _rf=RUN.found;RUN.found=function(){if(!S.dev&&S.money<foundNeed()){openModal('창간 자금이 모자라다',`<p class="lede">투자자와 지인들이 먼저 묻는다. "대표님은 얼마 넣으세요?"</p><p>창간하려면 내 돈이 최소 <b>${manW(foundNeed())} 원</b> 있어야 한다. 지금 통장은 ${manW(S.money)} 원.</p><p class="hint">기본 자본(지인·크라우드펀딩)은 따로 모이지만, 대표가 자기 돈을 걸지 않으면 아무도 따라 넣지 않는다. 내 돈의 60%가 자본금으로 들어간다.</p>`);return;}return _rf.apply(this,arguments);};}
+
+// ===== 1.41 창간 대표의 월급·생활비: 회사 규모를 따른다 =====
+// 예전: 대표 월급 320~355만인데 생활비는 사장급(340만)이라 창간하는 순간 매달 0원 근처·적자였다
+function founderPay(){const c=S.co||{};const st=c.staff||8;const yr=(S.turn-(S.fStart||0))/YW;
+  let p=st<=40?240+st*6:480+(st-40)*3.2;p=Math.min(1000,p);
+  if(yr<1)p=Math.min(p,260);                                   // 리스크: 창간 첫해는 박봉
+  const pf=c.last?(c.last.profit||0):0;
+  if((c.cash||0)<0)p=0;                                        // 리스크: 자금이 바닥나면 무급
+  else if(pf<0&&(c.cash||0)<Math.max(1.5,-pf*6))p*=.6;          // 리스크: 적자에 자금 6개월치 미만이면 40% 삭감
+  return Math.round(p*Math.pow(1.02,Math.floor(S.turn/YW))*(DF().pay||1)/5)*5;}
+{const _pay=payOf;payOf=function(o,rank){try{if(S&&S.founder&&o&&(o.id==='mine'||o.custom)&&(rank==null||rank===S.rank))return founderPay();}catch(e){}return _pay.apply(this,arguments);};}
+{const _lv=living;living=function(){try{if(S&&S.founder){const st=(S.co&&S.co.staff)||8;return Math.round((230+Math.min(110,st*1.1))*Math.pow(1.015,Math.floor(S.turn/YW)));}}catch(e){}return _lv.apply(this,arguments);};}
+
+// 리턴: 흑자면 해마다 1월에 지난해 이익의 30% × 내 지분을 배당으로 받는다
+function fDivMonth(lines){if(!S.founder||!S.co||!S.co.last)return;S.fPLy=(S.fPLy||0)+(S.co.last.profit||0);S.fPLn=(S.fPLn||0)+1;
+  if(month()!==1||S.fPLn<6)return;const pl=S.fPLy,eq=(S.equity??100)/100;S.fPLy=0;S.fPLn=0;
+  if(pl<=0){lines.push({c:'r',t:`지난해 회사가 ${eok(-pl)} 적자 — 대표 배당은 없다`});return;}
+  const cap=Math.max(.5,((S.co.staff||8)*.08));const raw=pl*.3*eq;const div=+Math.min(raw,cap).toFixed(2);const man=Math.round(div*10000);S.co.cash-=div;S.money+=man;S.fDivTot=(S.fDivTot||0)+man;log(`연말 배당 ${man.toLocaleString('ko-KR')}만 원`);
+  Q.push(()=>openModal('연말 배당',`<p class="lede">지난해 회사가 <b>${eok(pl)}</b> 흑자를 냈다. 이사회가 이익의 30%를 배당하기로 했다.</p><p>내 지분 ${Math.round(eq*100)}% → <b>${man.toLocaleString('ko-KR')}만 원</b>이 통장에 들어왔다.</p>${raw>cap?`<p class="hint">이익이 커도 배당은 회사 규모만큼만 — 한도 ${eok(cap)} (직원 ${S.co.staff}명 × 800만). 나머지는 회사에 남겨 재투자한다.</p>`:''}<p class="hint">지금까지 받은 배당 ${(S.fDivTot).toLocaleString('ko-KR')}만 원. 회사 자금에서는 ${eok(div)}이 나갔다. 투자를 많이 받아 지분이 줄면 배당도 줄어든다.</p>`));}
+{const _em37=endMonth;endMonth=function(){const r=_em37.apply(this,arguments);try{if(S&&S.founder&&S.phase==='game'){const L=[];fDivMonth(L);L.forEach(x=>log(x.t));}}catch(e){console.error(e);}return r;};}
+// 창간 버튼: 리스크와 리턴을 먼저 보여 준다
+{const _rf2=RUN.found;RUN.found=function(){const r=_rf2.apply(this,arguments);try{if(/독립 언론 창간/.test($('#mt').textContent)&&!$('#mb .rr37')){$('#mb').insertAdjacentHTML('beforeend',`<div class="deal rr37"><div class="dc"><b>리스크</b><ul><li>창간 첫해 월급은 260만 원 이하 (지금 ${payOf(OUT()).toLocaleString('ko-KR')}만 원)</li><li>적자에 자금이 6개월치도 안 남으면 월급 40% 삭감</li><li>회사 자금이 바닥나면 무급 · 파산하면 넣은 돈은 전부 날아간다</li></ul></div><div class="dp"><b>리턴</b><ul><li>회사가 클수록 월급이 오른다 (직원 50명 약 560만 · 최대 1,000만)</li><li>흑자면 해마다 1월에 지난해 이익의 30% × 내 지분을 배당 (한도: 직원 수 × 800만 원)</li><li>회사를 크게 키우면 매각·상장 같은 엔딩</li></ul></div></div>`);}}catch(e){}return r;};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
