@@ -5105,6 +5105,8 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '수정|조직 탭 「직급별 인원」에서 수습기자를 실제로 뽑아도 0명으로 나오던 문제(창간 모드·작은 매체는 수습 수를 어림값으로만 셌다). 이제 지금 수습 중인 기자를 그대로 세고, 몇 개월 뒤 발령되는지도 보여 준다',
   '수정|「제목」 뒤 조사가 받침과 안 맞던 문장 60여 곳(「개발일보」을, 「독자의 편지」을, 「…의혹」를 등). 기자 이름 뒤에 「기자」가 두 번 붙던 바이라인(○○ 기자 기자), 지역 주재 비용 「0.015억」 표기, 회사·관계망 탭의 「광고 중단·축소 -0원」 「관계 영향 -0원 / +0원」 같은 빈 숫자도 고쳤다',
   '수정|재정 탭: 일반 매체(창간이 아닌 회사)에서 순이익이 0원·이익률 NaN%로 나오고 비용 항목이 비던 문제(예전 회사 기록과 저장 칸 이름이 겹쳤다)',
+  '수정|빠른 시작의 나이: 편집국장(48세)으로 시작해도 입사 동기가 26세, 옛 캡이 40세, 사장이 44세로 나이·연차가 나보다 어리던 문제. 이제 입사 동기는 나와 같은 연차, 옛 캡은 9~13년 선배, 윗선(부장·국장·사장)은 3~9년 선배로 시작하고, 시작부터 정년(60세)을 넘긴 동료·지역 주재기자도 없다',
+  '수정|게임 첫 달에 만난 동료(캡·부장·동기 등)가 몇 년이 지나도 나이를 먹지 않던 문제. 이제 해마다 한 살씩 먹고, 60세가 되면 정년퇴직한다(관계는 남는다). 윗선(부장·국장)이 정년이면 후임이 오고 관계를 새로 쌓아야 한다',
   '개선|공세 보도가 부서·회사에 맞게: 부장 이하는 내 부서 출입처, 국장단·대표는 우리 회사 부서들이 맡는 분야, 지역 매체는 지역 기관·기업부터 상대 목록에 오른다(예전엔 어느 부서든 광고 큰 대기업·정부 6곳만 나왔다). 상대마다 「내 출입처·우리 지역·다른 분야」와 승산이 보이고, 연속 기획 제목도 분야별로 달라진다(정치=후원금·공천, 지역=수의계약·인허가, 스포츠=폭행 은폐·승부조작, 연예=불공정 계약 등). 출입처를 잘 알수록·매체 체급이 클수록 파급력이 커지고, 방송은 「메인뉴스 톱」, 인터넷은 「메인 톱」에 걸린다. 한 번 공세한 곳은 1년 동안 목록에서 빠진다',
   'AI|윗선의 공세 지시와 부서원이 올리는 광고주 비판 기사도 우리 부서·회사 분야의 상대를 고르고, 공세 상대 목록에서 승산이 가장 나은 곳에 추천이 붙는다',
   '수정|기사 쓰기 제목 만들기에서 「야마를 살려」+「핵심 확인」, 「인용 따옴표」+사람 이야기 야마처럼 고르면 같은 문구가 두 번 들어가던 문제(예: 「…경보기 고장…경보기 고장 확인」). 겹치는 조각은 한 번만 쓰고, 물음표 꼬리도 본문과 겹치지 않는 말로 바꾼다. 야마 단계에서 두 선택지가 같은 사실을 똑같이 내세우던 것, 반론 칸의 「○○ 측 측」, 리드 「현장… 현장은」 중복도 고쳤다',
@@ -13394,6 +13396,31 @@ body.v19 #hud .h-money b.eok42::after{content:'억'!important}
 function jp(w,a,b){const s=String(w==null?'':w).replace(/[\s"'”’」)\]]+$/,'');return jo2(s,a,b).slice(s.length);}
 function byN(s){return String(s||'').replace(/\s*기자$/,'');}
 (function(){const st=document.createElement('style');st.textContent=`.ld{max-width:100vw!important;box-sizing:border-box!important;overflow:hidden}`;document.head.appendChild(st);})();
+// ===== 나이 정리: 빠른 시작(3년 차·부장·국장·편집국장)에서 옛 캡·윗선이 나보다 어리거나, 시작부터 정년(60)을 넘긴 동료가 있던 문제 =====
+// · 옛 캡은 나보다 9~13년 선배, 윗선(부장·국장·사장)은 3~9년 선배로 맞춘다 (정년 전까지)
+// · 동료(캡·선배·사진·편집·노조 등)도 60세가 되면 정년퇴직(관계는 남는다) · 윗선이 정년이면 후임이 온다
+{const _cy42=colYrs;colYrs=function(c){const fresh=c&&c.yrs==null;const v=_cy42.apply(this,arguments);try{if(fresh&&c){const me=years();let y=c.yrs;
+  if(c.role==='cap')y=Math.max(y,me+R(9,13));if(c.role==='boss')y=Math.max(y,me+R(3,9));if(c.role==='senior')y=Math.max(y,me+R(3,6));
+  const cap=c.role==='boss'&&S.rank>=6?37:33;if(['cap','boss','senior'].includes(c.role))y=Math.min(y,cap);c.yrs=y;c.t0=S.turn;return y;}
+  // 원래 식은 t0가 0(게임 첫 턴)이면 나이를 안 먹었다 → 첫 턴에 만난 동료도 해마다 한 살씩
+  if(c&&c.yrs!=null)return c.yrs+Math.floor((S.turn-(c.t0==null?S.turn:c.t0))/YW);}catch(e){}return v;};}
+function ageFixNpc(m,maxA){try{const a=npcAge(m);if(a>=maxA){const d=a-R(maxA-8,maxA-2);if(m.age!=null)m.age-=d;else m.yrs=Math.max(1,(m.yrs||1)-d);}}catch(e){}}
+function ageSanitize(){if(!S||S.founder&&!S.cols)return;const me=years();
+  (S.cols||[]).forEach(c=>{if(c.ret)return;const y=colYrs(c);
+    if(c.role==='cap'&&y<me+6){c.yrs+=Math.min(33,me+R(9,12))-y;}
+    if(c.role==='boss'&&!S.founder&&y<me+2){c.yrs+=Math.min(S.rank>=6?37:33,me+R(3,8))-y;}
+    if((c.role==='peer'||c.role==='rivalpeer')&&Math.abs(y-me)>2){c.yrs+=me-y;}
+    {const lim=(c.role==='boss'&&S.rank>=6?64:59)-26;const y2=colYrs(c);if(y2>lim)c.yrs-=y2-(lim-R(1,4));}});
+  (S.team||[]).forEach(m=>ageFixNpc(m,60));(S.mates||[]).forEach(m=>ageFixNpc(m,60));(S.corr||[]).forEach(m=>ageFixNpc(m,60));
+  try{if(S.ros&&S.ros.per)Object.values(S.ros.per).forEach(L=>(L||[]).forEach(m=>m&&ageFixNpc(m,60)));}catch(e){}}
+{const _qg42=qsGo;qsGo=function(){const r=_qg42.apply(this,arguments);try{ageSanitize();S.age42=1;render();}catch(e){console.error(e);}return r;};}
+{const _r42=render;render=function(){try{if(S&&S.phase==='game'&&!S.age42){S.age42=1;ageSanitize();}}catch(e){}return _r42.apply(this,arguments);};}
+// 동료의 정년퇴직 · 윗선 교체 (매달 확인)
+function colRetire(lines){if(!S||!S.cols||S.story)return;S.cols.forEach((c,i)=>{if(c.ret)return;const a=26+colYrs(c);
+   if(c.role==='boss'){if(S.founder)return;const lim=S.rank>=6?65:60;if(a>=lim){const old=c.name,role=colRole(c);const n=mkCol('boss',R(0,12));n.yrs=Math.min(S.rank>=6?37:33,years()+R(3,8));n.t0=S.turn;S.cols[i]=n;lines.push({c:'',t:`${role} ${old} 정년퇴직 — 후임 ${n.name}. 관계를 새로 쌓아야 한다`});log(`${role} 교체: ${old} 정년퇴직 → ${n.name}`);}return;}
+   if(['cap','senior','photo','editor','union','mentor','peer','rivalpeer','junior'].includes(c.role)&&a>=60){c.ret=1;lines.push({c:'',t:`${colRole(c)} ${c.name} 정년퇴직 — 연락은 이어진다`});log(`${c.name} 정년퇴직`);}});}
+{const _cr42=colRole;colRole=function(c){const r=_cr42.apply(this,arguments);return c&&c.ret?`퇴직 · ${r}`:r;};}
+{const _em42=endMonth;endMonth=function(){const r=_em42.apply(this,arguments);try{if(S&&S.phase==='game'){const L=[];colRetire(L);if(L.length){L.forEach(x=>{try{const fd=document.querySelector('#mb .feed');if(fd&&!$('#modal').hidden)fd.insertAdjacentHTML('beforeend',`<li>${esc(x.t)}</li>`);}catch(e){}});}}}catch(e){console.error(e);}return r;};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
