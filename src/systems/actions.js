@@ -665,14 +665,7 @@ function session(it){
   };
   draw();
 }
-function bribeEvent(it){
-  it.bribed=1;
-  openModal('봉투',`<p class="lede">${esc(sbjN(it.subj))} 측 인사가 저녁을 청했다. 헤어질 때 두툼한 봉투를 내밀었다. "기자님 고생하시는데 차비라도."</p>`,[
-    {label:'정중히 돌려준다',sub:'신뢰도↑',fn:()=>{toast(apply({trust:3}));log('취재 대상의 봉투를 돌려줬다');}},
-    {label:'돌려주고 이 사실도 기사에 넣는다',sub:'상대 경계↑, 기사 파급력↑',fn:()=>{it.imp=Math.round(it.imp*1.15);it.alert=clamp(it.alert+15,0,100);toast(apply({trust:4,fame:1}));log('회유 시도까지 기록했다');}},
-    {label:'받는다',sub:'통장 +150만 원. 들키면 끝이다',fn:()=>{S.money+=150;S.pending.push({type:'bribe',due:S.turn+R(6,30),title:it.title});it.imp=Math.round(it.imp*.7);toast(apply({trust:-8}));}}
-  ]);
-}
+// bribeEvent: 1.6에서 src/compat/v43.js의 같은 이름 함수로 대체됨 (예전 정의는 실행되지 않아 지웠다)
 
 // --- 기사 쓰기 ---
 RUN.write=function(){

@@ -309,7 +309,7 @@ function scandal(p){calmSet(8);
     {label:'버틴다',risk:true,sub:'넘어갈 수도, 소송으로 커질 수도',fn:()=>{if(chance(.4)){toast('흐지부지 넘어갔다');log(`오보 논란 무마: ${p.title}`);}else{const kk=(p.desk?.5:1)*(S.simple?.7:1);const t=apply({trust:-10*kk,eval:-7*kk,fame:-4*kk});S.co.cash-=.5;openModal('손해배상 소송',`<p class="lede">법원은 정정보도와 함께 손해배상을 명령했다. 회사가 배상금을 냈고, 사내 징계위원회가 열렸다.</p>${fxLine(t)}`);log(`오보 소송 패소: ${p.title}`);return false;}}}]);
 }
 function rebateOut(p){if(!chance(.35)){return closeModal();}openModal('리베이트 적발',`<p class="lede">감사실이 「${esc(p.title)}」 건을 들여다보고 있다. 광고주 담당자에게 흘러간 돈이 문제가 됐다.</p>`,[{label:'관행이었다고 해명한다',fn:()=>{toast(apply({trust:-8,eval:-6}));log('광고 리베이트 적발 — 징계');}},{label:'책임을 지고 받은 돈을 반납한다',fn:()=>{S.money-=Math.round((p.amt||.25)*10000*.05);toast(apply({trust:-4,eval:-4}));}}]);}
-function bribeOut(p){openModal('봉투가 드러났다',`<p class="lede">「${esc(p.title)}」 취재 당시 받은 봉투가 다른 매체 보도로 드러났다. 회사는 감사에 착수했다.</p>${fxLine(apply({trust:-20,eval:-15,fame:-10}))}`);log('금품 수수 의혹 보도됨');}
+// bribeOut: 1.6에서 src/compat/v43.js의 같은 이름 함수로 대체됨 (예전 정의는 실행되지 않아 지웠다)
 function favorEvent(id){const s=S.sources.find(x=>x.id===id);if(!s)return closeModal();
   openModal('취재원의 부탁',`<p class="lede">${s.name} ${s.role}: "지난번 그거 제가 드렸잖아요. 이번엔 저희 쪽 보도자료 좀 크게 써주세요."</p>`,[
     {label:'써준다',sub:'취재원 신뢰↑, 내 신뢰도↓',fn:()=>{s.trust=clamp(s.trust+15,0,100);toast(apply({trust:-4}));log(`${s.name}의 부탁으로 홍보성 기사`);}},

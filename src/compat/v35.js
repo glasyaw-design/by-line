@@ -62,7 +62,7 @@ function orgMonth(lines){if(!S.co||S.story)return;const per=roster();const D=org
     if(!q.h)return;
     // 부서장 실력이 부서원 성장·사기로 번진다
     const g=(q.hs-orgBase()-2)/400;L.forEach(m=>{if(!T.has(m)&&m!==q.h)m.skill=clamp((m.skill||40)+g,10,95);});
-    q.h.ai=q.h.ai||{};
+    npcAI(q.h);
     if(q.q<orgBase()-7&&chance(.06)){Q0.push({c:'r',t:`${DEPTS[d].n}에서 데스크를 거치지 않은 기사가 나가 정정보도를 냈다 (부서 전력 ${orgGrade(q.q)})`});S.co.q=Math.max(10,S.co.q-1);}
     if(q.q>=orgBase()+10&&chance(.05)){Q0.push({c:'g',t:`${DEPTS[d].n} ${q.h.name} 부장이 이끄는 팀이 단독을 냈다 (부서 전력 ${orgGrade(q.q)})`});S.co.q=Math.min(100,S.co.q+.6);if(S.rank>=6||S.founder)apply({fame:.3});}
     // 밀려난 부서장 AI: 사이가 나쁘면 버티거나 떠난다

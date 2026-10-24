@@ -1,11 +1,11 @@
 # 바이라인 1.6 — 여러 파일 프로젝트
 
 한 파일(약 14MB)이던 `바이라인_1.6_전체소스.html`을 **동작은 그대로 두고** 파일 여러 개로 나눈 프로젝트입니다.
-게임 규칙·확률·저장 형식은 한 글자도 바꾸지 않았습니다. 원본은 `original/`에 그대로 있습니다.
+분리 자체는 게임 규칙·확률·저장 형식을 바꾸지 않습니다. 원본(이 프로젝트를 만든 단일 HTML)은 `original/`에 그대로 있습니다.
 
 ## 실행
 
-Node.js 18 이상만 있으면 됩니다. 외부 패키지는 필요 없습니다.
+Node.js 18 이상만 있으면 됩니다. 외부 패키지는 필요 없습니다. (`npm test`만 Playwright가 필요 — 처음 한 번 `npm i -D playwright && npx playwright install chromium`)
 
 ```bash
 npm install        # 받을 게 없어서 바로 끝난다 (Vercel 접속자 API용 선택 패키지는 네트워크가 되면 받는다)
@@ -14,6 +14,9 @@ npm run build      # dist/ (여러 파일 배포본) + dist-single/ (예전처�
 npm run preview    # http://localhost:4173  — dist/를 서버로 열어 본다
 npm run preview:single   # http://localhost:4174 — dist-single/를 열어 본다
 npm run check      # 정적 검사: 문법 · 파일 참조 · 리소스 해시
+npm test           # 자동 회귀 테스트: 시나리오 8개를 같은 난수로 돌려 기준값과 비교 + 저장·불러오기 점검
+npm run test:quick # 저장 시나리오 2개만 (빠르게)
+npm run test:update # 게임을 일부러 바꾼 뒤 기준값(tests/golden.json)을 새로 저장
 ```
 
 > 서버로 여는 걸 권장합니다. `index.html`을 더블클릭(`file://`)해도 게임은 돌아가지만, 원본과 마찬가지로 음악은 막히고(합성 음악으로 대체),
@@ -29,16 +32,18 @@ npm run check      # 정적 검사: 문법 · 파일 참조 · 리소스 해시
 ## 폴더
 
 ```
-index.html            화면 골격 + CSS 2개 + script 92개를 원본과 같은 순서로 부른다
+index.html            화면 골격 + CSS 2개 + script 88개를 원본과 같은 순서로 부른다
 styles/main.css       원본 첫 번째 <style>
 styles/loader.css     원본 두 번째 <style> (로딩 화면)
 src/core|data|systems|ui|dev/   바탕 게임 코드 (원본의 구획 주석 단위)
-src/compat/v13a.js … v50.js     1.x 확장 모듈 49개 (원본에 이어 붙어 있던 순서 그대로)
+src/compat/v13a.js … v42.js     1.21~1.42 확장 모듈 (원본에 이어 붙어 있던 순서 그대로)
+src/compat/r15-*.js · r16-*.js  1.5~1.6 확장 (이웃한 모듈을 순서 그대로 주제별로 합침)
 src/compat/_hoisted.js          순서 보존용으로 앞당긴 함수 선언 3개
 src/main.js           로딩 화면 · start() · 부팅
 assets/images|fonts|audio       내장돼 있던 그림 738개 · 글꼴 2개 · 음악 8곡 (바이너리 그대로)
 api/presence.js       동시 접속자 API (기존 그대로)
 original/             원본 HTML (수정하지 않음)
+tests/                자동 회귀 테스트 (npm test)
 tools/                리소스 목록·빌드 정보·분리/검증에 쓴 스크립트
 docs/                 구조·대응표·검증 결과
 ```
@@ -49,7 +54,8 @@ docs/                 구조·대응표·검증 결과
 2. `async`·`defer`·`type="module"`을 붙이지 마세요. 전역 이름을 그대로 공유해야 합니다.
 3. 새 기능은 **새 파일을 맨 뒤 `src/main.js` 바로 앞**에 끼우는 게 가장 안전합니다. (`main.js`의 `start()`가 마지막에 게임을 켭니다.)
 4. 바탕 파일에 새 **함수 선언**을 넣을 때, 그 함수를 앞 파일에서 바로 실행하거나 감싸면 안 됩니다(원본은 한 스크립트라 끌어올림으로 됐지만 파일을 나누면 안 됨). 자세한 건 `docs/STRUCTURE.md`.
-5. 고친 뒤 `npm run check` → `npm run build` → `npm run preview`로 확인하세요.
+5. 고친 뒤 `npm test`(또는 `npm run check` → `npm run build` → `npm run preview`)로 확인하세요. 기준값과 달라졌다고 나오면, 일부러 바꾼 거라면 `npm run test:update`.
+6. 어떤 기능이 어느 파일에 있는지는 `docs/STRUCTURE.md`의 「기능 찾아보기」를 보세요.
 
 ## 저장
 
