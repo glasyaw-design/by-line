@@ -5090,6 +5090,8 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '대규모|조직 운영 다시 짜기: 승진·보직 해임이 실제로 남는다 — 예전엔 부서마다 차장 1자리라 승진이 「자리가 찼다」며 막히고, 부장을 해임해도 명단 정리 때 가장 선임이라며 그 사람이 다시 부서장이 됐고, 직급에 맞춰 연차가 몰래 바뀌었다. 이제 내가 한 인사는 2년 동안 자동 정리가 되돌리지 않는다. 차장 정원은 부서 크기만큼(모자라면 인건비를 들여 늘리거나 기존 차장과 맞바꾼다), 차장을 승진시키면 어느 부서 팀장으로 보낼지 고르고, 부장을 해임하면 바로 후임을 고른다. 새 「조직 운영」 화면(인사권 행사 맨 위 · 조직 탭)에서 부서마다 팀장 교체 · 차장 지명·해임 · 부서 방침(단독 우선 · 검증 우선 · 영업 강화 · 인재 육성)을 정하고, 팀장 성향(단독형·검증형·속보형·영업형…)과 방침에 따라 매달 그 부서의 단독·정정보도·광고 실적·성장이 달라진다(예상 확률이 화면에 보인다). 밀려난 사람은 서운해하고, 사이가 나쁘면 사표를 낸다. 인사팀이 가장 처진 부서와 팀장 후보를 짚어 준다',
   '대규모|지역 TO로 승진 적체 해소: 본사 차장·부장 자리는 정해져 있고 연차 찬 사람은 늘어난다 — 지역 책임자 자리(주재 차장 · 주재 부장 · 거점 지역본부장/총국장)가 그 숨통이다. ★3 이상 매체는 지역마다 주재 차장·부장, 거점 지역엔 국장급까지 자리를 둔다. 조직 탭에 「인사 TO」 현황(본사 자리·지역 자리·빈 자리·승진 대기)이 보이고, 정기 인사 때 지역 승진 발령이 나면 맨 위에 알려 준다. 인사권자는 「조직 운영 → 지역 발령으로 적체 해소」에서 대기자를 빈 지역 자리로 승진 발령하거나 인건비를 들여 지역 TO를 새로 만들고, 그러면 본사 빈자리에 다음 사람이 연쇄로 올라간다. 내가 본사에서 승진이 막혀 있으면 「지역 책임자 공모」가 와서 한 직급 올라 지역을 이끌 수 있다(행동력 +1 · 지역 평판↑ · 2년 뒤 그 직급 그대로 본사 복귀 제안)',
   '개선|영입 기자 배치와 수습의 가치: 경력·스타 기자를 뽑으면 어느 부서에 부서장·차장·평기자 중 어떤 직책으로 둘지 바로 정한다. 경력·스타는 들어올 때 편집국 분위기가 조금 처지고 3년 안에 더 좋은 조건을 찾아 떠날 수 있다. 수습 공채는 분위기를 띄우고, 공채 출신은 5년 동안 더 빨리 자란다',
+  '수정|저장·불러오기: 새로 시작한 게임을 처음 불러올 때 편집국 명부·주재기자·동료가 통째로 새로 만들어져 부서장 배치·승진이 사라지던 문제, 불러온 뒤 인사가 내 팀원과 명부 중 한쪽에만 반영되던 문제를 고쳤다',
+  '수정|종편 매체에서 촬영을 고르면 멈추던 오류, 아이템 제목에 같은 낱말이 겹치던 문제(「누리시 의회 의회」), 이벤트로 기자가 줄 때 고참·부서장부터 빠지던 문제를 고쳤다',
   '수정|창간 모드 인사: 매체 위상을 올려도 저장 후 불러오면 이전 위상으로 돌아가던 문제, 영입한 기자의 실력이 인사 화면에서 낮게 다시 계산되던 문제, 명부에 실제로 없는 기자가 채워지던 문제, 다른 부서의 우리 기자를 새 부서 팀장으로 데려올 수 없던 문제를 고쳤다',
   '개선|지역 TO 순환과 밸런스: 지역 책임자도 3년쯤 지나면 본사 빈자리로 돌아와 지역 자리가 다시 열린다. 적체를 반년 넘게 두면 분위기가 처지고 막힌 사람이 떠난다. 실력 55 이상 책임자가 있는 지역은 주재기자가 함께 자라고, 내가 책임자면 주재기자 제보가 올라온다. 지역 TO 신설엔 상한이 생겼고, 공모는 사내 평가가 너무 낮으면 오지 않으며 승진이 가까우면 「버틴다」를 추천한다',
   '대규모|신세 장부: 신뢰 높은 취재원을 꾸준히 만나고, 동료와 가깝게 지내고, 기관·광고주·인물의 호재를 쓰면 「신세」가 쌓인다. 새 행동 「신세 쓰기」(행동력 0)로 결정적인 순간에 쓴다 — 사실 하나 확인 보증, 오보 방어 증언, 공식 입장 바로 받기, 반년 소송 방패, 발표 일정 귀띔(물때 아이템), 고과 챙기기, 대신 뛰어 주기(행동력 +1). 가까운 곳이 먼저 「신세를 갚으라」고 청구해 오기도 한다',
@@ -6847,7 +6849,7 @@ function applyPool(){if(S.applyPool&&S.applyPoolR===(S.retries||0))return S.appl
 // ===== 창간 모드 10년 연대기: 창간 후 주차별 장면 (4주 = 1달, 48주 = 1년) =====
 const fYr=()=>Math.floor((S.turn-(S.fStart||0))/YW);
 const fN=()=>esc(OUT().n);
-const fHit=(o)=>{const t=[];if(o.cash){S.co.cash+=o.cash;t.push(`자금 ${o.cash>0?'+':''}${eok(o.cash)}`);}if(o.q){S.co.q=clamp(S.co.q+o.q,10,100);t.push(`품질 ${o.q>0?'+':''}${o.q}`);}if(o.subs){S.co.subs*=1+o.subs;t.push(`구독 ${o.subs>0?'+':''}${Math.round(o.subs*100)}%`);}if(o.tr){S.co.tr=Math.round(S.co.tr*(1+o.tr));t.push(`트래픽 ${o.tr>0?'+':''}${Math.round(o.tr*100)}%`);}if(o.staff){S.co.staff=Math.max(3,S.co.staff+o.staff);if(o.staff<0)S.team.splice(0,-o.staff);else for(let i=0;i<o.staff;i++)S.team.push(genMember(pick(OUT().depts)));t.push(`기자 ${o.staff>0?'+':''}${o.staff}명`);}
+const fHit=(o)=>{const t=[];if(o.cash){S.co.cash+=o.cash;t.push(`자금 ${o.cash>0?'+':''}${eok(o.cash)}`);}if(o.q){S.co.q=clamp(S.co.q+o.q,10,100);t.push(`품질 ${o.q>0?'+':''}${o.q}`);}if(o.subs){S.co.subs*=1+o.subs;t.push(`구독 ${o.subs>0?'+':''}${Math.round(o.subs*100)}%`);}if(o.tr){S.co.tr=Math.round(S.co.tr*(1+o.tr));t.push(`트래픽 ${o.tr>0?'+':''}${Math.round(o.tr*100)}%`);}if(o.staff){S.co.staff=Math.max(3,S.co.staff+o.staff);if(o.staff<0){const _dr=S.team.filter(m=>(m.r||0)<2&&!(typeof lk45==='function'&&lk45(m))).sort((a,b)=>(a.skill||0)-(b.skill||0)).slice(0,-o.staff);S.team=S.team.filter(m=>!_dr.includes(m));}else for(let i=0;i<o.staff;i++)S.team.push(genMember(pick(OUT().depts)));t.push(o.staff>0?`기자 ${o.staff}명 충원`:`기자 ${-o.staff}명 이탈`);}
   const ap={};['fame','trust','eval','hp','men','net','money'].forEach(k=>{if(o[k])ap[k]=o[k];});const a=Object.keys(ap).length?apply(ap):'';if(o.rel)relAll(['fstaff','cofound','photo'],o.rel);if(o.pen)portalPen(o.pen,o.penWhy||'');return [t.join(' · '),a].filter(Boolean).join(' · ');};
 const fCh=(label,sub,o,after)=>({label,sub,fn:()=>{const r=fHit(o);if(after){const x=after();if(x===false)return false;}if(r)toast(r);}});
 Object.assign(F_BEATS,{
@@ -9202,9 +9204,9 @@ function spWire(){const P=spmS();const L=S.items.filter(i=>i.facts.some(fOK)&&!(
 function spWireMonth(lines){let n=0;S.items.forEach(it=>{if(S.turn-(it.born||0)>=8&&!it.aged){it.aged=1;it.imp=Math.round(it.imp*.85);if(it.excl){it.excl=false;n++;}}});if(n)lines.push({c:'r',t:`두 주 넘게 묵힌 아이템 ${n}건의 단독 가치가 사라졌다. 통신은 늦으면 기사가 아니다`});}
 
 // ---- 지상파·종편: 촬영 ----
-function spTV(){const P=spmS();const L=S.items.filter(it=>!tvFt(it));const jp=OUT().type==='jp';
+function spTV(){const P=spmS();const L=S.items.filter(it=>!tvFt(it));const isJp=OUT().type==='jp';
   const opts=L.slice(0,5).map(it=>({label:`「${yamaShort(it.title,30)}」 촬영`,sub:'카메라 기자와 현장에 나간다 · 방송감이 높을수록 잘 찍는다 · 컨디션↓',fn:()=>{spend(1,6);setCd('spx');gain('brd',.3);if(chance(.62+S.st.brd/300)){it.ft=1;if(!it.photo)it.photo='현장 화면';spmV(1);toast(`그림을 땄다 — 「${yamaShort(it.title,20)}」${jp(yamaShort(it.title,20),'은','는')} 이제 리포트가 된다`);}else toast('현장은 이미 정리돼 있었다. 쓸 만한 그림이 없다');}}));
-  if(jp)opts.push({label:'시사 토크 패널로 출연한다',sub:'평판↑ · 방송감↑ · 말 한마디가 논란이 될 수 있다',risk:true,fn:()=>{spend(1,5);setCd('spx');gain('brd',.5);if(chance(.2)){valN('pb',-2,'토크쇼에서 센 말을 했다');toast('한마디가 클립으로 돌았다. 댓글창이 불탔다 · '+apply({fame:1.5,trust:-1.5}));}else toast('차분하게 짚었다 · '+apply({fame:1,eval:.5}));}});
+  if(isJp)opts.push({label:'시사 토크 패널로 출연한다',sub:'평판↑ · 방송감↑ · 말 한마디가 논란이 될 수 있다',risk:true,fn:()=>{spend(1,5);setCd('spx');gain('brd',.5);if(chance(.2)){valN('pb',-2,'토크쇼에서 센 말을 했다');toast('한마디가 클립으로 돌았다. 댓글창이 불탔다 · '+apply({fame:1.5,trust:-1.5}));}else toast('차분하게 짚었다 · '+apply({fame:1,eval:.5}));}});
   if(mgOn()&&typeof mgTV==='function'&&S.rank>=2)opts.push({label:'메인뉴스 큐시트 회의',sub:'미니게임 · 오늘 메인뉴스 순서를 직접 짠다',fn:()=>{spend(1,3);setCd('spx');mgTV();return false;}});
   openModal('촬영 나가기',`<p class="lede">방송은 그림이 절반이다. 그림 없는 아이템은 리포트가 아니라 앵커 단신으로 짧게 나간다.</p><p class="hint">이달 그림 있는 리포트 ${kpiVal('ft')}/${kpiTarget('ft',1)} · 현장을 확인한 아이템은 이미 그림이 있다</p>`,(opts.length?opts:[{label:'그림이 필요한 아이템이 없다',sub:'가진 아이템은 모두 그림이 있다',disabled:true}]).concat([{label:'나중에',cls:'ghost'}]));}
 
@@ -9590,7 +9592,7 @@ function mgWire(){const f=filler(vars());const E=pick(WIRE_EV);const L=shuffle(E
 
 // 지상파·종편 — 메인뉴스 큐시트
 const TV_POOL=[['{city} 아파트 화재 대피 소동','h',4],['국회 예산안 처리 무산','h',3],['{corp} 대규모 구조조정','h',4],['물가 넉 달째 상승','h',3],['{team} 극적 역전승','s',2],['벚꽃 개화 앞당겨져','s',2],['{star} 깜짝 결혼 발표','s',3],['전세사기 피해 확산','h',4],['기습 폭우 피해','h',5],['대통령실 개편안 발표','h',3],['반려견 놀이터 논란','s',1],['주말 나들이 인파','s',1]];
-function mgTV(){const f=filler(vars());const jp=OUT().type==='jp';const P=shuffle(TV_POOL.slice()).slice(0,6).map(x=>({t:f(x[0]),k:x[1],p:clamp(x[2]+R(0,1),1,5),d:x[1]==='h'?2+R(0,3)*.5:1.5+R(0,2)*.5}));if(jp)P.push({t:'[시사 토크] 정치권 공방',k:'t',p:4,d:3.5});
+function mgTV(){const f=filler(vars());const isJp=OUT().type==='jp';const P=shuffle(TV_POOL.slice()).slice(0,6).map(x=>({t:f(x[0]),k:x[1],p:clamp(x[2]+R(0,1),1,5),d:x[1]==='h'?2+R(0,3)*.5:1.5+R(0,2)*.5}));if(isJp)P.push({t:'[시사 토크] 정치권 공방',k:'t',p:4,d:3.5});
   const B=S.simple?11:10;const ord=[];const rv=mgRival();
   const draw=()=>{const used=ord.reduce((a,i)=>a+P[i].d,0);const box=document.getElementById('cueL');if(box)box.innerHTML=ord.length?ord.map((i,n)=>`<div>${n+1}. ${esc(P[i].t)} <small>${P[i].d}분</small></div>`).join(''):'<small>위에서 순서대로 누른다. 첫 번째가 톱이다</small>';const u=document.getElementById('cueU');if(u)u.textContent=`${used}/${B}분`;document.querySelectorAll('#mb .mgi').forEach(b=>{const i=+b.dataset.i;b.classList.toggle('on',ord.includes(i));});};
   const air=()=>{const W=[1.6,1.25,1,.85,.7,.6];let used=0,rate=0,cut=0;ord.forEach((i,n)=>{if(used+P[i].d>B+.01){cut++;return;}used+=P[i].d;rate+=P[i].p*(W[n]||.5);});
@@ -14557,6 +14559,19 @@ function place48Role(m,d,rest){const per=roster();Object.keys(per).forEach(x=>{i
     if(chance(p)){S.team=S.team.filter(x=>x!==m);try{const per=roster();if(per[m.d])per[m.d]=per[m.d].filter(x=>x!==m);}catch(e){}S.co.staff=Math.max(1,(S.co.staff||1)-1);try{S.co.extra=Math.max(0,+((S.co.extra||0)-hireCostD(m.src48,m)).toFixed(3));}catch(e){}
       const dest=(S.comp||[]).length?cName(pick(S.comp)):'경쟁사';lines.push({c:'b',t:`${m.name} ${jo2(m.src48==='star'?'스타 기자':'경력 기자','이','가')} ${dest}의 더 좋은 조건을 받고 떠났다 — 영입 ${Math.round((S.turn-m.hT48)/4)}개월 만`});log(`${m.name} 이직 (영입 기자)`);}});}}catch(e){console.error(e);}return r;};}
 
+
+// ===== 1.6 저장·불러오기 바로잡기 =====
+// (1) 새 게임에 저장 형식 표시가 빠져 있어, 처음 불러올 때마다 편집국 명부·주재기자·동료가 새로 만들어지던 문제
+// (2) 저장 파일에선 「내 팀원」과 「명부 속 같은 사람」이 따로 풀린다 → 불러올 때 같은 사람으로 다시 묶는다
+{const _ns49=newState;newState=function(){const s=_ns49.apply(this,arguments);try{s.ver4=2;}catch(e){}return s;};}
+function relink49(s){try{if(!s||!s.ros||!s.ros.per)return;const canon=new Map();const key=m=>m&&(m.id!=null?'i'+m.id:'n'+m.name+'|'+(m.d||''));
+  const reg=a=>(a||[]).forEach(m=>{if(m&&typeof m==='object'){const k=key(m);if(!canon.has(k))canon.set(k,m);}});
+  reg(s.team);reg(s.mates);if(Array.isArray(s.corr))reg(s.corr);if(s.corrList)Object.values(s.corrList).forEach(a=>Array.isArray(a)&&reg(a));
+  Object.keys(s.ros.per).forEach(d=>{const L=s.ros.per[d];if(!Array.isArray(L))return;const seen=new Set();s.ros.per[d]=L.map(m=>{const c=canon.get(key(m));return c||m;}).filter(m=>{if(!m||seen.has(m))return false;seen.add(m);return true;});});}catch(e){console.error(e);}}
+{const _mg49=migrate;migrate=function(s){try{if(s&&(s.ver4||0)<2&&s.ros&&s.ros.v3)s.ver4=2;relink49(s);}catch(e){}return _mg49.apply(this,arguments);};}
+// 아이템 제목에 같은 낱말이 겹치는 경우(「누리시 의회 의회」) 하나로
+function dedup49(t){if(typeof t!=='string')return t;return t.replace(/(^|[\s「"'])([가-힣A-Za-z]{2,})\s+\2(?=[\s,.!?」"'·]|$)/g,(m,a,w)=>/^(하나|다시|점점|조금|천천히|계속|아니|또)$/.test(w)?m:a+w);}
+{const _mi49=makeItem;makeItem=function(){const it=_mi49.apply(this,arguments);try{if(it&&it.title)it.title=dedup49(it.title);}catch(e){}return it;};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
