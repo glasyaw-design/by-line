@@ -288,6 +288,6 @@ function place48Role(m,d,rest){const per=roster();Object.keys(per).forEach(x=>{i
 {const _om48m=orgMonth;orgMonth=function(lines){const r=_om48m.apply(this,arguments);try{if(!S.story){const T=S.team||[];
   T.forEach(m=>{if(m.src48==='new'&&m.rk==null&&S.turn-(m.hT48||0)<YW*5)m.skill=Math.min(88,(m.skill||30)+.12);});
   const out=T.filter(m=>(m.src48==='career'||m.src48==='star')&&S.turn-(m.hT48||0)<YW*3&&S.turn-(m.hT48||0)>=YW/2);
-  const mood=S.wMood??60;out.forEach(m=>{const p=(m.src48==='star'?.012:.006)*(mood<45?2:mood>70?.6:1)*((m.rel??20)<0?1.6:1)*((S.payLv||1)<1?1.5:1);
+  const mood=S.wMood??60;out.forEach(m=>{const p=(m.src48==='star'?.012:.006)*(mood<45?2:mood>70?.6:1)*((m.rel??20)<0?1.6:1)*((S.payLv||1)<1?1.5:1)*((m.rel??20)>=90?.1:(m.rel??20)>=75?.25:(m.rel??20)>=55?.55:1);
     if(chance(p)){S.team=S.team.filter(x=>x!==m);try{const per=roster();if(per[m.d])per[m.d]=per[m.d].filter(x=>x!==m);}catch(e){}S.co.staff=Math.max(1,(S.co.staff||1)-1);try{S.co.extra=Math.max(0,+((S.co.extra||0)-hireCostD(m.src48,m)).toFixed(3));}catch(e){}
       const dest=(S.comp||[]).length?cName(pick(S.comp)):'경쟁사';lines.push({c:'b',t:`${m.name} ${jo2(m.src48==='star'?'스타 기자':'경력 기자','이','가')} ${dest}의 더 좋은 조건을 받고 떠났다 — 영입 ${Math.round((S.turn-m.hT48)/4)}개월 만`});log(`${m.name} 이직 (영입 기자)`);}});}}catch(e){console.error(e);}return r;};}
