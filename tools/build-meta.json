@@ -1,0 +1,1107 @@
+{
+ "origSha256": "7b82df7f030ae591b861c0dab905b32f45f2c832d15c6c3ef379696268b2144a",
+ "files": [
+  "src/core/utils.js",
+  "src/data/base-data.js",
+  "src/data/articles.js",
+  "src/core/state.js",
+  "src/systems/items.js",
+  "src/ui/modal.js",
+  "src/systems/actions.js",
+  "src/systems/desking.js",
+  "src/systems/hiring.js",
+  "src/systems/business.js",
+  "src/core/turn.js",
+  "src/systems/market.js",
+  "src/systems/npc.js",
+  "src/systems/career.js",
+  "src/data/events.js",
+  "src/systems/onboarding.js",
+  "src/dev/devmode.js",
+  "src/ui/render.js",
+  "src/ui/scene.js",
+  "src/systems/management.js",
+  "src/systems/audio.js",
+  "src/systems/founder.js",
+  "src/systems/legal.js",
+  "src/systems/newsroom-life.js",
+  "src/systems/power-bosses.js",
+  "src/ui/presentation.js",
+  "src/systems/life-events.js",
+  "src/systems/story.js",
+  "src/systems/network.js",
+  "src/systems/rookies-corr.js",
+  "src/systems/company.js",
+  "src/ui/hud-missions.js",
+  "src/systems/roster.js",
+  "src/systems/storylines.js",
+  "src/systems/v10.js",
+  "src/systems/outlet-rules.js",
+  "src/systems/values-minigames.js",
+  "src/systems/worlds.js",
+  "src/systems/routes.js",
+  "src/compat/_hoisted.js",
+  "src/compat/v13a.js",
+  "src/compat/v14.js",
+  "src/compat/v15.js",
+  "src/compat/v16.js",
+  "src/compat/v17img.js",
+  "src/compat/v17.js",
+  "src/compat/v17bd.js",
+  "src/compat/v17ch.js",
+  "src/compat/v17rt.js",
+  "src/compat/v18img.js",
+  "src/compat/v18f.js",
+  "src/compat/v18.js",
+  "src/compat/v19.js",
+  "src/compat/v21img.js",
+  "src/compat/v21.js",
+  "src/compat/v20img.js",
+  "src/compat/v22img.js",
+  "src/compat/v22.js",
+  "src/compat/v23.js",
+  "src/compat/v24font.js",
+  "src/compat/v24.js",
+  "src/compat/v25img.js",
+  "src/compat/v25.js",
+  "src/compat/v26img.js",
+  "src/compat/v26.js",
+  "src/compat/v27img.js",
+  "src/compat/v28.js",
+  "src/compat/v29img.js",
+  "src/compat/v30.js",
+  "src/compat/v31.js",
+  "src/compat/v32.js",
+  "src/compat/v33.js",
+  "src/compat/v34img.js",
+  "src/compat/v35.js",
+  "src/compat/v36.js",
+  "src/compat/v37.js",
+  "src/compat/v38.js",
+  "src/compat/v39.js",
+  "src/compat/v40.js",
+  "src/compat/v41.js",
+  "src/compat/v42.js",
+  "src/compat/v43.js",
+  "src/compat/v44.js",
+  "src/compat/v45.js",
+  "src/compat/v46.js",
+  "src/compat/v47.js",
+  "src/compat/v48.js",
+  "src/compat/v49.js",
+  "src/systems/era-front.js",
+  "src/systems/dept-signature.js",
+  "src/main.js"
+ ],
+ "rows": [
+  {
+   "file": "src/core/utils.js",
+   "stmts": [
+    0,
+    19
+   ],
+   "lines": [
+    2,
+    28
+   ]
+  },
+  {
+   "file": "src/data/base-data.js",
+   "stmts": [
+    20,
+    57
+   ],
+   "lines": [
+    29,
+    369
+   ]
+  },
+  {
+   "file": "src/data/articles.js",
+   "stmts": [
+    58,
+    100
+   ],
+   "lines": [
+    370,
+    861
+   ]
+  },
+  {
+   "file": "src/core/state.js",
+   "stmts": [
+    101,
+    210
+   ],
+   "lines": [
+    862,
+    1135
+   ]
+  },
+  {
+   "file": "src/systems/items.js",
+   "stmts": [
+    211,
+    247
+   ],
+   "lines": [
+    1136,
+    1327
+   ]
+  },
+  {
+   "file": "src/ui/modal.js",
+   "stmts": [
+    248,
+    256
+   ],
+   "lines": [
+    1328,
+    1353
+   ]
+  },
+  {
+   "file": "src/systems/actions.js",
+   "stmts": [
+    257,
+    393
+   ],
+   "lines": [
+    1354,
+    2301
+   ]
+  },
+  {
+   "file": "src/systems/desking.js",
+   "stmts": [
+    394,
+    422
+   ],
+   "lines": [
+    2302,
+    2453
+   ]
+  },
+  {
+   "file": "src/systems/hiring.js",
+   "stmts": [
+    423,
+    452
+   ],
+   "lines": [
+    2454,
+    2613
+   ]
+  },
+  {
+   "file": "src/systems/business.js",
+   "stmts": [
+    453,
+    573
+   ],
+   "lines": [
+    2614,
+    3271
+   ]
+  },
+  {
+   "file": "src/core/turn.js",
+   "stmts": [
+    574,
+    581
+   ],
+   "lines": [
+    3272,
+    3290
+   ]
+  },
+  {
+   "file": "src/systems/market.js",
+   "stmts": [
+    582,
+    670
+   ],
+   "lines": [
+    3291,
+    3625
+   ]
+  },
+  {
+   "file": "src/systems/npc.js",
+   "stmts": [
+    671,
+    704
+   ],
+   "lines": [
+    3626,
+    4029
+   ]
+  },
+  {
+   "file": "src/systems/career.js",
+   "stmts": [
+    705,
+    740
+   ],
+   "lines": [
+    4030,
+    4716
+   ]
+  },
+  {
+   "file": "src/data/events.js",
+   "stmts": [
+    741,
+    750
+   ],
+   "lines": [
+    4717,
+    4829
+   ]
+  },
+  {
+   "file": "src/systems/onboarding.js",
+   "stmts": [
+    751,
+    780
+   ],
+   "lines": [
+    4830,
+    4990
+   ]
+  },
+  {
+   "file": "src/dev/devmode.js",
+   "stmts": [
+    781,
+    798
+   ],
+   "lines": [
+    4991,
+    5141
+   ]
+  },
+  {
+   "file": "src/ui/render.js",
+   "stmts": [
+    799,
+    818
+   ],
+   "lines": [
+    5142,
+    5374
+   ]
+  },
+  {
+   "file": "src/ui/scene.js",
+   "stmts": [
+    819,
+    846
+   ],
+   "lines": [
+    5375,
+    5501
+   ]
+  },
+  {
+   "file": "src/systems/management.js",
+   "stmts": [
+    847,
+    889
+   ],
+   "lines": [
+    5502,
+    5689
+   ]
+  },
+  {
+   "file": "src/systems/audio.js",
+   "stmts": [
+    890,
+    915
+   ],
+   "lines": [
+    5690,
+    5815
+   ]
+  },
+  {
+   "file": "src/systems/founder.js",
+   "stmts": [
+    916,
+    927
+   ],
+   "lines": [
+    5816,
+    5856
+   ]
+  },
+  {
+   "file": "src/systems/legal.js",
+   "stmts": [
+    928,
+    933
+   ],
+   "lines": [
+    5857,
+    5889
+   ]
+  },
+  {
+   "file": "src/systems/newsroom-life.js",
+   "stmts": [
+    934,
+    1006
+   ],
+   "lines": [
+    5890,
+    6281
+   ]
+  },
+  {
+   "file": "src/systems/power-bosses.js",
+   "stmts": [
+    1007,
+    1025
+   ],
+   "lines": [
+    6282,
+    6374
+   ]
+  },
+  {
+   "file": "src/ui/presentation.js",
+   "stmts": [
+    1026,
+    1046
+   ],
+   "lines": [
+    6375,
+    6469
+   ]
+  },
+  {
+   "file": "src/systems/life-events.js",
+   "stmts": [
+    1047,
+    1095
+   ],
+   "lines": [
+    6470,
+    6730
+   ]
+  },
+  {
+   "file": "src/systems/story.js",
+   "stmts": [
+    1096,
+    1100
+   ],
+   "lines": [
+    6731,
+    6751
+   ]
+  },
+  {
+   "file": "src/systems/network.js",
+   "stmts": [
+    1101,
+    1140
+   ],
+   "lines": [
+    6752,
+    6963
+   ]
+  },
+  {
+   "file": "src/systems/rookies-corr.js",
+   "stmts": [
+    1141,
+    1172
+   ],
+   "lines": [
+    6964,
+    7098
+   ]
+  },
+  {
+   "file": "src/systems/company.js",
+   "stmts": [
+    1173,
+    1190
+   ],
+   "lines": [
+    7099,
+    7193
+   ]
+  },
+  {
+   "file": "src/ui/hud-missions.js",
+   "stmts": [
+    1191,
+    1253
+   ],
+   "lines": [
+    7194,
+    7432
+   ]
+  },
+  {
+   "file": "src/systems/roster.js",
+   "stmts": [
+    1254,
+    1269
+   ],
+   "lines": [
+    7433,
+    7533
+   ]
+  },
+  {
+   "file": "src/systems/storylines.js",
+   "stmts": [
+    1270,
+    1315
+   ],
+   "lines": [
+    7534,
+    7902
+   ]
+  },
+  {
+   "file": "src/systems/v10.js",
+   "stmts": [
+    1316,
+    1347
+   ],
+   "lines": [
+    7903,
+    8066
+   ]
+  },
+  {
+   "file": "src/systems/outlet-rules.js",
+   "stmts": [
+    1348,
+    1429
+   ],
+   "lines": [
+    8067,
+    8537
+   ]
+  },
+  {
+   "file": "src/systems/values-minigames.js",
+   "stmts": [
+    1430,
+    1495
+   ],
+   "lines": [
+    8538,
+    8833
+   ]
+  },
+  {
+   "file": "src/systems/worlds.js",
+   "stmts": [
+    1496,
+    1636
+   ],
+   "lines": [
+    8834,
+    9343
+   ]
+  },
+  {
+   "file": "src/systems/routes.js",
+   "stmts": [
+    1637,
+    1656
+   ],
+   "lines": [
+    9344,
+    9438
+   ]
+  },
+  {
+   "file": "src/compat/v13a.js",
+   "stmts": [
+    1657,
+    1736
+   ],
+   "lines": [
+    9439,
+    10128
+   ]
+  },
+  {
+   "file": "src/compat/v14.js",
+   "stmts": [
+    1737,
+    1808
+   ],
+   "lines": [
+    10129,
+    10457
+   ]
+  },
+  {
+   "file": "src/compat/v15.js",
+   "stmts": [
+    1809,
+    1847
+   ],
+   "lines": [
+    10458,
+    10589
+   ]
+  },
+  {
+   "file": "src/compat/v16.js",
+   "stmts": [
+    1848,
+    1961
+   ],
+   "lines": [
+    10590,
+    11002
+   ]
+  },
+  {
+   "file": "src/compat/v17img.js",
+   "stmts": [
+    1962,
+    1962
+   ],
+   "lines": [
+    11003,
+    11005
+   ]
+  },
+  {
+   "file": "src/compat/v17.js",
+   "stmts": [
+    1963,
+    1983
+   ],
+   "lines": [
+    11006,
+    11039
+   ]
+  },
+  {
+   "file": "src/compat/v17bd.js",
+   "stmts": [
+    1984,
+    1984
+   ],
+   "lines": [
+    11040,
+    11042
+   ]
+  },
+  {
+   "file": "src/compat/v17ch.js",
+   "stmts": [
+    1985,
+    1985
+   ],
+   "lines": [
+    11043,
+    11045
+   ]
+  },
+  {
+   "file": "src/compat/v17rt.js",
+   "stmts": [
+    1986,
+    1986
+   ],
+   "lines": [
+    11046,
+    11048
+   ]
+  },
+  {
+   "file": "src/compat/v18img.js",
+   "stmts": [
+    1987,
+    1987
+   ],
+   "lines": [
+    11049,
+    11051
+   ]
+  },
+  {
+   "file": "src/compat/v18f.js",
+   "stmts": [
+    1988,
+    1988
+   ],
+   "lines": [
+    11052,
+    11053
+   ]
+  },
+  {
+   "file": "src/compat/v18.js",
+   "stmts": [
+    1989,
+    2035
+   ],
+   "lines": [
+    11054,
+    11164
+   ]
+  },
+  {
+   "file": "src/compat/v19.js",
+   "stmts": [
+    2036,
+    2048
+   ],
+   "lines": [
+    11165,
+    11404
+   ]
+  },
+  {
+   "file": "src/compat/v21img.js",
+   "stmts": [
+    2049,
+    2049
+   ],
+   "lines": [
+    11405,
+    11406
+   ]
+  },
+  {
+   "file": "src/compat/v21.js",
+   "stmts": [
+    2050,
+    2065
+   ],
+   "lines": [
+    11407,
+    11509
+   ]
+  },
+  {
+   "file": "src/compat/v20img.js",
+   "stmts": [
+    2066,
+    2066
+   ],
+   "lines": [
+    11510,
+    11511
+   ]
+  },
+  {
+   "file": "src/compat/v22img.js",
+   "stmts": [
+    2067,
+    2067
+   ],
+   "lines": [
+    11512,
+    11513
+   ]
+  },
+  {
+   "file": "src/compat/v22.js",
+   "stmts": [
+    2068,
+    2071
+   ],
+   "lines": [
+    11514,
+    11580
+   ]
+  },
+  {
+   "file": "src/compat/v23.js",
+   "stmts": [
+    2072,
+    2075
+   ],
+   "lines": [
+    11581,
+    11619
+   ]
+  },
+  {
+   "file": "src/compat/v24font.js",
+   "stmts": [
+    2076,
+    2076
+   ],
+   "lines": [
+    11620,
+    11622
+   ]
+  },
+  {
+   "file": "src/compat/v24.js",
+   "stmts": [
+    2077,
+    2077
+   ],
+   "lines": [
+    11623,
+    11638
+   ]
+  },
+  {
+   "file": "src/compat/v25img.js",
+   "stmts": [
+    2078,
+    2078
+   ],
+   "lines": [
+    11639,
+    11640
+   ]
+  },
+  {
+   "file": "src/compat/v25.js",
+   "stmts": [
+    2079,
+    2085
+   ],
+   "lines": [
+    11641,
+    11730
+   ]
+  },
+  {
+   "file": "src/compat/v26img.js",
+   "stmts": [
+    2086,
+    2086
+   ],
+   "lines": [
+    11731,
+    11732
+   ]
+  },
+  {
+   "file": "src/compat/v26.js",
+   "stmts": [
+    2087,
+    2094
+   ],
+   "lines": [
+    11733,
+    11772
+   ]
+  },
+  {
+   "file": "src/compat/v27img.js",
+   "stmts": [
+    2095,
+    2095
+   ],
+   "lines": [
+    11773,
+    11775
+   ]
+  },
+  {
+   "file": "src/compat/v28.js",
+   "stmts": [
+    2096,
+    2106
+   ],
+   "lines": [
+    11776,
+    11831
+   ]
+  },
+  {
+   "file": "src/compat/v29img.js",
+   "stmts": [
+    2107,
+    2107
+   ],
+   "lines": [
+    11832,
+    11834
+   ]
+  },
+  {
+   "file": "src/compat/v30.js",
+   "stmts": [
+    2108,
+    2114
+   ],
+   "lines": [
+    11835,
+    11876
+   ]
+  },
+  {
+   "file": "src/compat/v31.js",
+   "stmts": [
+    2115,
+    2132
+   ],
+   "lines": [
+    11877,
+    11924
+   ]
+  },
+  {
+   "file": "src/compat/v32.js",
+   "stmts": [
+    2133,
+    2139
+   ],
+   "lines": [
+    11925,
+    11962
+   ]
+  },
+  {
+   "file": "src/compat/v33.js",
+   "stmts": [
+    2140,
+    2153
+   ],
+   "lines": [
+    11963,
+    12025
+   ]
+  },
+  {
+   "file": "src/compat/v34img.js",
+   "stmts": [
+    2154,
+    2154
+   ],
+   "lines": [
+    12026,
+    12028
+   ]
+  },
+  {
+   "file": "src/compat/v35.js",
+   "stmts": [
+    2155,
+    2177
+   ],
+   "lines": [
+    12029,
+    12107
+   ]
+  },
+  {
+   "file": "src/compat/v36.js",
+   "stmts": [
+    2178,
+    2186
+   ],
+   "lines": [
+    12108,
+    12126
+   ]
+  },
+  {
+   "file": "src/compat/v37.js",
+   "stmts": [
+    2187,
+    2204
+   ],
+   "lines": [
+    12127,
+    12204
+   ]
+  },
+  {
+   "file": "src/compat/v38.js",
+   "stmts": [
+    2205,
+    2235
+   ],
+   "lines": [
+    12205,
+    12357
+   ]
+  },
+  {
+   "file": "src/compat/v39.js",
+   "stmts": [
+    2236,
+    2255
+   ],
+   "lines": [
+    12358,
+    12413
+   ]
+  },
+  {
+   "file": "src/compat/v40.js",
+   "stmts": [
+    2256,
+    2286
+   ],
+   "lines": [
+    12414,
+    12540
+   ]
+  },
+  {
+   "file": "src/compat/v41.js",
+   "stmts": [
+    2287,
+    2317
+   ],
+   "lines": [
+    12541,
+    12704
+   ]
+  },
+  {
+   "file": "src/compat/v42.js",
+   "stmts": [
+    2318,
+    2339
+   ],
+   "lines": [
+    12705,
+    12899
+   ]
+  },
+  {
+   "file": "src/compat/v43.js",
+   "stmts": [
+    2340,
+    2401
+   ],
+   "lines": [
+    12900,
+    13290
+   ]
+  },
+  {
+   "file": "src/compat/v44.js",
+   "stmts": [
+    2402,
+    2433
+   ],
+   "lines": [
+    13291,
+    13396
+   ]
+  },
+  {
+   "file": "src/compat/v45.js",
+   "stmts": [
+    2434,
+    2460
+   ],
+   "lines": [
+    13397,
+    13497
+   ]
+  },
+  {
+   "file": "src/compat/v46.js",
+   "stmts": [
+    2461,
+    2478
+   ],
+   "lines": [
+    13498,
+    13559
+   ]
+  },
+  {
+   "file": "src/compat/v47.js",
+   "stmts": [
+    2479,
+    2486
+   ],
+   "lines": [
+    13560,
+    13610
+   ]
+  },
+  {
+   "file": "src/compat/v48.js",
+   "stmts": [
+    2487,
+    2494
+   ],
+   "lines": [
+    13611,
+    13663
+   ]
+  },
+  {
+   "file": "src/compat/v49.js",
+   "stmts": [
+    2495,
+    2500
+   ],
+   "lines": [
+    13664,
+    13688
+   ]
+  },
+  {
+   "file": "src/systems/era-front.js",
+   "stmts": [
+    2501,
+    2539
+   ],
+   "lines": [
+    13689,
+    13847
+   ]
+  },
+  {
+   "file": "src/systems/dept-signature.js",
+   "stmts": [
+    2540,
+    2547
+   ],
+   "lines": [
+    13848,
+    13877
+   ]
+  },
+  {
+   "file": "src/main.js",
+   "stmts": [
+    2548,
+    2559
+   ],
+   "lines": [
+    13878,
+    13901
+   ]
+  }
+ ],
+ "moved": [
+  {
+   "name": "jo2",
+   "to": "src/core/utils.js"
+  },
+  {
+   "name": "eraGen",
+   "to": "src/compat/_hoisted.js"
+  },
+  {
+   "name": "eraBox",
+   "to": "src/compat/_hoisted.js"
+  },
+  {
+   "name": "migrate",
+   "to": "src/compat/_hoisted.js"
+  }
+ ],
+ "manifestCount": 741
+}

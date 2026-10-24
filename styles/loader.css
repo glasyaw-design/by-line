@@ -1,0 +1,2 @@
+/* 바이라인 1.6 — 원본 두 번째 <style> (본문, 로더 바로 앞) 그대로. 이미지 경로만 ../assets 로 */
+#loader{background:url(../assets/images/loader-bg.webp) center/cover #0b0e1a!important}#loader .ldpaper{display:none!important}#loader .ldlogo i{background:url(../assets/images/loader-logo.webp) center/cover!important;box-shadow:0 0 18px rgba(255,184,77,.5)!important}#loader .ldlogo i::after{display:none!important}#loader .ldlogo{filter:drop-shadow(0 4px 14px #000)}#loader .ld{margin-top:18vh;background:rgba(10,13,24,.55);border-radius:16px;padding:14px 22px}

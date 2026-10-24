@@ -1,0 +1,25 @@
+/* 바이라인 1.6 — src/systems/story.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 스토리 모드 5.0: 새 시스템(정정·허위 제보·행사·광고 단가·임금·창간/폐간·순환 보직)을 스토리마다 엮는다 =====
+Object.assign(STORY_BEATS.rookie,{
+ 8:()=>{const it=makeItem('case',{excl:true,mult:1.2,hoax:true});it.hoaxHint=0;openModal('새벽의 제보',`<p class="lede">처음 보는 번호. "기자님, 경찰이 덮은 사건이 있어요." 제보 내용: 「${esc(it.title)}」</p><p class="hint">수습에게 단독은 목숨줄이다. 하지만 제보가 늘 진짜는 아니다.</p>`,[{label:'아이템으로 챙긴다',sub:'확인 취재가 필수다',fn:()=>{S.items.push(it);toast('제보를 챙겼다');}},{label:'캡에게 먼저 보고한다',sub:'캡이 수상하다고 짚어 줄 수도',fn:()=>{if(chance(.6)){toast(`캡: "이거 냄새가 나. 번호 조회부터 해." · ${apply({ver:.5,eval:.5})}`);}else{S.items.push(it);toast('캡: "한번 파 봐."');}}}]);},
+ 12:()=>openModal('선배의 정정 기사',`<p class="lede">사건팀 선배 기사에 "바로잡습니다"가 붙었다. 선배가 담배를 끄며 말했다. "숨기면 두 번 죽어. 틀리면 바로 고쳐."</p>`,[{label:'새겨듣는다',sub:'검증력↑',fn:()=>toast(apply({ver:.6,men:.3}))}])});
+Object.assign(STORY_BEATS.local,{
+ 32:()=>{const cid=cityEnt();openModal('시장의 제안',`<p class="lede">시장 비서실장: "남부일보랑 시 마라톤 공동 주최 어떻습니까? 보조금 넉넉히 드리죠." 우리 팀은 지금 시청 비리를 파고 있다.</p>`,[{label:'회사에 넘기고 취재는 계속한다',sub:'회사 흑자에 도움 · 시청 관계 복잡',fn:()=>{S.co.cash+=.15;if(cid)netUp(cid,4);toast(`사업국이 받았다 · ${apply({trust:-.5})}`);}},{label:'"취재 중인 기관과는 안 된다"고 막는다',sub:'신뢰↑ · 회사 수입↓',fn:()=>{if(cid)netUp(cid,-6);toast(apply({trust:1.5,eval:-.5}));}}]);},
+ 48:()=>openModal('신생 매체의 등장',`<p class="lede">지역에 「${pick(NEW_NAMES)}」가 창간했다. 남부일보 경력 기자 둘이 그리로 갔다는 소문이다.</p>`,[{label:'경쟁할 단독으로 답한다',sub:'단독 아이템 하나',fn:()=>{S.items.push(makeItem(S.dept,{excl:true,mult:1.15}));toast('선배가 묵혀 둔 아이템을 넘겨줬다');}}]),
+ 72:()=>openModal('토착 기업의 단가 압박',`<p class="lede">지역 최대 건설사가 "광고 단가 깎아 주면 1년 계약하겠다"고 회사에 제안했다. 그 회사도 취재 대상이다.</p>`,[{label:'회사 판단에 맡긴다',sub:'흑자에 도움 · 기사 부담',fn:()=>{S.co.cash+=.2;S.adRate=+((S.adRate||1)*.95).toFixed(2);toast(apply({trust:-.8}));}},{label:'편집국 이름으로 반대한다',sub:'신뢰↑ · 회사 관계↓',fn:()=>toast(apply({trust:1.2,eval:-.6}))}])});
+Object.assign(STORY_BEATS.xfile,{
+ 12:()=>openModal('태산그룹 광고 문의',`<p class="lede">광고국으로 태산그룹 계열사의 연간 광고 문의가 왔다. 조건은 없다고 한다. "그냥 좋은 매체라서요."</p>`,[{label:'광고국에 "받지 말라"고 요청한다',sub:'신뢰↑ · 회사 자금↓',fn:()=>toast(apply({trust:1.5}))},{label:'광고와 편집은 별개라고 넘긴다',sub:'회사 자금↑ · 나중에 발목',fn:()=>{S.co.cash+=.3;S.flags.xAd=1;toast(apply({trust:-1}));}}]),
+ 44:()=>{const it=makeItem('inv',{excl:true,mult:1.4,hoax:true});it.title='[X파일] 태산 회장 해외 차명계좌 목록';it.hoaxHint=1;openModal('너무 완벽한 문건',`<p class="lede">익명 메일로 "X파일 결정판"이 왔다. 차명계좌 목록이 너무 깔끔하다.</p><p class="hint">상대가 오보를 유도해 연속 보도 전체를 무너뜨리려는 함정일 수 있다.</p>`,[{label:'아이템으로 두고 교차 확인한다',fn:()=>{S.items.push(it);toast('확인부터 하자');}},{label:'포렌식을 맡긴다',sub:'회사 자금 -0.1억 · 진위가 드러난다',fn:()=>{S.co.cash-=.1;toast(`문서 작성자 정보가 태산 법무팀 PC였다. 함정이었다 · ${apply({ver:.8,trust:.5})}`);}}]);},
+ 76:()=>openModal('스카우트 제안',`<p class="lede">대형 방송사 탐사팀장이 연락해 왔다. "연봉 두 배. X파일은 우리 쪽에서 크게 터뜨리죠."</p>`,[{label:'남는다',sub:'평판↑ · 팀 사기↑',fn:()=>toast(apply({fame:1,eval:1}))},{label:'연봉 협상 카드로 쓴다',fn:()=>toast(apply({money:200,eval:-.5}))}])});
+Object.assign(STORY_BEATS.pbs,{
+ 8:()=>openModal('정정보도 코너',`<p class="lede">시청자위원회가 "틀린 보도를 고친 기록을 매주 공개하라"고 제안했다.</p><p class="hint">정정에 솔직하면 다음 정정 때 신뢰 타격이 줄어든다.</p>`,[{label:'메인뉴스 끝에 정정 코너를 만든다',sub:'신뢰↑ · 기자들 반발',fn:()=>{for(let i=0;i<3;i++)(S.corrLog=S.corrLog||[]).push({h:'지난 보도 바로잡기',k:'정정',t:S.turn});toast(apply({trust:2.5,eval:-.5}));}},{label:'홈페이지에만 조용히 올린다',fn:()=>toast(apply({trust:.6}))}]),
+ 20:()=>openModal('취재 수당 요구',`<p class="lede">노조가 "신뢰 회복하려면 현장 기자부터 챙겨라"며 취재 수당 인상을 요구했다.</p>`,[{label:'수당을 5% 올린다',sub:'사기↑ · 인건비↑',fn:()=>{const r=setPay((S.payLv||1)*1.05,'노조 요구');toast(r.join(' · ')||`사기 ${Math.round(S.wMood)}`);}},{label:'예산이 없다고 한다',sub:'사기↓',fn:()=>{S.wMood=clamp((S.wMood??60)-12,0,100);toast('노조가 성명을 냈다');}}]),
+ 44:()=>openModal('보도국 인사 개편',`<p class="lede">정치부에만 10년 넘게 있던 기자들이 많다. 순환 보직으로 판을 바꿀까?</p>`,[{label:'대규모 순환 보직',sub:'보도 품질 잠시↓ · 신뢰 회복에 도움',fn:()=>{S.co.q=clamp(S.co.q-3,10,100);toast(apply({trust:2}));}},{label:'그대로 간다',fn:()=>toast('익숙한 얼굴들이 그대로 남았다')}])});
+Object.assign(STORY_BEATS.rescue,{
+ 8:()=>openModal('임금 구조 점검',`<p class="lede">재무 담당: "인건비가 매출의 ${Math.round(((S.co.last&&S.co.last.rev)?payroll()/S.co.last.rev:1.1)*100)}%예요. 이대로면 반년입니다."</p><p class="hint">임금 조정은 할 일의 "임금 조정"에서 할 수 있다. 크게 깎으면 사람이 나간다.</p>`,[{label:'임금 조정 창을 연다',fn:()=>{RUN.wage();return false;}},{label:'나중에',cls:'ghost'}]),
+ 28:()=>openModal('광고 단가 협상',`<p class="lede">광고대행사: "뉴스판 단가로는 집행이 어렵습니다. 20% 낮추시면 물량을 드리죠."</p>`,[{label:'낮춘다',sub:'단가↓ · 물량↑',fn:()=>{S.adRate=+((S.adRate||1)*.85).toFixed(2);S.co.adB+=.08;toast('물량이 늘었다');}},{label:'후원 모델로 승부한다',sub:'구독·후원↑',fn:()=>{S.co.bS+=.01;toast(apply({trust:.6}));}}]),
+ 52:()=>openModal('문 닫은 이웃 매체',`<p class="lede">비슷한 규모의 인터넷 매체가 폐간했다. 후원 회원들과 기자 둘이 갈 곳을 찾는다.</p>`,[{label:'후원 회원 전환 캠페인',sub:'회사 자금↓ · 후원↑',fn:()=>{S.co.cash-=.05;S.co.bS+=.015;toast('전환 캠페인을 시작했다');}},{label:'기자 둘을 받는다',sub:'인력↑ · 인건비↑',fn:()=>{for(let i=0;i<2;i++)S.team.push(genMember(pick(OUT().depts),50,70));S.co.staff+=2;S.co.q=clamp(S.co.q+2,10,100);toast('경력 기자 둘이 합류했다');}}])});

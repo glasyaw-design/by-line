@@ -1,0 +1,7 @@
+/* 바이라인 1.6 — src/compat/v34img.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// 1.4 매체 그림 리마스터: 정사각 240px + 언론고시 카드용 가로 그림
+Object.assign(IMG,{"md_wire": "assets/images/md_wire__2.webp", "mdw_wire": "assets/images/mdw_wire.webp", "md_tv": "assets/images/md_tv__2.webp", "mdw_tv": "assets/images/mdw_tv.webp", "md_jp": "assets/images/md_jp__2.webp", "mdw_jp": "assets/images/mdw_jp.webp", "md_ch": "assets/images/md_ch__2.webp", "mdw_ch": "assets/images/mdw_ch.webp", "md_daily": "assets/images/md_daily__2.webp", "mdw_daily": "assets/images/mdw_daily.webp", "md_econ": "assets/images/md_econ__2.webp", "mdw_econ": "assets/images/mdw_econ.webp", "md_sports": "assets/images/md_sports__2.webp", "mdw_sports": "assets/images/mdw_sports.webp", "md_local": "assets/images/md_local__2.webp", "mdw_local": "assets/images/mdw_local.webp", "md_eng": "assets/images/md_eng__2.webp", "mdw_eng": "assets/images/mdw_eng.webp", "md_online": "assets/images/md_online__2.webp", "mdw_online": "assets/images/mdw_online.webp", "md_weekly": "assets/images/md_weekly__2.webp", "mdw_weekly": "assets/images/mdw_weekly.webp", "md_trade": "assets/images/md_trade__2.webp", "mdw_trade": "assets/images/mdw_trade.webp"});

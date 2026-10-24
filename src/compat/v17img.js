@@ -1,0 +1,7 @@
+/* 바이라인 1.6 — src/compat/v17img.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// 1.31 그림: 할 일 아이콘 75 · 인물 얼굴 32명×3 · 이벤트 머리 그림 24
+try{Object.assign(IMG,{"il_retire": "assets/images/il_retire.webp", "il_board": "assets/images/il_board.webp", "il_press": "assets/images/il_press.webp", "il_coin": "assets/images/il_coin.webp", "il_pet": "assets/images/il_pet.webp", "il_age": "assets/images/il_age.webp", "il_paper": "assets/images/il_paper.webp", "il_scoop": "assets/images/il_scoop.webp", "il_phone": "assets/images/il_phone.webp", "il_siren": "assets/images/il_siren.webp", "il_court": "assets/images/il_court.webp", "il_money": "assets/images/il_money.webp", "il_trophy": "assets/images/il_trophy.webp", "il_mic": "assets/images/il_mic.webp", "il_meeting": "assets/images/il_meeting.webp", "il_run": "assets/images/il_run.webp", "il_phone2": "assets/images/il_phone2.webp", "il_doc": "assets/images/il_doc.webp", "il_mic2": "assets/images/il_mic2.webp", "il_hand": "assets/images/il_hand.webp", "il_fire": "assets/images/il_fire.webp", "il_storm": "assets/images/il_storm.webp", "il_rally": "assets/images/il_rally.webp", "il_fire2": "assets/images/il_fire2.webp"});}catch(e){console.error(e);}

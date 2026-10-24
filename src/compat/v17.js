@@ -1,0 +1,38 @@
+/* 바이라인 1.6 — src/compat/v17.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 1.31 그림 적용: 할 일 아이콘 · 인물 얼굴 · 이벤트 머리 그림 =====
+function actImg(id){const k='ai_'+id;return IMG[k]?`<img class="aimg" src="${IMG[k]}" alt="" draggable="false">`:'';}
+// 해 본 일은 짧게 보기에서 설명 줄을 접는다 (아이콘과 이름만)
+function actDescHide(id){return shortOn()&&!!(S.tipSeen&&S.tipSeen[id])&&!!IMG['ai_'+id];}
+// 얼굴: 새 역할 연결
+try{Object.assign(FACE_ROLE,{union:'union',photo:'np12',editor:'np14',op:'op',owner:'owner',heir:'heir',sales:'sales',jg:'jg',junm:'junm',junf:'junf'});}catch(e){}
+function hashS2(s){let h=0;s=String(s||'');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h);}
+const NPC_FACE=['np09','np10','np11','np13','np14','np15','np16','np17','np18','np19','np20','np21','np22','np23','np24','np25','np26','np27','np29','np30','np31','np32','junm','junf'];
+function npcFaceKey(m){const rel=m&&m.rel;const e=rel==null?0:rel>=40?1:rel<=-10?2:0;const f=(m&&m.role&&/사진/.test(m.role))?'np12':(m&&m.d==='x_photo')?'np28':NPC_FACE[hashS2(m&&m.name)%NPC_FACE.length];return `pf_${f}_${e}`;}
+function npcFace(m,cls){return imgTag(npcFaceKey(m),'face npcf'+(cls?' '+cls:''));}
+// 이벤트 머리 그림
+try{if(typeof KICK!=='undefined'){KICK.fire=KICK.fire||['재난·사고','#ff6f61'];KICK.storm=KICK.storm||['기상·재해','#77a6ff'];KICK.rally=KICK.rally||['선거·광장','#b98cff'];}
+  if(typeof ILL_MAP!=='undefined'){ILL_MAP.unshift([/화재|참사|붕괴|폭발|대형 사고/,'fire'],[/태풍|호우|폭우|지진|해일|기후 재난|폭염|한파|장마|특보/,'storm'],[/선거|당선|투표|개표|집회|광장|총선|대선/,'rally']);}}catch(e){console.error(e);}
+const ILL_IMG={retire:['retire'],board:['board'],press:['press'],coin:['coin'],pet:['pet'],age:['age'],paper:['paper'],scoop:['scoop'],phone:['phone','phone2'],siren:['siren','fire2'],court:['court'],money:['money','coin'],trophy:['trophy'],mic:['mic','mic2'],meeting:['meeting','mic2'],run:['run'],hand:['hand','board'],doc:['doc','phone2'],city:['rally'],cal:['age'],fire:['fire','fire2'],storm:['storm'],rally:['rally']};
+const ILL_NO=/결산|결과|단계 · |취재 중|편집국 복귀|처음 해 보는 일|튜토리얼|도움말|업데이트|설정|메뉴/;
+{const _ih=illHTML;illHTML=function(k){const base=_ih(k);try{const t=window.__omT||'';const L=ILL_IMG[k];if(!L||ILL_NO.test(t)||S&&S.imgOff)return base;const key='il_'+L[hashS2(t)%L.length];if(!IMG[key])return base;return `<div class="evimg"><img src="${IMG[key]}" alt="" draggable="false">${base}</div>`;}catch(e){return base;}};}
+{const _omI=openModal;openModal=function(t,b,c){window.__omT=t;return _omI.call(this,t,b,c);};}
+(function(){const st=document.createElement('style');st.textContent=`.act.hasic:has(.aimg){grid-template-columns:52px minmax(0,1fr)!important}.act.hasic .aic:has(.aimg){padding:0!important;overflow:hidden;background:none!important;border:0!important;box-shadow:none!important;width:52px!important;height:52px!important;border-radius:13px!important}.act.hasic .aic .aimg{width:100%;height:100%;display:block;object-fit:cover}.act.hasic[disabled] .aic .aimg{filter:grayscale(.85);opacity:.55}
+.evimg{position:relative;margin:-2px 0 10px;border-radius:14px;overflow:hidden;aspect-ratio:2.57/1;max-height:150px;background:#151a2a}.evimg img{width:100%;height:100%;object-fit:cover;display:block}.evimg .mkick{position:absolute;left:8px;bottom:8px;margin:0;background:rgba(14,17,28,.88)!important;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.card.mcard{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:10px}.card.mcard>*:not(.npcf){grid-column:2}.card.mcard .npcf{grid-row:1 / span 3;width:44px;height:44px;border-radius:12px}`;document.head.appendChild(st);})();
+// 이야기 칭호 배지
+function bdImg(id,cls,off){const k='bd_'+id;return IMG[k]?`<img class="bdg-img ${cls||''}${off?' off':''}" src="${IMG[k]}" alt="" draggable="false">`:'';}
+{const _sh=slHTML;slHTML=function(){try{if(S.story)return '';const M=S.sl||{};const done=SL.filter(x=>M[x.id]&&M[x.id].ok);const act=SL.find(x=>M[x.id]&&!M[x.id].done);
+  const grid=`<div class="bdgrid">${SL.map(x=>{const ok=M[x.id]&&M[x.id].ok;return `<div class="bdc${ok?'':' lock'}" title="${esc(ok?x.n+' · '+M[x.id].ok:'아직 못 받은 칭호')}">${bdImg(x.id,'',!ok)}<small>${ok?esc(x.b):'?'}</small></div>`;}).join('')}</div>`;
+  return `<div class="sec">나의 이야기 ${done.length}/${SL.length}</div>${act?`<div class="card bdact">${bdImg(act.id,'sm',true)}<div><div class="t">진행 중 · ${esc(act.n)} <span class="tg">${M[act.id].st+1}/${act.st.length}장</span></div><p class="hint" style="margin:4px 0 0">다음 장은 ${Math.max(0,Math.ceil((M[act.id].due-S.turn)/4))}개월 안에 · 끝까지 가면 칭호 「${esc(act.b)}」</p></div></div>`:''}${grid}${done.length?'':`<p class="hint">평소처럼 일하다 보면 이야기가 찾아온다. 상황(직급·부서·경력)에 맞는 이야기 ${SL.length}편이 있다.</p>`}`;}catch(e){return _sh();}};}
+(function(){const st=document.createElement('style');st.textContent=`.bdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-top:8px}.bdc{text-align:center}.bdc img{width:100%;aspect-ratio:1;border-radius:14px;display:block;box-shadow:0 3px 10px rgba(0,0,0,.35)}.bdc small{display:block;font-size:11px;line-height:1.25;margin-top:4px;color:#e8ecf5;font-weight:600}.bdc.lock small{color:var(--mute)}.bdg-img.off{filter:grayscale(1) brightness(.45);opacity:.7}.bdact{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center}.bdg-img.sm{width:56px;height:56px;border-radius:12px}.bdg-img.lg{width:112px;height:112px;border-radius:22px;display:block;margin:4px auto 8px;box-shadow:0 6px 22px rgba(255,184,77,.35)}.slhd{display:flex;gap:10px;align-items:center;margin:0 0 6px}.slhd .bdg-img{width:44px;height:44px;border-radius:10px;flex:none}`;document.head.appendChild(st);})();
+// 도전 과제 배지
+function chImg(id,cls,off){const k='ch_'+id;return IMG[k]?`<img class="chimg ${cls||''}${off?' off':''}" src="${IMG[k]}" alt="" draggable="false">`:'';}
+(function(){const st=document.createElement('style');st.textContent=`.card.chc{display:grid;grid-template-columns:60px minmax(0,1fr);column-gap:12px;align-items:center}.card.chc>*:not(.chimg){grid-column:2}.card.chc .chimg{grid-row:1 / span 2;width:60px;height:60px;border-radius:14px;box-shadow:0 3px 10px rgba(0,0,0,.35)}.chimg.off{filter:grayscale(1) brightness(.5);opacity:.75}.chimg.cs{width:34px;height:34px;border-radius:9px;vertical-align:middle;margin-right:8px}.chimg.xs{width:22px;height:22px;border-radius:6px;vertical-align:-5px;margin-right:4px}`;document.head.appendChild(st);})();
+// 「길」 엠블럼
+function rtImg(k,cls,off){const key='rt_'+k;return IMG[key]?`<img class="rtimg ${cls||''}${off?' off':''}" src="${IMG[key]}" alt="" draggable="false">`:'';}
+{const _omR=openModal;openModal=function(t,b,c){const r=_omR.call(this,t,b,c);try{const m=/^(.+) — 부름$/.exec(t||'');if(m&&!$('#modal').hidden){const k=Object.keys(ROUTE).find(x=>ROUTE[x].n===m[1]);const h=k&&rtImg(k,'lg');if(h)$('#mb').insertAdjacentHTML('afterbegin',h);}}catch(e){}return r;};}
+(function(){const st=document.createElement('style');st.textContent=`.rtimg.lg{width:104px;height:104px;border-radius:20px;display:block;margin:2px auto 10px;box-shadow:0 6px 20px rgba(0,0,0,.4)}.rtimg.xs{width:22px;height:22px;border-radius:6px;vertical-align:-5px;margin-right:4px}.rtimg.off{filter:grayscale(1) brightness(.55);opacity:.75}.pth:has(.rtimg){display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:10px;align-items:center}.pth .rtimg.pi{grid-row:1 / span 2;width:44px;height:44px;border-radius:10px}.pth:has(.rtimg)>b,.pth:has(.rtimg)>small{grid-column:2}`;document.head.appendChild(st);})();
