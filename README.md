@@ -29,11 +29,11 @@ npm run check      # 정적 검사: 문법 · 파일 참조 · 리소스 해시
 ## 폴더
 
 ```
-index.html            화면 골격 + CSS 2개 + script 91개를 원본과 같은 순서로 부른다
+index.html            화면 골격 + CSS 2개 + script 92개를 원본과 같은 순서로 부른다
 styles/main.css       원본 첫 번째 <style>
 styles/loader.css     원본 두 번째 <style> (로딩 화면)
 src/core|data|systems|ui|dev/   바탕 게임 코드 (원본의 구획 주석 단위)
-src/compat/v13a.js … v49.js     1.x 확장 모듈 48개 (원본에 이어 붙어 있던 순서 그대로)
+src/compat/v13a.js … v50.js     1.x 확장 모듈 49개 (원본에 이어 붙어 있던 순서 그대로)
 src/compat/_hoisted.js          순서 보존용으로 앞당긴 함수 선언 3개
 src/main.js           로딩 화면 · start() · 부팅
 assets/images|fonts|audio       내장돼 있던 그림 738개 · 글꼴 2개 · 음악 8곡 (바이너리 그대로)

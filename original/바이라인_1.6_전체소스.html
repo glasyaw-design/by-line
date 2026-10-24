@@ -5077,6 +5077,7 @@ const PATCH=[ // 업데이트 내역: ['버전','제목',['대규모|… / 주�
   '대규모|조직 운영 다시 짜기: 승진·보직 해임이 실제로 남는다 — 예전엔 부서마다 차장 1자리라 승진이 「자리가 찼다」며 막히고, 부장을 해임해도 명단 정리 때 가장 선임이라며 그 사람이 다시 부서장이 됐고, 직급에 맞춰 연차가 몰래 바뀌었다. 이제 내가 한 인사는 2년 동안 자동 정리가 되돌리지 않는다. 차장 정원은 부서 크기만큼(모자라면 인건비를 들여 늘리거나 기존 차장과 맞바꾼다), 차장을 승진시키면 어느 부서 팀장으로 보낼지 고르고, 부장을 해임하면 바로 후임을 고른다. 새 「조직 운영」 화면(인사권 행사 맨 위 · 조직 탭)에서 부서마다 팀장 교체 · 차장 지명·해임 · 부서 방침(단독 우선 · 검증 우선 · 영업 강화 · 인재 육성)을 정하고, 팀장 성향(단독형·검증형·속보형·영업형…)과 방침에 따라 매달 그 부서의 단독·정정보도·광고 실적·성장이 달라진다(예상 확률이 화면에 보인다). 밀려난 사람은 서운해하고, 사이가 나쁘면 사표를 낸다. 인사팀이 가장 처진 부서와 팀장 후보를 짚어 준다',
   '대규모|지역 TO로 승진 적체 해소: 본사 차장·부장 자리는 정해져 있고 연차 찬 사람은 늘어난다 — 지역 책임자 자리(주재 차장 · 주재 부장 · 거점 지역본부장/총국장)가 그 숨통이다. ★3 이상 매체는 지역마다 주재 차장·부장, 거점 지역엔 국장급까지 자리를 둔다. 조직 탭에 「인사 TO」 현황(본사 자리·지역 자리·빈 자리·승진 대기)이 보이고, 정기 인사 때 지역 승진 발령이 나면 맨 위에 알려 준다. 인사권자는 「조직 운영 → 지역 발령으로 적체 해소」에서 대기자를 빈 지역 자리로 승진 발령하거나 인건비를 들여 지역 TO를 새로 만들고, 그러면 본사 빈자리에 다음 사람이 연쇄로 올라간다. 내가 본사에서 승진이 막혀 있으면 「지역 책임자 공모」가 와서 한 직급 올라 지역을 이끌 수 있다(행동력 +1 · 지역 평판↑ · 2년 뒤 그 직급 그대로 본사 복귀 제안)',
   '개선|영입 기자 배치와 수습의 가치: 경력·스타 기자를 뽑으면 어느 부서에 부서장·차장·평기자 중 어떤 직책으로 둘지 바로 정한다. 경력·스타는 들어올 때 편집국 분위기가 조금 처지고 3년 안에 더 좋은 조건을 찾아 떠날 수 있다. 수습 공채는 분위기를 띄우고, 공채 출신은 5년 동안 더 빨리 자란다',
+  '수정|총무국: 사내 교육·복리후생·포상·임금 인상을 거듭하면 편집국 전원 실력이 최고치에 붙고, 그 뒤엔 깎여도 화면에 그대로 보이던 문제(이제 잘하는 기자일수록 덜 오른다), 복리후생·세분형 직급의 매달 비용이 재무 손익에 빠져 회사 자금과 맞지 않던 문제, 자재 구매 계약과 원가 관리가 서로 덮어써 할인이 줄던 문제(이제 더해진다·최대 10%)를 고쳤다',
   '수정|창간 준비 3/4 회사의 성격에서 3개 이상 고르면 다음으로 넘어가지 않던 문제(이제 2개까지만 체크되고 안내가 뜬다), 승진·부서 이동으로 팀이 새로 꾸려지면 내 팀원이 편집국 명부·조직도에 빠지거나 한 사람이 두 부서에 걸리고 부장이 둘이 되던 문제를 고쳤다',
   '수정|저장·불러오기: 새로 시작한 게임을 처음 불러올 때 편집국 명부·주재기자·동료가 통째로 새로 만들어져 부서장 배치·승진이 사라지던 문제, 불러온 뒤 인사가 내 팀원과 명부 중 한쪽에만 반영되던 문제를 고쳤다',
   '수정|종편 매체에서 촬영을 고르면 멈추던 오류, 아이템 제목에 같은 낱말이 겹치던 문제(「누리시 의회 의회」), 이벤트로 기자가 줄 때 고참·부서장부터 빠지던 문제를 고쳤다',
@@ -14571,6 +14572,45 @@ function dedup49(t){if(typeof t!=='string')return t;return t.replace(/(^|[\s「"
   touched.forEach(d=>{try{if(!isRegD(d))fixDept(per[d],d);}catch(e){}});
   // 한 부서에 부장이 둘이면: 내가 앉힌 사람(최근) → 점수 높은 사람 하나만 남기고 나머지는 차장(선임)으로
   keys.forEach(d=>{if(!DEPTS[d]||isRegD(d))return;const H=per[d].filter(m=>m&&(m.r||0)===2&&!m.acting);if(H.length<2)return;const lkH=H.filter(m=>typeof lk45==='function'&&lk45(m)&&m.lk45.head&&!m.lk45.dem).sort((a,b)=>b.lk45.t-a.lk45.t);const keep=lkH[0]||H.slice().sort((a,b)=>orgScore(b)-orgScore(a))[0];H.forEach(m=>{if(m!==keep){m.r=1;if(m.lk45)m.lk45={...m.lk45,r:1,head:false};}});});}catch(e){console.error(e);}return per;};}
+
+// ===== 1.6 총무국 바로잡기: 실력 부풀림 · 손익 누락 · 비용 절감 덮어쓰기 =====
+// ① 사내 교육·복리후생·포상·임금 인상 같은 총무국 일이 편집국 전원의 실력을 끝없이 올려, 몇 년 지나면 모두 92(상한)에 붙었다.
+//    92를 넘긴 몫은 보이지 않게 쌓여, 나중에 깎여도(직급 축소·복지 축소) 화면엔 92 그대로였다 → 이미 잘하는 기자일수록 덜 오르게 한다
+// ② 복리후생·세분형 직급의 매달 비용이 그 달 손익을 계산한 뒤에 따로 빠져, 재무 화면의 손익과 실제 회사 자금이 맞지 않았다 → 그 달 비용에 넣는다
+// ③ 「자재 구매 계약」(2.5%)과 「원가 관리」(4~6%)가 같은 칸을 덮어써, 둘 다 하면 나중 것만 남았다(원가 관리 뒤 자재 계약을 하면 할인이 오히려 줄었다) → 둘을 더한다(최대 10%)
+const GAD_CAP50=88;
+const gadK50=s=>clamp((GAD_CAP50-(s||0))/35,0,1);
+let gadPend50=[];
+function gadSnap50(){return (S&&S.team||[]).map(t=>[t,t.skill]);}
+function gadFix50(snap){(snap||[]).forEach(([t,b])=>{if(!t||typeof t.skill!=='number'||typeof b!=='number')return;const d=t.skill-b;if(d>0)t.skill=b+d*gadK50(b);else if(d<0&&t.skill<10)t.skill=10;});}
+function gadFlush50(){const P=gadPend50;gadPend50=[];P.forEach(gadFix50);}
+// 총무국 일을 시작할 때(gadUse) 실력을 적어 두고, 그 일이 끝난 직후 늘어난 몫을 줄인다
+{const _gu50=gadUse;gadUse=function(){gadFlush50();const snap=gadSnap50();gadPend50.push(snap);const r=_gu50.apply(this,arguments);Promise.resolve().then(gadFlush50);return r;};}
+// 매달 총무국 처리: 복리후생 실력 성장도 같은 규칙 · 이번 달 비용을 손익에 넣는다
+{const _gm50=gadMonth;gadMonth=function(lines){gadFlush50();const c=S&&S.co;const cash0=c?c.cash:0;const snap=gadSnap50();const r=_gm50.apply(this,arguments);
+  try{gadFix50(snap);if(c&&c.last&&typeof c.cash==='number'){const d=c.cash-cash0;if(d<0){c.last.cost=+((c.last.cost||0)-d).toFixed(4);c.last.profit=+((c.last.profit||0)+d).toFixed(4);c.last.gad=+(-d).toFixed(4);}}}catch(e){console.error(e);}return r;};}
+{const _em50=endMonth;endMonth=function(){gadFlush50();try{costCut50();}catch(e){}return _em50.apply(this,arguments);};}
+// 비용 절감: 출처별로 따로 기록하고 매달 합쳐 적용한다
+function costCut50(){if(!S)return;const C=S.costCuts50=S.costCuts50||{};
+  // 다른 곳(구조조정 등)이 직접 넣은 비용 절감도 한 출처로 받는다
+  if(S.costCut&&!S.costCut.m50&&S.costCut.due>S.turn)C.other={due:S.costCut.due,r:S.costCut.r};
+  Object.keys(C).forEach(k=>{if(!(C[k]&&C[k].due>S.turn))delete C[k];});
+  const A=Object.values(C);if(!A.length){if(S.costCut&&S.costCut.m50)S.costCut=null;return;}
+  S.costCut={due:Math.max(...A.map(x=>x.due)),r:+Math.min(.1,A.reduce((a,x)=>a+x.r,0)).toFixed(3),m50:1};}
+['g_buy','g_fin'].forEach(id=>{const f=GAD_RUN[id];GAD_RUN[id]=function(){const keep=S.costCut&&S.costCut.due>S.turn?S.costCut:null;if(keep&&!keep.m50){S.costCuts50=S.costCuts50||{};S.costCuts50.other={due:keep.due,r:keep.r};}
+  const r=f.apply(this,arguments);try{if(S.costCut&&!S.costCut.m50){S.costCuts50=S.costCuts50||{};S.costCuts50[id]={due:S.costCut.due,r:S.costCut.r};S.costCut=null;}costCut50();}catch(e){console.error(e);}return r;};});
+// 총무국 설명
+try{const e=GAD.find(g=>g[1]==='g_edu');if(e)e[3]='기자 실력↑ · 이미 잘하는 기자일수록 덜 오른다';const w=GAD.find(g=>g[1]==='g_welfare');if(w)w[3]='자녀 학자금·건강검진·식당. 사기↑·실력 조금씩↑, 매달 비용(재무 손익에 포함)';const f=GAD.find(g=>g[1]==='g_fin');if(f)f[3]='반년 동안 비용 4~6%↓ · 자재 계약과 겹치면 더해진다(최대 10%)';}catch(e){}
+// 예전 저장: 92를 넘겨 보이지 않게 쌓인 실력은 92에 맞춘다(그래야 다시 깎일 때 화면에 보인다)
+function skDvFix50(list){(list||[]).forEach(m=>{try{if(!m||m.yrs==null||m._dv==null)return;const base=skillYrs(m.yrs);if(base+m._dv>96){m._dv=92-base;m.skill=Math.min(92,m.skill);m._sk0=m.skill;m._fy=m.yrs;}}catch(e){}});}
+{const _mg50=migrate;migrate=function(s){const r=_mg50.apply(this,arguments);try{if(r&&r.phase){skDvFix50(r.team);skDvFix50(r.mates);if(Array.isArray(r.corr))skDvFix50(r.corr);if(r.ros&&r.ros.per)Object.values(r.ros.per).forEach(a=>Array.isArray(a)&&skDvFix50(a));}}catch(e){}return r;};}
+// ④ 결산 밖에서 오가는 돈(판매 전략 비용·임금 조정·발행인 활동·부가 사업 등)이 재무 화면 손익에 안 보여 「손익과 자금 변화가 안 맞는」 것처럼 보였다
+//    → 게임 수치는 그대로 두고, 그 달 「그 밖의 수지」를 따로 계산해 재무 탭에 보여 준다 (손익 + 그 밖의 수지 = 이번 달 자금 변화)
+{const _em50b=endMonth;endMonth=function(){const c=S&&S.co;const cash0=c&&typeof c.cash==='number'?c.cash:null;const l0=c&&c.last;const r=_em50b.apply(this,arguments);
+  try{const c2=S&&S.co;if(c2&&c2===c&&cash0!=null&&c2.last&&c2.last!==l0){const d=c2.cash-cash0;c2.last.net=+d.toFixed(4);c2.last.etc=+(d-(c2.last.profit||0)).toFixed(4);}}catch(e){}return r;};}
+function flow50HTML(){try{const l=S&&S.co&&S.co.last;if(!l||l.net==null)return '';const etc=l.etc||0;
+  return `<div class="card"><div class="t">${ic('coin')} 지난달 자금 흐름</div><div class="meta"><span>손익 <b>${eok(l.profit||0)}</b></span>${Math.abs(etc)>=.005?`<span>그 밖의 수지 <b>${etc>0?'+':''}${eok(etc)}</b></span>`:''}<span>자금 변화 <b>${(l.net>0?'+':'')+eok(l.net)}</b></span>${l.gad?`<span class="hint">총무국 복리후생·직급 체계 비용 ${eok(l.gad)}은 손익(비용)에 들어 있다</span>`:''}</div>${Math.abs(etc)>=.005?'<p class="hint" style="margin:4px 0 0">그 밖의 수지: 판매 전략·임금 조정·발행인 활동·계열·부가 사업처럼 월 결산 밖에서 오간 돈. 행동으로 바로 쓴 돈(연수·행사·장비 등)은 쓴 순간 빠져 여기엔 없다.</p>':''}</div>`;}catch(e){return '';}}
+{const _tb50=tabBody;tabBody=function(){let h=_tb50.apply(this,arguments);try{if(S&&S.tab==='fin'&&!S.story)h=flow50HTML()+h;}catch(e){}return h;};}
 
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}

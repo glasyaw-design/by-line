@@ -4,8 +4,9 @@
 // 사용: node scripts/build.mjs
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const r = p => path.join(ROOT, p);
 const copyDir = (from, to) => { fs.mkdirSync(to, { recursive: true }); for (const e of fs.readdirSync(from, { withFileTypes: true })) { const a = path.join(from, e.name), b = path.join(to, e.name); if (e.isDirectory()) copyDir(a, b); else fs.copyFileSync(a, b); } };
 
@@ -26,7 +27,7 @@ if (fs.existsSync(r('og.png'))) fs.copyFileSync(r('og.png'), r('dist/og.png'));
 // 3) dist-single (하나로 합치기)
 const MIME = { webp: 'image/webp', woff: 'font/woff', png: 'image/png' };
 const dataURI = rel => { const ext = rel.split('.').pop(); return `data:${MIME[ext]};base64,` + fs.readFileSync(r(rel)).toString('base64'); };
-const stripHdr = t => t.replace(/^\/\* 바이라인 1\.6 — (?:[^*]|\*(?!\/))*\*\/\n/, '');
+const stripHdr = t => t.replace(/^\/\* 바이라인 1\.6 — (?:[^*]|\*(?!\/))*\*\/\r?\n/, '');
 const inlineCSS = t => stripHdr(t).replace(/url\(\.\.\/(assets\/(?:images|fonts)\/[^)]+)\)/g, (m, rel) => `url(${dataURI(rel)})`);
 const inlineJS = t => stripHdr(t)
   .replace(/"(assets\/images\/[^"]+\.webp)"/g, (m, rel) => `"${dataURI(rel)}"`)
@@ -34,7 +35,7 @@ const inlineJS = t => stripHdr(t)
 let single = index;
 for (const s of styles) single = single.replace(`<link rel="stylesheet" href="${s}">`, () => '<style>' + inlineCSS(fs.readFileSync(r(s), 'utf8')) + '</style>');
 const js = scripts.map(f => inlineJS(fs.readFileSync(r(f), 'utf8'))).join('');
-const block = /<!-- 게임 코드:[^\n]*\n(<script src="[^"]+"><\/script>\n)+/;
+const block = /<!-- 게임 코드:[^\n]*\n(<script src="[^"]+"><\/script>\r?\n)+/;
 if (!block.test(single)) { console.error('script 목록을 찾지 못했다'); process.exit(1); }
 single = single.replace(block, () => '<script>' + js + '</script>');
 const left = (single.match(/["(](\.\.\/)?assets\/(images|fonts)\//g) || []).length;
