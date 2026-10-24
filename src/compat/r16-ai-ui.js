@@ -1,5 +1,5 @@
-// 1.6 · AI 개선 · 안내 · 관계 한눈에 · NaN 방지 · 화면 간소화 · 밸런스 · 할 일 카드 아이콘
-// 예전 파일 v51.js · v52.js · v53.js · v54.js · v55.js · v56.js를 순서 그대로 이어 붙였다
+// 1.6 · AI 개선 · 안내 · 관계 한눈에 · NaN 방지 · 화면 간소화 · 밸런스 · 할 일 카드 아이콘 · 삭제 요청 · 내 지갑
+// 예전 파일 v51.js · v52.js · v53.js · v54.js · v55.js · v56.js · v57.js · v58.js를 순서 그대로 이어 붙였다
 
 // ───── (예전 v51.js) ─────
 /* 바이라인 1.6 — src/compat/v51.js
@@ -235,3 +235,50 @@ function simp54(){try{if(!S||S.phase!=='game')return;const tab=S.tab;const root=
 (function(){const st=document.createElement('style');st.textContent=`
 body.cmp42 .act.hasic .aic:not(:has(.aimg)){display:none!important}
 `;document.head.appendChild(st);})();
+
+// ───── (예전 v57.js) ─────
+/* 바이라인 1.6 — src/compat/v57.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 1.6 기사 삭제 요청: 기사 내용과 맞는 사람이 찾아오게 =====
+// 예전엔 부서만 보고 골라서, 문화부의 「작은도서관 휴관」 기사에 연예인 소속사가 찾아왔다
+// → 연예인·무죄·피해자 요청은 제목에 그런 내용이 있을 때만. 그 밖의 비판 기사엔 「기관·단체의 삭제 요청」
+try{DEL_T.org={n:'기관·단체의 삭제 요청',who:'기사 속 기관 관계자',ask:'"지적하신 건 이미 바로잡았습니다. 그런데 기사가 계속 검색되니 후원과 이용이 끊겨 갑니다. 내려 주시거나 고친 내용을 실어 주세요."',best:['follow'],c:['cul','ent','spo','culspo','soc','loc','sigun','edu','wel','nat','int','sci','it','env']};}catch(e){}
+const DELRE57={
+ star:/연예인|배우|가수|아이돌|걸그룹|보이그룹|열애|결혼|이혼|스캔들|사생활|소속사|예능|드라마|영화배우|스타|방송인|유튜버|인플루언서/,
+ acq:/기소|구속|혐의|재판|수사|피의자|체포|검찰|경찰|송치|입건|고소|고발|영장/,
+ victim:/사건|사고|피해자|피해 가족|유족|범죄|폭행|숨져|숨진|사망|화재|참사|학대|성범죄|스토킹|실종|살인|중상|부상/,
+ old:/[가-힣]{2,4} ?씨|주민|시민|학부모|상인|세입자|직원|노동자|운전자|학생/};
+{const _dk57=delKind;delKind=function(c){try{if(!c)return null;const t=String(c.h||'');const k=cat1(c.d||'soc');const age=S.turn-c.turn;
+  const L=Object.keys(DEL_T).filter(x=>{const T=DEL_T[x];if(!T.c.includes(k)&&!T.c.includes(c.d))return false;
+    if(x==='old'&&(age<YW*2||!DELRE57.old.test(t)))return false;
+    if(x==='acq'&&(c.pos||!DELRE57.acq.test(t)))return false;
+    if(x==='victim'&&!DELRE57.victim.test(t))return false;
+    if(x==='star'&&!DELRE57.star.test(t)&&k!=='ent'&&c.d!=='ent')return false;
+    if((x==='corp'||x==='pol'||x==='org')&&c.pos)return false;
+    if(x==='org'&&(DELRE57.star.test(t)||DELRE57.acq.test(t)||DELRE57.victim.test(t)))return false;
+    return true;});
+  return L.length?pick(L):null;}catch(e){return _dk57.apply(this,arguments);}};}
+
+// ───── (예전 v58.js) ─────
+/* 바이라인 1.6 — src/compat/v58.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 1.6 「나」 탭에 내 지갑: 넓은 화면에선 월급·생활비 상자가 숨겨져 있어 볼 곳이 없었다 =====
+(function(){const st=document.createElement('style');st.textContent=`
+.wal58{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:6px;margin:8px 0 10px}
+.wal58>div{background:rgba(255,255,255,.04);border:1px solid var(--edge,rgba(120,140,200,.16));border-radius:12px;padding:7px 10px}
+.wal58 span{display:block;font-size:11.5px;color:var(--mute)}.wal58 b{font-size:14.5px}
+`;document.head.appendChild(st);})();
+function wal58HTML(){try{const C=[];const won=v=>Math.round(v).toLocaleString('ko-KR')+'만';
+  C.push(['통장',won(S.money||0)]);
+  if(!S.founder){try{C.push(['월급 (실수령)',`<span style="display:inline;color:var(--good);font-size:inherit">${won(payOf(OUT()))}</span>`]);}catch(e){}}
+  try{C.push(['한 달 생활비',won(living())]);}catch(e){}
+  if(S.co&&(S.rank>=5||S.founder))C.push(['회사 자금',f1(S.co.cash)+'억']);
+  return `<div class="wal58">${C.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>`;}catch(e){return '';}}
+{const _me58=v19Me;v19Me=function(){const had=!!document.querySelector('.bx-tab .tb .mehero');const r=_me58.apply(this,arguments);
+  try{if(S&&S.phase==='game'&&S.tab==='me'){const tb=document.querySelector('.bx-tab .tb');if(tb&&!tb.querySelector('.wal58')){const h=tb.querySelector('.mehero');if(h)h.insertAdjacentHTML('afterend',wal58HTML());else tb.insertAdjacentHTML('afterbegin',wal58HTML());}}}catch(e){}return r;};}
