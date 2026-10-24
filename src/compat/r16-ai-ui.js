@@ -1,5 +1,5 @@
-// 1.6 · AI 개선 · 안내 · 관계 한눈에 · NaN 방지 · 화면 간소화 · 밸런스 · 할 일 카드 아이콘 · 삭제 요청 · 내 지갑 · 봉투 팝업 · 투자·충성·지분 인수
-// 예전 파일 v51.js · v52.js · v53.js · v54.js · v55.js · v56.js · v57.js · v58.js · v59.js · v60.js를 순서 그대로 이어 붙였다
+// 1.6 · AI 개선 · 안내 · 관계 한눈에 · NaN 방지 · 화면 간소화 · 밸런스 · 할 일 카드 아이콘 · 삭제 요청 · 내 지갑 · 봉투 팝업 · 투자·충성·지분 인수 · 전수 조사(버그·AI 선택·금고·광고 목표)
+// 예전 파일 v51.js · v52.js · v53.js · v54.js · v55.js · v56.js · v57.js · v58.js · v59.js · v60.js · v61.js · v62.js를 순서 그대로 이어 붙였다
 
 // ───── (예전 v51.js) ─────
 /* 바이라인 1.6 — src/compat/v51.js
@@ -379,3 +379,76 @@ function mnaOne60(c){const st=mnaSt60();const x=st[c.id]=st[c.id]||{p:0,t0:S.tur
 {const _cm60=compMonth;compMonth=function(lines){const r=_cm60.apply(this,arguments);try{if(S.mna60&&S.co&&S.turn%YW===0&&S.mnaY60!==S.turn){S.mnaY60=S.turn;let tot=0;const by=[];
     Object.keys(S.mna60).forEach(id=>{const x=S.mna60[id];const c=(S.comp||[]).find(y=>y.id===id);if(!c||x.p<10)return;const d=+(x.p/100*Math.max(0,c.cash||0)*(x.p>=51?.45:.25)).toFixed(2);if(d<=0)return;c.cash-=d;S.co.cash+=d;tot+=d;by.push(`${cName(c)} ${eok(d)}`);});
     if(tot>0&&lines)lines.push({c:'g',t:`지분 배당 +${eok(tot)} (${by.join(' · ')})`});}}catch(e){console.error(e);}return r;};}
+
+// ───── (예전 v61.js) ─────
+/* 바이라인 1.6 — src/compat/v61.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 1.6 전수 조사 ①: 버그 · AI 선택 · 회사 금고 =====
+
+// ---------- 1) 그룹 복귀(ownReturn) 때 기록 상자가 없으면 멈추던 문제 ----------
+{const _or61=ownReturn;ownReturn=function(){try{if(S&&!S.grpOwn)S.grpOwn={};}catch(e){}return _or61.apply(this,arguments);};}
+
+// ---------- 2) 맡기기 AI가 고르는 선택지 ----------
+// 예전: 「거절·접는다·넘긴다」가 들어간 선택지는 무조건 피해서, 「광고주의 조건 → 써 준다」처럼 신뢰를 깎는 쪽을 골랐다
+// 이제: 추천 · 방향 · 위험 · 신뢰·벌점·소송 표시를 점수로 따져 고른다
+function aiBtnScore61(k,b,i){const D=AUTO_DIR[k]||{};const t=b.innerText||'';let s=0;
+  if(b.classList.contains('rec')||b.querySelector('.bdg.rec,.rec'))s+=4;
+  if(D.pref&&D.pref.test(t))s+=1.2;
+  if(b.querySelector('.bdg.rsk')||b.classList.contains('risk')||/위험/.test(t))s-=k==='scoop'?1.5:3;
+  if(/그만두|포기|취소|닫기|뒤로|나중에/.test(t))s-=3;
+  if(/신뢰도?\s*↓↓|신뢰도?\s*크게\s*↓/.test(t))s-=3;else if(/신뢰도?\s*조금\s*↓/.test(t))s-=.8;else if(/신뢰도?\s*↓/.test(t))s-=2;
+  if(/신뢰도?\s*(조금\s*|크게\s*)?↑/.test(t))s+=.8;
+  if(/포털 벌점|벌점|들킬|윤리 위반|징계/.test(t))s-=1.5;
+  if(/소송/.test(t)&&!/소송을 막|소송 방패/.test(t))s-=.8;
+  if(/접는다|킬한다|덮는다/.test(t))s-=1;
+  if(k==='money'&&/돈↑|매출↑|수입↑|광고↑/.test(t))s+=.6;
+  if(k==='safe'&&/확인|반론|사실만|정정/.test(t))s+=.6;
+  return s-i*.01;}
+autoPickBtn=function(k,tried){const bs=[...document.querySelectorAll('#mc button')].filter(b=>!b.disabled&&!(tried&&tried.has((b.innerText||'').split('\n')[0])));if(!bs.length)return null;
+  const main=bs.filter(b=>!b.classList.contains('ghost'));const L=main.length?main:bs;let best=null,bv=-1e9;L.forEach((b,i)=>{const v=aiBtnScore61(k,b,i);if(v>bv){bv=v;best=b;}});return best;};
+
+// ---------- 3) 사장의 광고주 순회: 신뢰가 낮으면 추천하지 않는다 ----------
+{const _om61=openModal;openModal=function(t,b,c){try{if(t==='광고주 영업 (사장)'&&Array.isArray(c)&&(S.trust??50)<50){c=c.map(x=>{if(!x||typeof x!=='object')return x;if(x.label==='대형 광고주 순회')return Object.assign({},x,{rec:false});if(/정부·공공기관/.test(x.label||''))return Object.assign({},x,{rec:true});return x;});}}catch(e){}return _om61.call(this,t,b,c);};}
+
+// ---------- 4) 회사 금고: 경영권 밖이면 돈이 끝없이 쌓이지 않는다 ----------
+// 예전: 큰 매체는 10년이면 회사 자금이 1,000억을 넘었고, 나중에 사장이 되면 그대로 물려받았다
+// 이제: 해마다 연 매출의 0.8배를 넘는 현금은 60%를 대주주 배당·설비 투자로 내보낸다 (내가 사장·발행인이면 내가 정한다)
+{const _om61b=orgMonth;orgMonth=function(lines){const r=_om61b.apply(this,arguments);try{const c=S.co;if(c&&!S.founder&&!S.story&&S.rank<7&&month()===12&&S.cashCapY61!==Math.floor(S.turn/YW)){S.cashCapY61=Math.floor(S.turn/YW);
+    const yr=((c.last&&c.last.rev)||0)*12;if(yr>0&&c.cash>yr*.8){const out=+((c.cash-yr*.8)*.6).toFixed(1);c.cash-=out;if(lines&&S.rank>=4)lines.push({c:'',t:`연말 결산 — 쌓인 현금 ${eok(out)}을 대주주 배당과 설비 투자로 내보냈다 (회사 자금 ${eok(c.cash)})`});}}}catch(e){console.error(e);}return r;};}
+
+// ---------- 5) 경찰서 기자실 텃세: 스포츠·연예·전문지·영문지·주간지 수습에겐 어색하다 ----------
+try{EVENTS.filter(e=>String(e.run).includes("'기자실의 텃세'")).forEach(e=>{const c0=e.c;e.c=()=>c0()&&!['sports','trade','eng','weekly'].includes((OUT()||{}).type);});}catch(e){}
+
+// ---------- 6) 효과가 안 적혀 있던 선택지에 효과를 적는다 (플레이어와 AI가 같이 보고 고른다) ----------
+const SUB61={'회장님 사진':{'싣는다':'광고주 관계↑ · 자금 조금↑ · 신뢰↓','광고면에만 싣겠다고 한다':'광고주 관계 조금↓ · 신뢰 조금↑'},
+ '정부 광고 축소':{'담당자를 찾아가 관계를 푼다':'기관 관계↑ · 신뢰 조금↓'},
+ '정부 광고 배정':{'고맙게 받는다':'자금↑ · 신뢰 조금↓','편집국에 "신경 쓰지 말라"고 공지한다':'자금↑ · 신뢰↑'},
+ '압수수색':{'협조한다':'취재원들이 등을 돌린다 · 신뢰↓'}};
+{const _om61c=openModal;openModal=function(t,b,c){try{const M=SUB61[t];if(M&&Array.isArray(c))c=c.map(x=>x&&typeof x==='object'&&M[x.label]&&(!x.sub||!/신뢰/.test(x.sub))?Object.assign({},x,{sub:M[x.label]}):x);}catch(e){}return _om61c.call(this,t,b,c);};}
+
+// ---------- 7) 데스킹: 문제 문장이 남았으면 출고 대신 보강 지시를 권한다 ----------
+// 예전: 맡기기 AI가 문제 문장이 남은 초고도 늘 「출고한다」를 눌러, 부장 10년이면 신뢰가 70 넘게 깎였다
+{const _om61d=openModal;openModal=function(t,b,c){try{if(t==='데스킹 3/3 · 처리'&&Array.isArray(c)&&/오보 위험/.test(String(b||''))){c=c.map(x=>{if(!x||typeof x!=='object')return x;if(x.label==='출고한다')return Object.assign({},x,{sub:(x.sub||'')+' · 오보 위험',rec:false});if(/^보강 지시/.test(x.label||''))return Object.assign({},x,{rec:true});return x;});}}catch(e){}return _om61d.call(this,t,b,c);};}
+
+// ───── (예전 v62.js) ─────
+/* 바이라인 1.6 — src/compat/v62.js
+ * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
+ */
+
+
+// ===== 1.6 전수 조사 ②: 광고 목표 =====
+// 반기 중간에 부서를 옮기거나 팀원이 새로 꾸려지면, 새 사람들의 실적은 0부터 쌓이는데 목표는 반기 전체 몫으로 잡혀
+// 「목표 10억 · 실적 20%」처럼 처음부터 못 채우는 목표가 됐다 → 반기 중간에 들어온 사람은 남은 기간만큼만 목표를 진다
+function qHalf62(){return Math.floor(S.turn/(4*QM));}
+function qTrack62(m){if(!m||typeof m!=='object')return;const hk=qHalf62();if(m.qH62!==hk){m.qH62=hk;m.qS62=qMon()<=1?hk*4*QM:S.turn;}}
+function qFrac62(m){try{if(!m||m.qH62!==qHalf62())return 1;const h0=qHalf62()*4*QM;return clamp((h0+4*QM-m.qS62)/(4*QM),0,1);}catch(e){return 1;}}
+function qTrackAll62(){try{const per=roster();Object.values(per).forEach(L=>(L||[]).forEach(qTrack62));(S.team||[]).forEach(qTrack62);}catch(e){}}
+{const _das62=deptAdStat;deptAdStat=function(d){const r=_das62.apply(this,arguments);try{if(r&&Array.isArray(r.rows)){let cut=0;r.rows.forEach(x=>{qTrack62(x.m);const f=qFrac62(x.m);if(f<1){cut+=x.goal*(1-f);x.goal*=f;x.part62=f;}});r.goal-=cut;r.cut62=cut;}}catch(e){}return r;};}
+{const _em62=endMonth;endMonth=function(){qTrackAll62();const r=_em62.apply(this,arguments);qTrackAll62();return r;};}
+// 영업 창: 부서 목표 가운데 내 몫이 얼마인지, 나머지는 누가 채우는지 보여 준다
+{const _om62=openModal;openModal=function(t,b,c){try{if(t==='광고·협찬 영업'&&typeof b==='string'&&S&&S.co&&!S.founder&&(deptShared()||nrAll())){const st=nrAll()?nrAdStat():deptAdStat(S.dept);const own=quotaOwn(),mine=myAdDirect();const rest=Math.max(0,st.goal-own),restGot=Math.max(0,st.got-mine);
+    const line=`<p class="hint" style="margin:6px 0 0">이 목표는 ${jo2(nrAll()?'편집국 전체 부서':'부서원 모두','이','가')} 함께 진다 — <b>내 몫 ${eok(own)}</b> (지금 ${eok(mine)}) · ${nrAll()?'부서들':'부서원'} 몫 ${eok(rest)} (지금 ${eok(restGot)}). 부서원은 매달 알아서 영업한다.</p>`;
+    b=b.replace(/(<div class="adq">[\s\S]*?<\/p>)/,'$1'+line);}}catch(e){}return _om62.call(this,t,b,c);};}

@@ -1,5 +1,5 @@
 {
- "origSha256": "b46fceb14e669a6418ced2d42e4fd9cda20cac1ea7260c389750a04d95705852",
+ "origSha256": "2b4c75019faf16c267de77fcd5209af9984e20fd850141d5a34bc4ab91faf5fe",
  "files": [
   "src/core/utils.js",
   "src/data/base-data.js",
@@ -1022,11 +1022,11 @@
    "file": "src/compat/r16-ai-ui.js",
    "stmts": [
     2518,
-    2598
+    2614
    ],
    "lines": [
     13257,
-    13575
+    13636
    ],
    "from": [
     "v51.js",
@@ -1038,40 +1038,42 @@
     "v57.js",
     "v58.js",
     "v59.js",
-    "v60.js"
+    "v60.js",
+    "v61.js",
+    "v62.js"
    ]
   },
   {
    "file": "src/systems/era-front.js",
    "stmts": [
-    2599,
-    2637
+    2615,
+    2653
    ],
    "lines": [
-    13576,
-    13734
+    13637,
+    13795
    ]
   },
   {
    "file": "src/systems/dept-signature.js",
    "stmts": [
-    2638,
-    2645
+    2654,
+    2661
    ],
    "lines": [
-    13735,
-    13764
+    13796,
+    13825
    ]
   },
   {
    "file": "src/main.js",
    "stmts": [
-    2646,
-    2657
+    2662,
+    2673
    ],
    "lines": [
-    13765,
-    13788
+    13826,
+    13849
    ]
   }
  ],
