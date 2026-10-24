@@ -14333,6 +14333,12 @@ function simp54(){try{if(!S||S.phase!=='game')return;const tab=S.tab;const root=
 // 맡기기: 쓸 수 있는 아이템이 모두 「물때 전」(3개월 안, 단독 아님)이면 이번엔 쓰기를 건너뛰고 다른 일을 한다
 {const _ap55=autoPickAct;autoPickAct=function(k){let r=_ap55.apply(this,arguments);try{if(r==='write'&&typeof writable==='function'){const W=writable();if(W.length&&W.every(i=>i.peg&&!i.excl&&pegDt44(i)>2&&pegDt44(i)<=12)){const had=!!S._autoBan;const B=S._autoBan||(S._autoBan=new Set());const hw=B.has('write');B.add('write');let r2=null;try{r2=_ap55.apply(this,arguments);}finally{if(!hw)B.delete('write');if(!had)delete S._autoBan;}if(r2)r=r2;}}}catch(e){}return r;};}
 
+// ===== 1.6 할 일 카드: 그림이 없는 행동(신세 쓰기 · 국장/사장 전략 등)의 아이콘이 카드 절반을 차지하던 것 =====
+// 간결한 화면(기본)에선 다른 카드처럼 아이콘 칸을 숨긴다. 그림 카드 화면에선 다른 카드 그림과 같은 크기 칸에 아이콘을 둔다(그대로)
+(function(){const st=document.createElement('style');st.textContent=`
+body.cmp42 .act.hasic .aic:not(:has(.aimg)){display:none!important}
+`;document.head.appendChild(st);})();
+
 RUN.cfile=()=>caseAct();function v12Road(){if(S.story)return '';let h='';try{h+=caseBox()+meProfileBox();}catch(e){console.error(e);}return h;}
 function v12World(){if(S.story||S.phase!=='game')return '';try{return oidCard()+worldBox();}catch(e){console.error(e);return '';}}
 RUN.spec=()=>spec2Act();
