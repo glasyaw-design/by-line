@@ -1,4 +1,4 @@
-/* 바이라인 1.6 — src/systems/business.js
+/* 바이라인 — src/systems/business.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -220,7 +220,7 @@ const corpId=name=>(ENTS.find(e=>e[2]==='corp'&&e[1]===name)||[])[0];
 function entHit(it,W,imp){
   if(it.pos)return posEntHit(it,W,imp);const id=it.ent,e=S.net&&S.net[id];if(!e)return '';const E=ENT[id];
   let d=Math.min(18,imp/5*(it.excl?1.2:1)*(W.rb&&it.rebut==='got'?.6:1)*(W.head==='bait'?1.3:1)*(W.head==='calm'?.7:1)*(W.adTone==='soft'?.4:W.adTone==='hard'?1.15:1));
-  if(!CRIT_RE.test(it.title||''))d*=.5;e.rel=clamp(e.rel-d,-100,100);const wasKnown=e.known;e.known=true;const out=[`${jo2(entName(id),'과','와')}의 관계 -${Math.round(d)}${wasKnown?'':' (이 일로 상대가 나를 알게 됐다)'}`];
+  if(!CRIT_RE.test(it.title||''))d*=.5;e.rel=clamp(e.rel-d,-100,100);const wasKnown=e.known;e.known=true;const out=[`${jo2(entName(id),'과','와')}의 관계 -${Math.max(1,Math.round(d))}${wasKnown?'':' (이 일로 상대가 나를 알게 됐다)'}`];
   if(id==='c4')netUp('pr_chair',-d*.6);try{arcStart(id,d,W.headline);}catch(x){}
   if(E.kind==='corp'&&e.rel<=-25&&!e.cut){e.cut=R(8,20);out.push(`${E.n} 홍보실이 광고 집행 중단을 통보했다 (${wkTxt(e.cut)}, 월 -${adAmt(OUT().ad*adShareOf(id))})`);log(`${E.n} 광고 중단 통보`);tick(`${E.n}, ${OUT().n}에 광고 집행 중단`);}
   if(E.kind==='gov'&&e.rel<=-45&&!e.block){e.block=R(4,8);out.push(`${jo2(E.n,'이','가')} 우리 매체에 자료 제공을 거부하기 시작했다 (${wkTxt(e.block)})`);log(`${E.n} 자료 제공 거부`);}

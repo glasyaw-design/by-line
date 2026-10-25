@@ -135,7 +135,7 @@ for (const [to] of extra) if (!files.has(to)) {
 }
 for (const [to, arr] of extra) files.get(to).push(...arr, '\n');
 // 파일 쓰기
-const HDR = f => `/* 바이라인 1.6 — ${f}\n * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).\n */\n`;
+const HDR = f => `/* 바이라인 — ${f}\n * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).\n */\n`;
 const outFiles = [];
 let leftData = 0;
 for (const f of order) { const body = resJS(files.get(f).join('')); leftData += (body.match(/data:[a-z]+\/[a-z0-9.+-]+;base64,/g) || []).length; W(f, HDR(f) + body); outFiles.push(f); }
@@ -152,8 +152,8 @@ for (const [s, f] of parts) {
 }
 
 // ---------- 4) CSS ----------
-W('styles/main.css', `/* 바이라인 1.6 — 원본 첫 번째 <style> (머리) 그대로. 내장 이미지 1개만 ../assets 경로로 */\n` + css1b);
-W('styles/loader.css', `/* 바이라인 1.6 — 원본 두 번째 <style> (본문, 로더 바로 앞) 그대로. 이미지 경로만 ../assets 로 */\n` + css2b);
+W('styles/main.css', `/* 바이라인 — 원본 첫 번째 <style> (머리) 그대로. 내장 이미지 1개만 ../assets 경로로 */\n` + css1b);
+W('styles/loader.css', `/* 바이라인 — 원본 두 번째 <style> (본문, 로더 바로 앞) 그대로. 이미지 경로만 ../assets 로 */\n` + css2b);
 
 // ---------- 5) index.html ----------
 const desc = '수습기자로 시작해 단독을 쫓고, 데스크·편집국장·사장까지 오르거나 내 언론사를 세우는 기자 커리어 시뮬레이션 웹게임';

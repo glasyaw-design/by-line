@@ -2,7 +2,7 @@
 // 예전 파일 v45.js · v46.js · v47.js · v48.js를 순서 그대로 이어 붙였다
 
 // ───── (예전 v45.js) ─────
-/* 바이라인 1.6 — src/compat/v45.js
+/* 바이라인 — src/compat/v45.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -109,7 +109,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 orgBase=function(){try{return 52+OUT().p*1.2;}catch(e){return 56;}};
 
 // ───── (예전 v46.js) ─────
-/* 바이라인 1.6 — src/compat/v46.js
+/* 바이라인 — src/compat/v46.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -177,7 +177,7 @@ function lead46Month(lines){const L=S.lead46;if(!L||!isRegD(S.dept))return;apply
 {const _dr46=doRotate;doRotate=function(nd){if(S&&S.lead46&&S.lead46.t===S.turn&&isRegD(S.dept)&&!isRegD(nd))return;return _dr46.apply(this,arguments);};}
 
 // ───── (예전 v47.js) ─────
-/* 바이라인 1.6 — src/compat/v47.js
+/* 바이라인 — src/compat/v47.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -234,7 +234,7 @@ function newUsed47(){return Object.values(S.corrX46||{}).reduce((a,x)=>a+(x||[])
 {const _rc47=recommend;recommend=function(){const r=_rc47.apply(this,arguments);try{if(S&&(S.jam47||0)>=4&&orgCanRun()&&r!=='rest'&&r!=='breaking'&&rankActs().includes('personnel')&&!why('personnel')&&(S.toR47??-99)<S.turn-4){S.toR47=S.turn;return 'personnel';}}catch(e){}return r;};}
 
 // ───── (예전 v48.js) ─────
-/* 바이라인 1.6 — src/compat/v48.js
+/* 바이라인 — src/compat/v48.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 

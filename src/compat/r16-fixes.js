@@ -2,7 +2,7 @@
 // 예전 파일 v49.js · v50.js를 순서 그대로 이어 붙였다
 
 // ───── (예전 v49.js) ─────
-/* 바이라인 1.6 — src/compat/v49.js
+/* 바이라인 — src/compat/v49.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -33,7 +33,7 @@ function dedup49(t){if(typeof t!=='string')return t;return t.replace(/(^|[\s「"
   keys.forEach(d=>{if(!DEPTS[d]||isRegD(d))return;const H=per[d].filter(m=>m&&(m.r||0)===2&&!m.acting);if(H.length<2)return;const lkH=H.filter(m=>typeof lk45==='function'&&lk45(m)&&m.lk45.head&&!m.lk45.dem).sort((a,b)=>b.lk45.t-a.lk45.t);const keep=lkH[0]||H.slice().sort((a,b)=>orgScore(b)-orgScore(a))[0];H.forEach(m=>{if(m!==keep){m.r=1;if(m.lk45)m.lk45={...m.lk45,r:1,head:false};}});});}catch(e){console.error(e);}return per;};}
 
 // ───── (예전 v50.js) ─────
-/* 바이라인 1.6 — src/compat/v50.js
+/* 바이라인 — src/compat/v50.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 

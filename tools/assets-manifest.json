@@ -6669,6 +6669,42 @@
   "b64sha256": "6e61e2df83b20fbf4a8a120832b3835c7f32e3d523ae46334a0ea3b701b2e073"
  },
  {
+  "file": "assets/images/rank_sp0.webp",
+  "kind": "image/webp",
+  "key": "rank_sp0",
+  "from": "js IMG",
+  "bytes": 11158,
+  "sha256": "42ed13ca20d35fef27d13904eb9a978c74aaf1d1452adb4062f6491f815ec8d8",
+  "b64sha256": "b861b4ed68e7e169c24999080c02fadc29a6aa442c54ffcb38551cadc773ec2d"
+ },
+ {
+  "file": "assets/images/rank_sp1.webp",
+  "kind": "image/webp",
+  "key": "rank_sp1",
+  "from": "js IMG",
+  "bytes": 12724,
+  "sha256": "0b372361de4dce7ad5b3702e1b76144f43a9add0f12bbdcbaee1e7dc3d14ecec",
+  "b64sha256": "37f31d641ae8d9011c528f5ebcdb62eef97209748965eb7957464a2c03f2e2af"
+ },
+ {
+  "file": "assets/images/rank_sp2.webp",
+  "kind": "image/webp",
+  "key": "rank_sp2",
+  "from": "js IMG",
+  "bytes": 14816,
+  "sha256": "fbcc1f0719f5e3f512244c5fa3b7b59a869d7d4fd44027b3d7184e892f7a3107",
+  "b64sha256": "fab033553a0090f902f8649403b4cbc341472b4ab63fe26c07adfc47c251ee89"
+ },
+ {
+  "file": "assets/images/rank_jp.webp",
+  "kind": "image/webp",
+  "key": "rank_jp",
+  "from": "js IMG",
+  "bytes": 14580,
+  "sha256": "8da98f982ddd9b6a07f0ab5b8dcb712831ebb6dcf99f0804b3fe2687d831fe9e",
+  "b64sha256": "74a245de9fc317472593ce66cd9051e99b629f84f1970ca7053c772a9b0be37f"
+ },
+ {
   "file": "assets/audio/bgm_crisis.mp3",
   "kind": "audio/mpeg",
   "key": "bgm_crisis.mp3",

@@ -2,7 +2,7 @@
 // 예전 파일 v43.js · v44.js를 순서 그대로 이어 붙였다
 
 // ───── (예전 v43.js) ─────
-/* 바이라인 1.6 — src/compat/v43.js
+/* 바이라인 — src/compat/v43.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
@@ -399,7 +399,7 @@ function regEvalHTML43(){try{if(!S||S.founder||S.story||!isRegD(S.dept))return '
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rg43]');if(!b)return;e.preventDefault();S.rg43=b.getAttribute('data-rg43');try{render();}catch(x){}});
 
 // ───── (예전 v44.js) ─────
-/* 바이라인 1.6 — src/compat/v44.js
+/* 바이라인 — src/compat/v44.js
  * 일반 <script>로 index.html에 적힌 순서대로 실행된다. 순서를 바꾸지 말 것 (README의 로드 순서 참고).
  */
 
