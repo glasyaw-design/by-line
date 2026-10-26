@@ -24,7 +24,7 @@ npm run test:update # 게임을 일부러 바꾼 뒤 기준값(tests/golden.json
 
 ## 배포
 
-- **Vercel**: 이 폴더를 그대로 올리면 `vercel.json`이 `npm run build` → `dist/`를 배포합니다. `api/presence.js`(동시 접속자)는 예전과 같습니다.
+- **Vercel**: 이 폴더를 그대로 올리면 `vercel.json`이 `npm run build` → `dist/`를 배포합니다. `api/presence.js`(동시 접속자)는 예전과 같고, `api/account.js`(계정·클라우드 저장)는 같은 Upstash/Redis를 그대로 씁니다 — 따로 설정할 것은 없습니다. 연결 점검은 `/api/account?debug=1`.
 - **다른 정적 호스팅**: `npm run build` 후 `dist/` 폴더를 통째로 올립니다.
 - **예전 방식(파일 하나)**: `dist-single/index.html`과 `dist-single/assets/audio/`를 올립니다. Claude 아티팩트에도 이 `index.html`을 쓰면 됩니다.
   - 음악 경로가 `bgm/` → `assets/audio/`로 바뀌었으니, 예전 배포의 `bgm/` 폴더 대신 `assets/audio/`를 함께 올려야 음악이 나옵니다.
@@ -42,6 +42,7 @@ src/compat/_hoisted.js          순서 보존용으로 앞당긴 함수 선언 3
 src/main.js           로딩 화면 · start() · 부팅
 assets/images|fonts|audio       내장돼 있던 그림 738개 · 글꼴 2개 · 음악 8곡 (바이너리 그대로)
 api/presence.js       동시 접속자 API (기존 그대로)
+api/account.js        계정 · 클라우드 저장 · 기록실 동기화 API (1.71)
 original/             원본 HTML (수정하지 않음)
 tests/                자동 회귀 테스트 (npm test)
 tools/                리소스 목록·빌드 정보·분리/검증에 쓴 스크립트

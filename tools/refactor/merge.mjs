@@ -11,6 +11,7 @@ export const GROUPS = [
   ['src/compat/r17-specialist.js', '1.7 · 전문기자·선임·대기자 트랙 · 대형 추적 · 다음 자리(전문 에디터·명망가 편집국장·주필·사장) · 승진 레이스 · 조직 정원', ['v63', 'v64']],
   ['src/compat/r17-content.js', '1.7 · 반복 사건의 기억 · 부서별 사건 · 오보 복기 · 지분 인수 2단계 · 후계자 · 연말 기자상 · 취재원 인생 · 대표 통장 · 맡기기 「관계」', ['v65', 'v66']],
   ['src/compat/r17-articles.js', '1.7 · 기사·칼럼 소재 은행 · 해설·기획 시리즈·팩트체크 · 칼럼 개편 · 업적·칭호 · 주필 · 전문기자 휘장', ['v67d', 'v67', 'v68img', 'v68']],
+  ['src/compat/r17-account.js', '1.71 · 계정 · 클라우드 저장 · 기록실 동기화', ['v69']],
 ];
 let idx = fs.readFileSync(path.join(D, 'index.html'), 'utf8');
 for (const [out, title, mods] of GROUPS) {
