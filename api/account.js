@@ -7,6 +7,7 @@
 // - 요청: POST /api/account  { a: '동작', ... }
 //   register {id,pw,nick} · login {id,pw} · logout · me · password {pw,npw} · delete {pw}
 //   list · get {slot} · put {slot,label,t,z} · del {slot} · meta-get · meta-put {t,z}
+//   hall-put {run} (로그인) · hall-top {scope:'all'|'month'} (누구나) · ghosts (누구나: 다른 플레이어의 은퇴 기자 몇 명)
 // - 연결 점검: GET /api/account?debug=1 (어떤 저장소를 찾았는지만 보여 준다)
 
 import crypto from 'node:crypto';
@@ -88,6 +89,28 @@ async function profile(id) {
   return { id, nick: nick || id, created: Number(created || 0) };
 }
 
+
+// ---- 명예의 전당 ----
+const HALL_MAX = 300;                              // 순위표에 남기는 사람 수
+const clean = (v, n) => String(v == null ? '' : v).replace(/[<>&"'`\\]/g, '').replace(/[\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
+const num = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));
+const monthKey = () => { const d = new Date(Date.now() + 9 * 3600e3); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1; }; // 한국 시간 기준 달
+function hallEntry(r, uid, nick) {
+  const nm = clean(r.nm, 10).replace(/[^가-힣ㄱ-ㅎa-zA-Z0-9 ·]/g, '').trim() || '이름 없는 기자';
+  const yrs = num(r.yrs, 0, 60), ex = num(r.ex, 0, yrs * 20 + 5), aw = num(r.aw, 0, yrs + 2);
+  // 점수는 게임의 계산식(직급·평판·신뢰·단독·기자상)으로 낼 수 있는 최대치까지만 받는다
+  const scMax = 7 * 14 + 100 * 0.6 + 100 * 0.4 + ex * 2 + aw * 6;
+  return { uid, nick: clean(nick, 12), nm, rn: clean(r.rn, 14), o: clean(r.o, 20), end: clean(r.end, 30), yrs, sc: num(r.sc, -500, scMax),
+    aw, ex, f: r.f ? 1 : 0, story: r.story ? 1 : 0, best: clean(r.best, 70), dept: clean(r.dept, 12), t: Date.now() };
+}
+async function hallRead(key, n) {
+  const flat = (await one(['ZREVRANGE', key, '0', String(n - 1), 'WITHSCORES'])) || [];
+  const ids = []; for (let i = 0; i < flat.length; i += 2) ids.push(String(flat[i]));
+  if (!ids.length) return [];
+  const raw = await db.run(ids.map((u) => ['HGET', P + 'hall:e', u]));
+  return raw.map((x) => { try { return JSON.parse(x); } catch { return null; } }).filter(Boolean);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const c = await getDb();
@@ -123,6 +146,18 @@ export default async function handler(req, res) {
       if (!h || !salt || !samePw(pw, salt, h)) return fail(401, '아이디 또는 비밀번호가 틀렸다');
       return res.status(200).json({ ok: true, token: await newSession(id), user: await profile(id) });
     }
+    // ---- 누구나: 전체 순위 · 다른 세계의 기자 ----
+    if (a === 'hall-top') {
+      if (await limited('ht:' + ipOf(req), 120, 600)) return fail(429, '잠시 뒤에 다시');
+      const key = b.scope === 'month' ? P + 'hall:m:' + monthKey() : P + 'hall:all';
+      return res.status(200).json({ ok: true, list: (await hallRead(key, 50)).map(({ t, ...x }) => x) });
+    }
+    if (a === 'ghosts') {
+      if (await limited('gh:' + ipOf(req), 60, 600)) return fail(429, '잠시 뒤에 다시');
+      const L = await hallRead(P + 'hall:recent', 60);
+      const pickN = L.filter((x) => x.yrs >= 5 && !x.story).sort(() => Math.random() - 0.5).slice(0, 8);
+      return res.status(200).json({ ok: true, list: pickN.map((x) => ({ uid: x.uid, nm: x.nm, rn: x.rn, o: x.o, end: x.end, yrs: x.yrs, sc: x.sc, best: x.best })) });
+    }
     // ---- 여기부터는 로그인한 사람만 ----
     const u = await userOf(req);
     if (!u) return fail(401, '로그인이 풀렸다. 다시 로그인하자');
@@ -141,8 +176,23 @@ export default async function handler(req, res) {
         await db.run([['HSET', P + 'u:' + id, 'pw', hashPw(npw, ns), 'salt', ns], ...kill, ['DEL', P + 'sl:' + id]]);
         return res.status(200).json({ ok: true, token: await newSession(id) }); // 다른 기기는 모두 로그아웃
       }
-      await db.run([...kill, ['DEL', P + 'sl:' + id, P + 'u:' + id, P + 'meta:' + id, ...SLOTS.map((s) => P + 'sv:' + id + ':' + s)], ['DECR', P + 'count']]);
+      await db.run([...kill, ['DEL', P + 'sl:' + id, P + 'u:' + id, P + 'meta:' + id, ...SLOTS.map((s) => P + 'sv:' + id + ':' + s)], ['DECR', P + 'count'], ['ZREM', P + 'hall:all', id], ['ZREM', P + 'hall:recent', id], ['ZREM', P + 'hall:m:' + monthKey(), id], ['HDEL', P + 'hall:e', id]]);
       return res.status(200).json({ ok: true });
+    }
+    // ---- 명예의 전당에 내 판 올리기: 한 사람은 가장 높은 판 하나만 순위에 남는다 ----
+    if (a === 'hall-put') {
+      const r = b.run || {}; if (!r.nm || r.sc == null) return fail(400, '판 기록이 없다');
+      if (await limited('hp:' + id, 6, 3600)) return fail(429, '잠시 뒤에 다시');
+      const nick = (await one(['HGET', P + 'u:' + id, 'nick'])) || id;
+      const e = hallEntry(r, id, nick), mk = P + 'hall:m:' + monthKey();
+      const [prevAll, prevM] = await db.run([['ZSCORE', P + 'hall:all', id], ['ZSCORE', mk, id]]);
+      const cmds = [['ZADD', P + 'hall:recent', String(Date.now()), id], ['ZREMRANGEBYRANK', P + 'hall:recent', '0', '-201']];
+      const better = prevAll == null || e.sc > Number(prevAll);
+      if (better) cmds.push(['ZADD', P + 'hall:all', String(e.sc), id], ['HSET', P + 'hall:e', id, JSON.stringify(e)]);
+      if (prevM == null || e.sc > Number(prevM)) cmds.push(['ZADD', mk, String(e.sc), id], ['EXPIRE', mk, String(100 * 24 * 3600)]);
+      cmds.push(['ZREMRANGEBYRANK', P + 'hall:all', '0', String(-HALL_MAX - 1)]);
+      await db.run(cmds);
+      return res.status(200).json({ ok: true, best: better });
     }
     // ---- 클라우드 저장 ----
     if (a === 'list') {

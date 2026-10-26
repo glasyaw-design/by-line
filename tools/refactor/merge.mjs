@@ -12,6 +12,7 @@ export const GROUPS = [
   ['src/compat/r17-content.js', '1.7 · 반복 사건의 기억 · 부서별 사건 · 오보 복기 · 지분 인수 2단계 · 후계자 · 연말 기자상 · 취재원 인생 · 대표 통장 · 맡기기 「관계」', ['v65', 'v66']],
   ['src/compat/r17-articles.js', '1.7 · 기사·칼럼 소재 은행 · 해설·기획 시리즈·팩트체크 · 칼럼 개편 · 업적·칭호 · 주필 · 전문기자 휘장', ['v67d', 'v67', 'v68img', 'v68']],
   ['src/compat/r17-account.js', '1.71 · 계정 · 클라우드 저장 · 기록실 동기화', ['v69']],
+  ['src/compat/r17-connect.js', '1.72 · 전문 분야↔전문기자 · 지난 판의 나 · 시대와 분야 수요 · 출세한 취재원 · 명예의 전당 · 다른 세계의 기자', ['v70']],
 ];
 let idx = fs.readFileSync(path.join(D, 'index.html'), 'utf8');
 for (const [out, title, mods] of GROUPS) {
