@@ -8,7 +8,7 @@
 //   register {id,pw,nick} · login {id,pw} · logout · me · password {pw,npw} · delete {pw}
 //   list · get {slot} · put {slot,label,t,z} · del {slot} · meta-get · meta-put {t,z}
 //   hall-put {run} (로그인) · hall-top {scope:'all'|'month'} (누구나) · ghosts (누구나: 다른 플레이어의 은퇴 기자 몇 명)
-// - 연결 점검: GET /api/account?debug=1 (어떤 저장소를 찾았는지만 보여 준다)
+// - 연결 점검: GET /api/account?debug=1 (연결 방식과 성공 여부만 보여 준다. 자세한 오류는 Vercel 로그에)
 
 import crypto from 'node:crypto';
 
@@ -54,7 +54,7 @@ async function getDb() {
       mode = 'redis-url';
       db = { async run(cmds) { const m = r.multi(); cmds.forEach((c) => m.addCommand(c.map(String))); return await m.exec(); }, async quit() { try { await r.quit(); } catch {} } };
     }
-  } catch (err) { initErr = String(err && err.message || err).slice(0, 200); db = null; }
+  } catch (err) { initErr = String(err && err.message || err).slice(0, 200); db = null; try { console.error('account init', err); } catch {} }
   return db;
 }
 const one = async (c) => (await db.run([c]))[0];
@@ -107,7 +107,7 @@ function hallEntry(r, uid, nick) {
   // 점수는 게임의 계산식(직급·평판·신뢰·단독·기자상)으로 낼 수 있는 최대치까지만 받는다
   const scMax = 7 * 14 + 100 * 0.6 + 100 * 0.4 + ex * 2 + aw * 6;
   return { uid, nick: clean(nick, 12), nm, rn: clean(r.rn, 14), o: clean(r.o, 20), end: clean(r.end, 30), yrs, sc: num(r.sc, -500, scMax),
-    aw, ex, f: r.f ? 1 : 0, story: r.story ? 1 : 0, best, dept: clean(r.dept, 12), t: Date.now() };
+    aw, ex, big: num(r.big, 0, aw), f: r.f ? 1 : 0, story: r.story ? 1 : 0, best, dept: clean(r.dept, 12), t: Date.now() };
 }
 async function hallRead(key, n, hkey) {
   const flat = (await one(['ZREVRANGE', key, '0', String(n - 1), 'WITHSCORES'])) || [];
@@ -121,7 +121,12 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const c = await getDb();
   if (req.method === 'GET') {
-    if (req.query && req.query.debug === '1') return res.status(200).json({ ok: !!c, mode, error: c ? undefined : (initErr || '연결할 Redis 환경 변수를 찾지 못했다') });
+    if (req.query && req.query.debug === '1') {
+      if (!c) return res.status(200).json({ ok: false, mode, error: initErr ? '연결 실패 — Vercel 로그(Functions)를 확인하자' : '연결할 Redis 환경 변수를 찾지 못했다' });
+      // 실제로 저장소에 닿는지 확인한다 (쓰기 권한까지: 1분 뒤 사라지는 키를 하나 쓴다)
+      try { const [pong, , back] = await db.run([['PING'], ['SET', P + 'ping', '1', 'EX', '60'], ['GET', P + 'ping']]); return res.status(200).json({ ok: String(pong).toUpperCase() === 'PONG' && String(back) === '1', mode, write: String(back) === '1' }); }
+      catch (err) { try { console.error('account debug', err); } catch {} db = null; return res.status(200).json({ ok: false, mode, error: '저장소가 응답하지 않는다 — 토큰(읽기 전용이 아닌지)과 주소를 확인하자' }); }
+    }
     return res.status(405).json({ error: '잘못된 요청' });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: '잘못된 요청' });
@@ -235,6 +240,7 @@ export default async function handler(req, res) {
     }
     return fail(400, '모르는 동작');
   } catch (err) {
+    try { console.error('account', a, err); } catch {}
     try { if (db && db.quit) await db.quit(); } catch {}
     db = null;
     return fail(500, '서버 오류 — 잠시 뒤에 다시');

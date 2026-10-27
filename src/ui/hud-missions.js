@@ -233,7 +233,7 @@ function warnHTML(){if(!S||S.phase!=='game')return '';const W=[];try{
   if(!W.length)return '';return `<div class="warnbox">${W.slice(0,4).map(([c,t])=>`<div class="wb ${c}"><i>${c==='r'?'!':c==='s'?'·':'i'}</i><span>${esc(t)}</span></div>`).join('')}</div>`;}
 // 매달 자동 저장 3개 (최근 3달)
 const AUTOKEY=i=>'byline-auto-'+i;
-function autoSave(){if(!S||S.phase!=='game'||S.dev)return;try{for(let i=2;i>0;i--){const v=localStorage.getItem(AUTOKEY(i-1));if(v)localStorage.setItem(AUTOKEY(i),v);}localStorage.setItem(AUTOKEY(0),JSON.stringify({t:Date.now(),label:`${S.name} · ${OUT().n} ${rankName()} · ${dateStr()}`,S}));}catch(e){}}
+function autoSave(){if(!S||S.phase!=='game'||S.dev)return;try{for(let i=2;i>0;i--){const v=localStorage.getItem(AUTOKEY(i-1));if(v)localStorage.setItem(AUTOKEY(i),v);}localStorage.setItem(AUTOKEY(0),JSON.stringify({t:Date.now(),label:`${S.name} · ${OUT().n} ${rankName()} · ${dateStr()}`,S}));}catch(e){try{svAutoFail76(e);}catch(_){}}}
 function autoInfo(i){try{const v=localStorage.getItem(AUTOKEY(i));return v?JSON.parse(v):null;}catch(e){return null;}}
 // 1년 결산: 12월 결산 뒤 한 해를 한 장으로
 function yrSnapOld(){return{turn:S.turn,arts:S.totalArticles||0,ex:(S.clips||[]).filter(c=>c.excl&&String(c.by||'').includes(S.name)).length,fr:(S.clips||[]).filter(c=>String(c.by||'').includes(S.name)&&/1면|첫 꼭지/.test(c.place||'')).length,fame:S.fame,eval:S.eval,money:S.money,rank:S.rank,rv:(S.rival&&S.rival.wins)||0,ml:Object.keys(S.miles||{}).length,src:(S.sources||[]).length,aw:S.awards||0};}

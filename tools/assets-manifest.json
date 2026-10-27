@@ -3820,18 +3820,18 @@
   "kind": "font/woff",
   "key": "Maplestory 700",
   "from": "js @font-face",
-  "bytes": 312332,
-  "sha256": "bb0d8a5e6784e436995f907cd54c62d99bc0ad84b18389820c65fe15599b8e35",
-  "b64sha256": "96c607a69960da2fdb2ca5130e4c86ed7466742497e3ade6b9271c33e27796b9"
+  "bytes": 463236,
+  "sha256": "d6854e4e0c4c266461d59b1934d16fa8759c4c1c06836b5e219ea0481dddcb1e",
+  "b64sha256": "432794572a6adb15f889e0e3b3edaccf68dbc39aa4fe468019ee14a0d56c8765"
  },
  {
   "file": "assets/fonts/maplestory-400.woff",
   "kind": "font/woff",
   "key": "Maplestory 400",
   "from": "js @font-face",
-  "bytes": 294372,
-  "sha256": "5a5729ee5e4c021a45ee541ed18f93473d6cffe1e9ab0582585575037ab3fa95",
-  "b64sha256": "258ad893aa8e4fbb93b92d8001e31c4745b1ddcbe15be3dd78a0ac0479fa7f6e"
+  "bytes": 437792,
+  "sha256": "8d17d7076c16ab074b20edcece541603ead1259f8ec11fc6877ef6d643444f73",
+  "b64sha256": "3f16672595c06b694c0d07b8feb48346fb0a8c23d2feb42e9058394e2d0967bd"
  },
  {
   "file": "assets/images/cr_exam.webp",

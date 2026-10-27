@@ -7,7 +7,7 @@
 let S=null;
 const SAVE_KEY='byline-career-v2';
 function newState(){try{oReset();}catch(e){}return{v:2,phase:'title',diff:'normal',name:'',major:0,spec:0,st:{...ST0},hp:100,ap:4,money:300,eval:42,fame:0,trust:48,turn:0,outlet:null,dept:'soc',rank:0,inRank:0,atOutlet:0,items:[],sources:[],clips:[],log:[],team:[],co:null,pending:[],history:[],apply:[],weekArticles:0,monthQ:[],dry:0,lowEval:0,awards:0,scoops:0,errors:0,lastError:-999,flags:{},cd:{},ach:{},scene:'newsroom',tab:'me',capName:rname(),retries:0,rival:null,ticker:[],reqDept:null,dev:false,devOpen:false};}
-function saveGame(){if(!S||(S.phase!=='game'&&S.phase!=='end'))return;if((S.turn>=96||S.phase==='end')&&!S.dev)setVet();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function saveGame(){if(!S||(S.phase!=='game'&&S.phase!=='end'))return;if((S.turn>=96||S.phase==='end')&&!S.dev)setVet();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));window.__svOK=1;}catch(e){window.__svOK=0;try{svFail76(e);}catch(_){}}}
 function loadGame(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
 const SAVESLOT=i=>'byline-slot-'+i;
 function slotInfo(i){try{const v=localStorage.getItem(SAVESLOT(i));return v?JSON.parse(v):null;}catch(e){return null;}}

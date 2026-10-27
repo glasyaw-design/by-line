@@ -14,6 +14,7 @@ export const GROUPS = [
   ['src/compat/r17-account.js', '1.71 · 계정 · 클라우드 저장 · 기록실 동기화', ['v69']],
   ['src/compat/r17-connect.js', '1.72 · 전문 분야↔전문기자 · 지난 판의 나 · 시대와 분야 수요 · 출세한 취재원 · 명예의 전당 · 다른 세계의 기자', ['v70']],
   ['src/compat/r17-ux.js', '1.74 · 데스킹 문장을 기사 주제로 · 모바일 상태 막대·변화 표시·알림창', ['v71', 'v72']],
+  ['src/compat/r176-easy-release.js', '1.76 · 쉬운 화면 · 라이벌의 인생 · 기자상과 몸값 · 저장 실패 알림 · 개인정보 동의 · 만든 사람들', ['v73', 'v74']],
 ];
 let idx = fs.readFileSync(path.join(D, 'index.html'), 'utf8');
 for (const [out, title, mods] of GROUPS) {

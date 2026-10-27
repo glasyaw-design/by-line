@@ -1,67 +1,65 @@
-# 바이라인 — 여러 파일 프로젝트 (지금 1.7)
+# 바이라인 — 기자 커리어 시뮬레이션 웹게임 (1.76)
 
-한 파일(약 14MB)이던 `바이라인_전체소스.html`을 **동작은 그대로 두고** 파일 여러 개로 나눈 프로젝트입니다.
-분리 자체는 게임 규칙·확률·저장 형식을 바꾸지 않습니다. 원본(이 프로젝트를 만든 단일 HTML)은 `original/`에 그대로 있습니다.
+수습기자로 시작해 단독을 쫓고, 편집국장·사장까지 오르거나 내 언론사를 세우는 게임입니다.
+게임 코드는 바깥 라이브러리 없이 일반 `<script>` 여러 개로 되어 있고, 배포할 때는 하나로 묶습니다.
 
 ## 실행
 
-Node.js 18 이상만 있으면 됩니다. 외부 패키지는 필요 없습니다. (`npm test`만 Playwright가 필요 — 처음 한 번 `npm i -D playwright && npx playwright install chromium`)
+Node.js 18 이상만 있으면 됩니다.
 
 ```bash
-npm install        # 받을 게 없어서 바로 끝난다 (Vercel 접속자 API용 선택 패키지는 네트워크가 되면 받는다)
-npm run dev        # http://localhost:5173  — 고친 파일을 저장하고 새로고침하면 바로 반영
-npm run build      # dist/ (여러 파일 배포본) + dist-single/ (예전처럼 index.html 하나로 합친 판)
-npm run preview    # http://localhost:4173  — dist/를 서버로 열어 본다
-npm run preview:single   # http://localhost:4174 — dist-single/를 열어 본다
-npm run check      # 정적 검사: 문법 · 파일 참조 · 리소스 해시
-npm test           # 자동 회귀 테스트: 시나리오 8개를 같은 난수로 돌려 기준값과 비교 + 저장·불러오기 점검
-npm run test:quick # 저장 시나리오 2개만 (빠르게)
-npm run test:update # 게임을 일부러 바꾼 뒤 기준값(tests/golden.json)을 새로 저장
+npm run dev          # http://localhost:5173 — 파일을 고치고 새로고침하면 바로 반영 (여러 파일 그대로)
+npm run build        # dist/ (배포판: 코드·CSS를 하나씩으로 묶음) + dist-single/ (index.html 하나로 합친 판)
+npm run preview      # http://localhost:4173 — dist/를 열어 본다
+npm run check        # 정적 검사: 문법 · 파일 참조 · 리소스 해시
+npm run test:api     # 계정 API 테스트 (브라우저 없이, 메모리 Redis)
+npm run test:start   # 실제 시작 경로: 5모드 × 폰·PC · 계정 가입→클라우드 저장→다른 기기 · 저장 실패 알림 · CSP
+npm test             # 회귀 테스트: 시나리오 8개를 같은 난수로 돌려 기준값(tests/golden.json)과 비교
 ```
 
-> 서버로 여는 걸 권장합니다. `index.html`을 더블클릭(`file://`)해도 게임은 돌아가지만, 원본과 마찬가지로 음악은 막히고(합성 음악으로 대체),
-> 그림이 파일로 나뉜 탓에 「커리어 1면 이미지로 저장」이 `file://`에서는 실패할 수 있습니다. 서버나 `dist-single/`에서는 원본과 같습니다.
+`test:start`와 `npm test`는 Playwright가 필요합니다. 처음 한 번: `npm i --no-save playwright && npx playwright install chromium`
+(배포에는 필요 없어서 package.json에 넣지 않았습니다.) GitHub에 올리면 `.github/workflows/ci.yml`이 위 테스트를 모두 돌립니다.
 
-## 배포
+## 배포 (Vercel)
 
-- **Vercel**: 이 폴더를 그대로 올리면 `vercel.json`이 `npm run build` → `dist/`를 배포합니다. `api/presence.js`(동시 접속자)는 예전과 같고, `api/account.js`(계정·클라우드 저장)는 같은 Upstash/Redis를 그대로 씁니다 — 따로 설정할 것은 없습니다. 연결 점검은 `/api/account?debug=1`.
-- **다른 정적 호스팅**: `npm run build` 후 `dist/` 폴더를 통째로 올립니다.
-- **예전 방식(파일 하나)**: `dist-single/index.html`과 `dist-single/assets/audio/`를 올립니다. Claude 아티팩트에도 이 `index.html`을 쓰면 됩니다.
-  - 음악 경로가 `bgm/` → `assets/audio/`로 바뀌었으니, 예전 배포의 `bgm/` 폴더 대신 `assets/audio/`를 함께 올려야 음악이 나옵니다.
+1. 이 폴더를 GitHub에 올리고 Vercel에 연결하면 `vercel.json`대로 `npm run build` → `dist/`가 배포됩니다.
+2. **Storage → Upstash(Redis) 연결**: 환경 변수가 저절로 생깁니다. 이름에 접두사가 붙어도 찾아 씁니다.
+3. 배포 주소 뒤에 `/api/account?debug=1`을 열어 `"ok":true,"write":true`인지 확인합니다.
+4. `public/privacy.html`의 **【입력: …】 세 곳**(운영자·연락처·Upstash 지역)을 채웁니다. 빌드할 때 남아 있으면 경고가 나옵니다.
+5. (선택) 접속자 수를 보려면 환경 변수 `ADMIN_KEY`를 정하고, 게임 주소 뒤에 `?admin=그값`을 한 번 붙여 엽니다.
+
+공유 이미지(og:image)는 Vercel이 주는 주소로 빌드할 때 절대 주소가 됩니다. 다른 곳에 올릴 땐 `SITE_URL=https://내주소 npm run build`.
 
 ## 폴더
 
 ```
-index.html            화면 골격 + CSS 2개 + script 88개를 원본과 같은 순서로 부른다
-styles/main.css       원본 첫 번째 <style>
-styles/loader.css     원본 두 번째 <style> (로딩 화면)
-src/core|data|systems|ui|dev/   바탕 게임 코드 (원본의 구획 주석 단위)
-src/compat/v13a.js … v42.js     1.21~1.42 확장 모듈 (원본에 이어 붙어 있던 순서 그대로)
-src/compat/r15-*.js · r16-*.js · r17-*.js  1.5~1.7 확장 (이웃한 모듈을 순서 그대로 주제별로 합침)
-src/compat/_hoisted.js          순서 보존용으로 앞당긴 함수 선언 3개
-src/main.js           로딩 화면 · start() · 부팅
-assets/images|fonts|audio       내장돼 있던 그림 738개 · 글꼴 2개 · 음악 8곡 (바이너리 그대로)
-api/presence.js       동시 접속자 API (기존 그대로)
-api/account.js        계정 · 클라우드 저장 · 기록실 동기화 API (1.71)
-original/             원본 HTML (수정하지 않음)
-tests/                자동 회귀 테스트 (npm test)
-tools/                리소스 목록·빌드 정보·분리/검증에 쓴 스크립트
-docs/                 구조·대응표·검증 결과
+index.html              화면 골격 + CSS 2개 + script 여러 개 (개발용 · 순서가 곧 실행 순서)
+styles/                 CSS
+src/core|data|systems|ui|dev/   바탕 게임 코드
+src/compat/             1.21~ 확장 모듈 (앞 파일의 함수를 감싸서 덮는 구조)
+src/main.js             로딩 화면 · start() · 부팅
+assets/images|fonts|audio       그림 · 글꼴 · 음악 (바이너리 그대로)
+public/                 개인정보처리방침 · 아이콘 · manifest · robots.txt · 크레딧 (빌드 때 dist/로 복사)
+api/presence.js         동시 접속자 수 (IP당 10분 40번 제한 · 숫자는 관리자만)
+api/account.js          계정 · 클라우드 저장 · 기록실 · 명예의 전당
+tests/                  api.mjs · start.mjs · run.mjs(회귀) · lib/fake-redis.mjs
+tools/ · docs/          리소스 목록 · 구조 문서 · 분리에 쓴 스크립트
 ```
+
+`dist/`, `dist-single/`은 빌드 결과라 저장소에 올리지 않습니다(.gitignore).
 
 ## 고칠 때 꼭 지킬 것
 
-1. **`index.html`의 script 순서를 바꾸지 마세요.** 모두 일반 `<script>`이고, 뒤 파일이 앞 파일의 함수를 감싸(`const _x=foo; foo=function(){…}`) 덮어쓰는 구조입니다.
-2. `async`·`defer`·`type="module"`을 붙이지 마세요. 전역 이름을 그대로 공유해야 합니다.
-3. 새 기능은 **새 파일을 맨 뒤 `src/main.js` 바로 앞**에 끼우는 게 가장 안전합니다. (`main.js`의 `start()`가 마지막에 게임을 켭니다.)
-4. 바탕 파일에 새 **함수 선언**을 넣을 때, 그 함수를 앞 파일에서 바로 실행하거나 감싸면 안 됩니다(원본은 한 스크립트라 끌어올림으로 됐지만 파일을 나누면 안 됨). 자세한 건 `docs/STRUCTURE.md`.
-5. 고친 뒤 `npm test`(또는 `npm run check` → `npm run build` → `npm run preview`)로 확인하세요. 기준값과 달라졌다고 나오면, 일부러 바꾼 거라면 `npm run test:update`.
-6. 파일 맨 위 머리말에는 버전을 적지 않는다 — 버전은 `src/systems/actions.js`의 `VERSION` 한 곳에서만 바꾼다.
-7. 어떤 기능이 어느 파일에 있는지는 `docs/STRUCTURE.md`의 「기능 찾아보기」를 보세요.
+1. **`index.html`의 script 순서를 바꾸지 마세요.** 뒤 파일이 앞 파일의 함수를 감싸(`const _x=foo; foo=function(){…}`) 덮어씁니다.
+2. `async`·`defer`·`type="module"`을 붙이지 마세요. 전역 이름을 공유합니다.
+3. 새 기능은 새 파일을 `src/main.js` 바로 앞에 끼우는 게 가장 안전합니다.
+4. 뒤 파일에서 선언한 함수를 앞 파일에서 감싸면 안 됩니다. 자세한 건 `docs/STRUCTURE.md`.
+5. 버전은 `src/systems/actions.js`의 `VERSION` 한 곳과 `package.json`의 `version`만 바꿉니다.
+6. 고친 뒤 `npm run check && npm run build && npm run test:start`. 일부러 게임을 바꿨다면 `npm run test:update`.
 
 ## 저장
 
-저장 키(`byline-career-v2`, `byline-slot-1~6`, `byline-auto-*` 등)와 형식은 원본과 같습니다. 예전 판에서 「저장 코드 내보내기」로 받은 코드를 이 판에서 「가져오기」하면 그대로 이어집니다.
-브라우저 저장소는 주소(origin)마다 따로라, 주소가 바뀌면 예전 저장이 안 보이는 건 정상입니다. 이럴 땐 내보내기·가져오기를 쓰세요.
+게임 저장은 브라우저 저장소(localStorage)에만 남습니다. 저장 공간이 차면 오래된 자동 저장부터 비우고, 그래도 안 되면 화면에 경고와 「저장 파일 내보내기」를 띄웁니다.
+로그인하면 석 달마다 클라우드에도 올라갑니다. 주소(origin)가 바뀌면 예전 저장이 안 보이는 건 정상입니다 — 내보내기·가져오기를 쓰세요.
 
-문서: [구조·로드 순서·대응표](docs/STRUCTURE.md) · [검증 결과](docs/VERIFICATION.md)
+문서: [구조](docs/STRUCTURE.md) · [검증](docs/VERIFICATION.md) · [크레딧](public/CREDITS.md)

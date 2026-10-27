@@ -169,6 +169,11 @@ const meta = `<!doctype html>
 <meta property="og:description" content="${desc}">
 <meta property="og:image" content="/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="바이라인">
 `;
 const head2 = headPre.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '');
 const scripts = outFiles.map(f => `<script src="${f}"></script>`).join('\n');

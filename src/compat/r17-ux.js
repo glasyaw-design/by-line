@@ -99,7 +99,10 @@ function dk71Flaws(d,S0,yy){const X=dk71Ctx(d),pos=X.pos,who=dk71Who(d);const sp
   if(wq)C.quote=()=>{if(chance(.5)){const o=pick(DESK_WHO.filter(x=>x!==wq.who));return {b:{t:deskFactSent({t:`${o} "${wq.q}"`,k:'w'}),e:`메모상 이 말을 한 사람은 ${jo2(wq.who,'이다','다')}. 발언자를 바꿔 적었다.`,src:wq.f.t},g:null};}
     const alt=pick((HEAD_Q[d.d]||HEAD_Q.soc).filter(x=>x!==wq.q));return {b:{t:deskFactSent({t:`${wq.who} "${alt}"`,k:'w'}),e:`메모에 적힌 발언은 따로 있다 — "${wq.q}". 직접 인용은 한 글자도 바꾸면 안 된다.`,src:wq.f.t},g:null};};
   const ks=shuffle(Object.keys(C));if(nf&&chance(.35)){ks.splice(ks.indexOf('num'),1);ks.unshift('num');}
-  const used=ks.slice(0,nb);used.forEach(k=>{B.push(C[k]().b);});
+  // 오보 복기 ↔ 데스킹: 내가 냈던 오보 유형이 후배 초고에서도 더 자주 보인다
+  let rk71=null;try{const E=S.errK65||{};const MAP={'숫자 그대로':['num','calc','unit'],'반론 누락':['oneside','jump'],'리드 과장':['hype','jump'],'미확인 사실':['jump','hype','oneside'],'단일 출처':['jump','oneside'],'증거 부족':['jump','oneside'],'조작된 제보':['jump','expose'],'데스크 통과':['date','spell','dup','num']};
+    const top=Object.entries(E).sort((a,b)=>b[1]-a[1])[0];if(top&&chance(.55)){const want=(MAP[top[0]]||[]).filter(k=>ks.includes(k));if(want.length){const k=pick(want);ks.splice(ks.indexOf(k),1);ks.unshift(k);rk71={k,n:top[0]};}}}catch(e){}
+  const used=ks.slice(0,nb);used.forEach(k=>{const bb=C[k]().b;if(rk71&&k===rk71.k)bb.e=bb.e+` — 지난번 내 오보(「${rk71.n}」)와 같은 유형이다.`;B.push(bb);});
   // 함정(틀려 보이지만 맞는 문장): 문제로 쓴 유형의 「맞는 짝」을 먼저 — 같은 유형끼리 비교하게 한다
   const dk=used.filter(k=>k!=='num'&&k!=='quote').concat(shuffle(ks.slice(nb))).filter(k=>k!=='num'&&k!=='quote');
   for(const k of dk){if(D.length>=Math.max(ndec,Math.min(2,nb)))break;const r=C[k]();if(r.g&&!B.some(x=>x.t===r.g.t)&&!D.some(x=>x.t===r.g.t))D.push(r.g);}

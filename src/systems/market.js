@@ -324,7 +324,7 @@ function chiefSales(lines){if(!S.co||S.founder||S.story||S.rank===6||salesPush()
     lines.push({c:'',t:`편집국장 ${nm}: "반기 숫자가 처집니다. 부서장들이 책임지고 맞춥시다." — 이번 달 전 부서가 영업에 더 뛴다`});}
   if(st.got>=exp*1.02||!chance((behind?.4:.18)*(cab+.1)))return;
   const L=st.depts.filter(x=>x.goal>0).sort((a,b)=>a.got/a.goal-b.got/b.goal);const tgt=L[0];if(!tgt)return;const gap=tgt.goal*Math.min(1,(k+1)/QM)-tgt.got;if(gap<=tgt.goal*.04)return;
-  const amt=+Math.min(st.goal*R(2,5)/100,Math.max(st.goal*.015,exp-st.got),gap*R(70,110)/100).toFixed(2);const M=(per[tgt.d]||[]).filter(m=>m&&m.ai&&slOk(m));
+  const amt=+Math.min(st.goal*R(2,5)/100,Math.max(st.goal*.015,exp-st.got),gap*R(70,110)/100).toFixed(2);if(!(amt>0))return;const M=(per[tgt.d]||[]).filter(m=>m&&m.ai&&slOk(m));
   if(M.length){const sh=amt/M.length;M.forEach(m=>{m.ai.q=(m.ai.q||0)+sh;});}else return;
   S.co.cash+=+(amt/SL_G*.45).toFixed(3);C.n=(C.n||0)+1;C.sum=+((C.sum||0)+amt).toFixed(2);const corp=pick(ENTS.filter(e=>e[2]==='corp'))||['','대기업'];
   lines.push({c:'g',t:`편집국장 ${nm}, ${corp[1]} ${pick(['연간 협찬','포럼 메인 후원','기획 시리즈 광고','창간 기념 특집 광고'])} ${eok(amt)} 수주 — 처지던 ${DEPTS[tgt.d].n} 실적에 얹었다`});}
