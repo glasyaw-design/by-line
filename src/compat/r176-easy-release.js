@@ -82,13 +82,19 @@ function monSnap76(){return {eval:+S.eval||0,fame:+S.fame||0,trust:+S.trust||0,h
   if(cy>=28&&!rv.ret76){rv.ret76=1;Q.push(()=>openModal('라이벌의 은퇴',`<p class="lede">${jo2(esc(rv.name),'이','가')} ${esc(ro.n)}에서 펜을 내려놓는다. 송별회 자리에 나도 초대받았다.</p><p>"너 때문에 여기까지 왔다." 술잔이 오갔다.</p><p class="hint">맞대결 ${rv.wins||0}번 졌다는 걸 그는 기억하고 있었다.</p>`,[{label:'잔을 부딪친다',fn:()=>{try{apply({fame:.5});}catch(e){}const nr=makeRival();S.rival=nr;log(`라이벌 ${rv.name} 은퇴 · 새 라이벌 ${nr.name}`);toast(`업계엔 새 얼굴이 올라온다 — ${nr.name}`);}}]));}
  }catch(e){}return r;};}
 
-// ===== B3 연말 기자상 ↔ 몸값: 수상하면 2년간 연봉이 오르고 스카우트 전화가 온다 =====
+// ===== B3 연말 기자상 → 이름값: 수상하면 2년간 제보가 찾아오고, 첫 반년은 행동력 +1, 스카우트 전화가 온다 =====
+// (예전 1.76 시험판의 연봉 인상 S.awPay76은 이름값 S.awFx76로 바꿔 읽는다)
+function awFx76(){try{if(S&&S.awPay76&&!S.awFx76){const A=S.awPay76;S.awFx76={t:A.until-YW*2,until:A.until,big:A.big?1:0};}delete S.awPay76;const A=S&&S.awFx76;return A&&S.turn<A.until?A:null;}catch(e){return null;}}
 {const _aj76=awardJudge66;awardJudge66=function(c){const a0=S.awards||0,b0=S.awBig66||0;const r=_aj76.apply(this,arguments);try{const big=(S.awBig66||0)>b0,won=(S.awards||0)>a0;
-  if(won){S.awPay76={k:big?.06:.03,until:S.turn+YW*2,big:big?1:0};const pc=big?6:3;setTimeout(()=>{try{toast(`기자상 ${big?'대상':'본상'} — 앞으로 2년 연봉 +${pc}% · 업계가 이름을 기억한다`);}catch(e){}},600);
+  if(won){S.awFx76={t:S.turn,until:S.turn+YW*2,big:big?1:0};setTimeout(()=>{try{toast(`기자상 ${big?'대상':'본상'} — 2년 동안 제보가 찾아오고, 다음 ${jo2(big?'1년':'반년','은','는')} 행동력 +1`);}catch(e){}},600);
     if(!S.founder&&S.rank>=1&&S.rank<=5&&chance(big?.7:.35))S.awScout76=S.turn+R(4,8);}}catch(e){}return r;};}
-{const _po76=payOf;payOf=function(o,rank){const v=_po76.apply(this,arguments);try{const A=S&&S.awPay76;if(A&&S.turn<A.until&&(rank===undefined||rank===S.rank))return Math.round(v*(1+A.k)/5)*5;}catch(e){}return v;};}
-{const _om76a=orgMonth;orgMonth=function(lines){const r=_om76a.apply(this,arguments);try{if(S&&S.phase==='game'&&S.awScout76&&S.turn>=S.awScout76&&!S.founder){S.awScout76=null;const want=o=>clamp(S.rank+(o.p<=OUT().p?1:0),1,5);const cand=OUTLETS.filter(o=>o.id!==S.outlet&&!o.closed&&!o.custom&&o.p>=OUT().p&&xferRank(o,want(o))>=S.rank);if(cand.length){const o=pick(cand);const rr=xferRank(o,want(o));
-  Q.push(()=>openModal('수상 뒤 걸려온 전화',`<p class="lede">${esc(o.n)} 편집국장이 직접 전화했다. "올해 기자상 봤습니다. ${ro2(rankName(rr,o))} 모시고 싶어요."</p><p class="hint">상을 받은 기자는 몸값이 오른다. 남으면 회사가 처우로 붙잡는다.</p>`,[{label:'옮긴다',sub:`${o.n} ${rankName(rr,o)}`,fn:()=>{transfer(o,rr);}},{label:'남는다 — 대신 처우를 올려 달라고 한다',sub:'연봉 조금↑ · 평가↑',fn:()=>{if(S.awPay76)S.awPay76.k+=.03;toast(apply({eval:1}));}}]));}}}catch(e){}return r;};}
+// 행동력 +1: 본상은 반년, 대상은 1년
+{const _ap76=apParts;apParts=function(){const p=_ap76.apply(this,arguments);try{const A=awFx76();if(A&&S.turn-A.t<(A.big?YW:YW/2))p.push([A.big?'기자상 대상':'기자상 수상',1]);}catch(e){}return p;};}
+// 제보: 상을 보고 찾아오는 사람들 (본상 25% · 대상 40% · 아이템이 너무 쌓였으면 쉰다)
+{const _om76a=orgMonth;orgMonth=function(lines){const r=_om76a.apply(this,arguments);try{if(!S||S.phase!=='game'||S.story)return r;const A=awFx76();
+  if(A&&S.items&&S.items.length<9&&chance(A.big?.4:.25)){const it=makeItem(S.dept,{excl:chance(A.big?.6:.4),mult:A.big?1.12:1.05,pre:1});S.items.push(it);const t=`기자상 기사를 보고 찾아온 제보 — 「${it.title}」`;if(Array.isArray(lines))lines.push({c:'g',t});else toast(t);log(t);}
+  if(S.awScout76&&S.turn>=S.awScout76&&!S.founder){S.awScout76=null;const want=o=>clamp(S.rank+(o.p<=OUT().p?1:0),1,5);const cand=OUTLETS.filter(o=>o.id!==S.outlet&&!o.closed&&!o.custom&&o.p>=OUT().p&&xferRank(o,want(o))>=S.rank);if(cand.length){const o=pick(cand);const rr=xferRank(o,want(o));
+  Q.push(()=>openModal('수상 뒤 걸려온 전화',`<p class="lede">${esc(o.n)} 편집국장이 직접 전화했다. "올해 기자상 봤습니다. ${ro2(rankName(rr,o))} 모시고 싶어요."</p><p class="hint">남으면 회사가 붙잡으려고 기획 하나를 통째로 맡긴다.</p>`,[{label:'옮긴다',sub:`${o.n} ${rankName(rr,o)}`,fn:()=>{transfer(o,rr);}},{label:'남는다 — 대신 하고 싶던 기획을 맡는다',sub:'단독 아이템 · 평가↑',fn:()=>{try{const it=makeItem(S.dept,{excl:true,mult:1.15,keyConf:true,pre:2});S.items.push(it);toast(`${apply({eval:1})} · 기획 「${it.title}」${jp(it.title,'을','를')} 맡았다`);}catch(e){toast(apply({eval:1}));}}}]));}}}catch(e){}return r;};}
 // 명예의 전당에 「기자상 대상」 표시
 {const _hr76=hallRun70;hallRun70=function(){const r=_hr76.apply(this,arguments);try{if(r)r.big=S.awBig66||0;}catch(e){}return r;};}
 
