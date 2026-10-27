@@ -159,3 +159,15 @@ ${web?`<p><a href="${PRIV_URL76}" target="_blank" rel="noopener">개인정보처
 function foot76(){try{if(!S||S.phase!=='title')return;const app=document.getElementById('app');if(!app||app.querySelector('.ft76'))return;const web=!inArtifact();
   const f=document.createElement('p');f.className='ft76';f.innerHTML=`${web?`<a href="${PRIV_URL76}" target="_blank" rel="noopener">개인정보처리방침</a>·`:''}<a data-cr76>만든 사람들 · 라이선스</a>`;app.appendChild(f);f.querySelector('[data-cr76]').onclick=ev=>{ev.preventDefault();credits76();};}catch(e){}}
 {const _rd74=render;render=function(){const r=_rd74.apply(this,arguments);try{foot76();svBar76();if(S&&S.phase==='game'){persist76();setTimeout(iosTip76,900);}}catch(e){}return r;};}
+// ---- 큰 화면 전환 버튼: 모바일 아래 「할 일·나·사람·회사」는 화면 너비를 나눠 크게, PC의 「나·사람·회사」 탭도 크게 ----
+(function(){try{const st=document.createElement('style');st.textContent=`
+@media (max-width:720px){
+ #mnav{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;padding:6px 8px max(6px,env(safe-area-inset-bottom,0px))!important}
+ #mnav button{min-height:64px!important;font-size:14px!important;gap:3px!important;border-radius:14px}
+ #mnav button i{font-size:25px!important}#mnav i .ic{width:27px!important;height:27px!important}
+ #mnav em{top:4px!important;right:calc(50% - 26px)!important;font-size:11.5px!important;min-width:19px!important;height:19px!important;line-height:19px!important}
+ body.mvon .wrap{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+}
+nav.tabs.tg{display:flex!important;gap:8px}
+nav.tabs.tg>button.tab{flex:1 1 0;min-height:56px;font-size:17px!important;justify-content:center;border-radius:14px}
+nav.tabs.tg>button.tab .ic{width:22px;height:22px}`;document.head.appendChild(st);}catch(e){}})();
