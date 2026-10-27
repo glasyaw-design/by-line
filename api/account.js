@@ -52,7 +52,7 @@ async function getDb() {
       r.on('error', () => {});
       await r.connect();
       mode = 'redis-url';
-      db = { async run(cmds) { const m = r.multi(); cmds.forEach((c) => m.addCommand(c.map(String))); return await m.exec(); } };
+      db = { async run(cmds) { const m = r.multi(); cmds.forEach((c) => m.addCommand(c.map(String))); return await m.exec(); }, async quit() { try { await r.quit(); } catch {} } };
     }
   } catch (err) { initErr = String(err && err.message || err).slice(0, 200); db = null; }
   return db;
@@ -61,13 +61,12 @@ const one = async (c) => (await db.run([c]))[0];
 
 // 비밀번호
 function hashPw(pw, salt) { return crypto.scryptSync(String(pw), salt, 32, { N: 16384, r: 8, p: 1 }).toString('hex'); }
-function samePw(pw, salt, h) { const a = Buffer.from(hashPw(pw, salt), 'hex'), b = Buffer.from(String(h || ''), 'hex'); return a.length === b.length && crypto.timingSafeEqual(a, b); }
+function samePw(pw, salt, h) { if (!salt || !h) return false; const a = Buffer.from(hashPw(pw, salt), 'hex'), b = Buffer.from(String(h || ''), 'hex'); return a.length === b.length && crypto.timingSafeEqual(a, b); }
 
 // 무차별 대입 막기: 키마다 창(초) 안에서 n번까지
 async function limited(key, n, win) {
   const k = P + 'rl:' + key;
-  const [c] = await db.run([['INCR', k]]);
-  if (Number(c) === 1) await one(['EXPIRE', k, String(win)]);
+  const [c] = await db.run([['INCR', k], ['EXPIRE', k, String(win), 'NX']]); // 같은 요청에서 만료를 건다 (사이에 끊겨도 영구 잠금이 없다)
   return Number(c) > n;
 }
 function ipOf(req) { return String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim().slice(0, 64) || 'x'; }
@@ -94,20 +93,27 @@ async function profile(id) {
 const HALL_MAX = 300;                              // 순위표에 남기는 사람 수
 const clean = (v, n) => String(v == null ? '' : v).replace(/[<>&"'`\\]/g, '').replace(/[\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
 const num = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));
+// 다른 플레이어 화면에 나가는 글: 욕설·광고·연락처는 걸러 낸다
+const BAD_RE = /시발|씨발|씨빨|ㅅㅂ|병신|ㅂㅅ|좆|개새|지랄|느금|애미|fuck|shit|sex|섹스|야동|http|www|\.com|\.kr|\.net|카톡|텔레그램|토토사이트|바카라|먹튀|010\d|\d{3,}-\d{3,}/i;
 const monthKey = () => { const d = new Date(Date.now() + 9 * 3600e3); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1; }; // 한국 시간 기준 달
+function recentMonths() { const L = []; const d = new Date(Date.now() + 9 * 3600e3); for (let i = 0; i < 4; i++) { const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 1)); L.push(x.getUTCFullYear() * 100 + x.getUTCMonth() + 1); } return L; }
 function hallEntry(r, uid, nick) {
-  const nm = clean(r.nm, 10).replace(/[^가-힣ㄱ-ㅎa-zA-Z0-9 ·]/g, '').trim() || '이름 없는 기자';
-  const yrs = num(r.yrs, 0, 60), ex = num(r.ex, 0, yrs * 20 + 5), aw = num(r.aw, 0, yrs + 2);
+  let nm = clean(r.nm, 10).replace(/[^가-힣ㄱ-ㅎa-zA-Z0-9 ·]/g, '').trim() || '이름 없는 기자';
+  let best = clean(r.best, 70).replace(/[^가-힣ㄱ-ㅎa-zA-Z0-9 ·,.!?\[\]()「」…%-]/g, '').trim();
+  if (BAD_RE.test(nm)) nm = '이름 없는 기자';
+  if (BAD_RE.test(best)) best = '';
+  // 현실적인 상한: 게임 한 판은 길어야 45년, 단독은 한 해 4개 남짓, 기자상은 세 해에 하나 꼴
+  const yrs = num(r.yrs, 0, 45), ex = num(r.ex, 0, yrs * 4 + 10), aw = num(r.aw, 0, Math.ceil(yrs / 3) + 2);
   // 점수는 게임의 계산식(직급·평판·신뢰·단독·기자상)으로 낼 수 있는 최대치까지만 받는다
   const scMax = 7 * 14 + 100 * 0.6 + 100 * 0.4 + ex * 2 + aw * 6;
   return { uid, nick: clean(nick, 12), nm, rn: clean(r.rn, 14), o: clean(r.o, 20), end: clean(r.end, 30), yrs, sc: num(r.sc, -500, scMax),
-    aw, ex, f: r.f ? 1 : 0, story: r.story ? 1 : 0, best: clean(r.best, 70), dept: clean(r.dept, 12), t: Date.now() };
+    aw, ex, f: r.f ? 1 : 0, story: r.story ? 1 : 0, best, dept: clean(r.dept, 12), t: Date.now() };
 }
-async function hallRead(key, n) {
+async function hallRead(key, n, hkey) {
   const flat = (await one(['ZREVRANGE', key, '0', String(n - 1), 'WITHSCORES'])) || [];
   const ids = []; for (let i = 0; i < flat.length; i += 2) ids.push(String(flat[i]));
   if (!ids.length) return [];
-  const raw = await db.run(ids.map((u) => ['HGET', P + 'hall:e', u]));
+  const raw = await db.run(ids.map((u) => ['HGET', hkey || P + 'hall:e', u]));
   return raw.map((x) => { try { return JSON.parse(x); } catch { return null; } }).filter(Boolean);
 }
 
@@ -122,12 +128,13 @@ export default async function handler(req, res) {
   if (!c) return res.status(503).json({ error: '계정 서버가 아직 준비되지 않았다' });
   let b = req.body || {};
   if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
+  if (!b || typeof b !== 'object' || Array.isArray(b)) b = {};
   const a = String(b.a || '');
   const fail = (code, msg) => res.status(code).json({ error: msg });
   try {
     // ---- 가입 ----
     if (a === 'register') {
-      const id = String(b.id || '').toLowerCase().trim(), pw = String(b.pw || ''), nick = cleanNick(b.nick) || id;
+      const id = String(b.id || '').toLowerCase().trim(), pw = String(b.pw || ''), nick = cleanNick(b.nick) || ('기자' + crypto.randomInt(1000, 9999)); // 닉네임을 비우면 아이디를 드러내지 않는다
       if (!ID_RE.test(id)) return fail(400, '아이디는 영문 소문자·숫자·_ 4~16자');
       if (pw.length < 6 || pw.length > 64) return fail(400, '비밀번호는 6~64자');
       if (await limited('reg:' + ipOf(req), 5, 3600)) return fail(429, '가입 시도가 너무 많다. 잠시 뒤에 다시');
@@ -149,14 +156,17 @@ export default async function handler(req, res) {
     // ---- 누구나: 전체 순위 · 다른 세계의 기자 ----
     if (a === 'hall-top') {
       if (await limited('ht:' + ipOf(req), 120, 600)) return fail(429, '잠시 뒤에 다시');
-      const key = b.scope === 'month' ? P + 'hall:m:' + monthKey() : P + 'hall:all';
-      return res.status(200).json({ ok: true, list: (await hallRead(key, 50)).map(({ t, ...x }) => x) });
+      const mo = b.scope === 'month', mk = monthKey();
+      const me = await userOf(req);
+      const L = await hallRead(mo ? P + 'hall:m:' + mk : P + 'hall:all', 50, mo ? P + 'hall:em:' + mk : P + 'hall:e');
+      return res.status(200).json({ ok: true, list: L.map(({ t, uid, ca, ...x }) => ({ ...x, mine: !!(me && me.id === uid) })) }); // 아이디는 내보내지 않는다
     }
     if (a === 'ghosts') {
       if (await limited('gh:' + ipOf(req), 60, 600)) return fail(429, '잠시 뒤에 다시');
       const L = await hallRead(P + 'hall:recent', 60);
-      const pickN = L.filter((x) => x.yrs >= 5 && !x.story).sort(() => Math.random() - 0.5).slice(0, 8);
-      return res.status(200).json({ ok: true, list: pickN.map((x) => ({ uid: x.uid, nm: x.nm, rn: x.rn, o: x.o, end: x.end, yrs: x.yrs, sc: x.sc, best: x.best })) });
+      const me = await userOf(req), old = Date.now() - 3 * 24 * 3600e3;
+      const pickN = L.filter((x) => x.yrs >= 5 && !x.story && x.nm !== '이름 없는 기자' && (!me || me.id !== x.uid) && (x.ca || 0) < old).sort(() => Math.random() - 0.5).slice(0, 8);
+      return res.status(200).json({ ok: true, list: pickN.map((x) => ({ nm: x.nm, rn: x.rn, o: x.o, end: x.end, yrs: x.yrs, sc: x.sc, best: x.best })) });
     }
     // ---- 여기부터는 로그인한 사람만 ----
     const u = await userOf(req);
@@ -176,20 +186,21 @@ export default async function handler(req, res) {
         await db.run([['HSET', P + 'u:' + id, 'pw', hashPw(npw, ns), 'salt', ns], ...kill, ['DEL', P + 'sl:' + id]]);
         return res.status(200).json({ ok: true, token: await newSession(id) }); // 다른 기기는 모두 로그아웃
       }
-      await db.run([...kill, ['DEL', P + 'sl:' + id, P + 'u:' + id, P + 'meta:' + id, ...SLOTS.map((s) => P + 'sv:' + id + ':' + s)], ['DECR', P + 'count'], ['ZREM', P + 'hall:all', id], ['ZREM', P + 'hall:recent', id], ['ZREM', P + 'hall:m:' + monthKey(), id], ['HDEL', P + 'hall:e', id]]);
+      await db.run([...kill, ['DEL', P + 'sl:' + id, P + 'u:' + id, P + 'meta:' + id, ...SLOTS.map((s) => P + 'sv:' + id + ':' + s)], ['DECR', P + 'count'], ['ZREM', P + 'hall:all', id], ['ZREM', P + 'hall:recent', id], ['HDEL', P + 'hall:e', id], ...recentMonths().flatMap((m) => [['ZREM', P + 'hall:m:' + m, id], ['HDEL', P + 'hall:em:' + m, id]])]);
       return res.status(200).json({ ok: true });
     }
     // ---- 명예의 전당에 내 판 올리기: 한 사람은 가장 높은 판 하나만 순위에 남는다 ----
     if (a === 'hall-put') {
       const r = b.run || {}; if (!r.nm || r.sc == null) return fail(400, '판 기록이 없다');
       if (await limited('hp:' + id, 6, 3600)) return fail(429, '잠시 뒤에 다시');
-      const nick = (await one(['HGET', P + 'u:' + id, 'nick'])) || id;
-      const e = hallEntry(r, id, nick), mk = P + 'hall:m:' + monthKey();
+      const [nick, created] = await db.run([['HGET', P + 'u:' + id, 'nick'], ['HGET', P + 'u:' + id, 'created']]);
+      const e = hallEntry(r, id, nick || '기자'), mk = P + 'hall:m:' + monthKey(), mh = P + 'hall:em:' + monthKey();
+      e.ca = Number(created || Date.now());
       const [prevAll, prevM] = await db.run([['ZSCORE', P + 'hall:all', id], ['ZSCORE', mk, id]]);
       const cmds = [['ZADD', P + 'hall:recent', String(Date.now()), id], ['ZREMRANGEBYRANK', P + 'hall:recent', '0', '-201']];
       const better = prevAll == null || e.sc > Number(prevAll);
       if (better) cmds.push(['ZADD', P + 'hall:all', String(e.sc), id], ['HSET', P + 'hall:e', id, JSON.stringify(e)]);
-      if (prevM == null || e.sc > Number(prevM)) cmds.push(['ZADD', mk, String(e.sc), id], ['EXPIRE', mk, String(100 * 24 * 3600)]);
+      if (prevM == null || e.sc > Number(prevM)) cmds.push(['ZADD', mk, String(e.sc), id], ['HSET', mh, id, JSON.stringify(e)], ['EXPIRE', mk, String(100 * 24 * 3600)], ['EXPIRE', mh, String(100 * 24 * 3600)]);
       cmds.push(['ZREMRANGEBYRANK', P + 'hall:all', '0', String(-HALL_MAX - 1)]);
       await db.run(cmds);
       return res.status(200).json({ ok: true, best: better });
@@ -224,6 +235,7 @@ export default async function handler(req, res) {
     }
     return fail(400, '모르는 동작');
   } catch (err) {
+    try { if (db && db.quit) await db.quit(); } catch {}
     db = null;
     return fail(500, '서버 오류 — 잠시 뒤에 다시');
   }

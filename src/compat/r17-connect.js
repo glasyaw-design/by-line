@@ -39,7 +39,7 @@ function demMonth70(lines){const s=S.spec63;if(!s)return;const dm=dem70(),en=dem
   if(dm>=1.25){s.ex=Math.min(100,(s.ex||0)+.3);if(chance(.25)){const fee=Math.round((60+(s.lv||0)*60)*dm);S.money+=fee;lines.push({c:'g',t:`${en||'시대'} 특집 원고·출연 청탁 — ${fee}만 원`});}}}
 {const _po70=payOf;payOf=function(o,rank){const v=_po70.apply(this,arguments);try{if(isSpec()&&(rank===undefined||rank===S.rank)){const dm=dem70();if(dm>1.05)return Math.round(v*(1+(dm-1)*.35)/5)*5;}}catch(e){}return v;};}
 // 전문기자 제안 때 「지금 뜨는 분야」 안내
-{const _om70c=openModal;openModal=function(t,b,c){try{if(/전문기자/.test(String(t||''))&&/제안|트랙/.test(String(t||''))&&!isSpec()){const d=S.dept,dm=dem70(d),en=demEra70(d);if(dm>=1.2&&en)b=String(b||'')+`<p class="hint">지금은 ${esc(en)} — ${esc(DEPTS[d]?DEPTS[d].n:'')} 분야의 몸값이 오른다 (월급·기사 파급력↑)</p>`;}}catch(e){}return _om70c.call(this,t,b,c);};}
+{const _om70c=openModal;openModal=function(t,b,c){try{if(/전문기자/.test(String(t||''))&&/제안|트랙/.test(String(t||''))&&!isSpec()){const d=S.dept,dm=dem70(d),en=demEra70(d);if(dm>=1.2&&en)b=String(b||'')+`<p class="hint">지금은 ${esc(en)} — ${esc(DEPTS[d]?DEPTS[d].n.replace(/부$/,''):'')} 전문기자의 몸값이 오른다 (월급·기사 파급력↑)</p>`;}}catch(e){}return _om70c.call(this,t,b,c);};}
 {const _ach70=achCheck67;achCheck67=function(){const r=_ach70.apply(this,arguments);try{if(S&&S.spec63&&(S.clips||[]).some(c=>c.hot70&&c.imp>=80))ach('hot70');}catch(e){}return r;};}
 
 // ---------- 2) 지난 판의 내가 이번 판에 나온다 · 후계자는 사수가 된다 ----------
@@ -49,8 +49,8 @@ function lastRun70(){try{const R=(typeof META==='object'&&META&&META.runs)||[];r
   if(S.heirMet66&&!S.heirSasu70){const h=(META.heirs||[])[0];const c=h&&colBy(S.founder?'mentor':'senior');if(c&&c.name===h.nm){S.heirSasu70=S.turn;c.rel=Math.max(c.rel||0,50);try{ach('heirSasu70');}catch(e){}}}
   if(S.heirSasu70&&S.turn-S.heirSasu70<YW&&S.m70h!==Math.floor(S.turn/4)){S.m70h=Math.floor(S.turn/4);try{gain(pick(['inv','wri','ver']),.25);}catch(e){}}
   // 지난 판의 나: 1년 차 봄 이후, 한 번
-  if(!S.meet70&&S.turn>=10&&chance(.2)){const L=lastRun70();S.meet70=1;if(L)Q.push(()=>meet70(L));}}catch(e){}return r;};}
-function meet70(L){const o=OUTLETS.find(x=>x.id===L.oid);const here=o&&o.id===S.outlet;const ret=/퇴임|정년|은퇴|명예/.test(String(L.end))||L.yrs>=20;
+  if(!S.meet70&&S.meet70q!==S.turn&&S.turn>=10&&chance(.2)){const L=lastRun70();if(!L)S.meet70=1;else{S.meet70q=S.turn;Q.push(()=>meet70(L));}}}catch(e){}return r;};}
+function meet70(L){S.meet70=1;const o=OUTLETS.find(x=>x.id===L.oid);const here=o&&o.id===S.outlet;const ret=/퇴임|정년|은퇴|명예/.test(String(L.end))||L.yrs>=20;
   const who=`${esc(L.o)} ${here?'':'출신 '}${esc(L.rn)} ${esc(L.nm)}`;
   openModal('명함 한 장',`<p class="lede">점심 자리에 낯선 손님이 끼었다. 명함에는 <b>${who}</b>. 기자 생활 ${L.yrs}년을 마친 사람이다${L.end?` (${esc(L.end)})`:''}.</p><p>"자네 기사 봤어. 나도 그 나이 때 그렇게 썼지."${L.best?` 그의 대표작은 「${esc(L.best.h)}」 — 기자들 사이에선 아직도 회자된다.`:''}</p><p class="hint">지난 판의 당신이다.</p>`,[
    {label:'밥을 사고 취재원으로 모신다',sub:'오래 가는 취재원 · 가끔 큰 귀띔',fn:()=>{const s={id:uid(),name:L.nm,role:`${L.o} ${ret?'전 ':''}${L.rn}`,d:S.dept,trust:60,pers:pick(Object.keys(PERS)),last:-9,fresh:S.turn,me70:1};S.sources.push(s);log(`취재원: ${L.nm} — 지난 판의 나`);try{ach('meet70');}catch(e){}toast(`${jo2(L.nm,'이','가')} 취재원이 됐다`);}},
@@ -74,14 +74,14 @@ function topWatch70(s){const nm=esc(s.name),r=esc(s.top70.r);const d=s.d||S.dept
 
 // ---------- 5) 명예의 전당 (모든 플레이어) · 7) 다른 세계의 기자 ----------
 function hallRun70(){try{const r=META.runs[0];if(!r)return null;return {id:r.id,nm:r.nm,rn:r.rn,o:r.o,oid:r.oid,end:String(r.end||''),yrs:r.yrs,age:r.age,sc:r.sc,aw:r.aw,ex:r.ex,f:r.f,best:r.best?r.best.h:'',dept:r.dept||'',sty:r.sty||'',d:r.d};}catch(e){return null;}}
-function hallSend70(){try{if(!S||S.phase!=='end'||!S.metaDone||S.hall70||S.dev||S.devUsed||!accOn()||!accGet())return;const r0=META&&META.runs&&META.runs[0];if(!r0||r0.nm!==S.name||r0.yrs!==years())return;S.hall70=1;const run=hallRun70();if(run&&run.yrs>=1)accApi('hall-put',{run}).then(x=>{try{toast(x.best?'명예의 전당에 이름을 올렸다':'명예의 전당 — 내 최고 기록은 그대로다');}catch(e){}}).catch(()=>{S.hall70=0;});}catch(e){}}
+function hallSend70(){try{if(!S||S.phase!=='end'||!S.metaDone||S.hall70||S.dev||S.devUsed||S.story||!accOn()||!accGet())return;if(S.hall70f&&(S.hall70f.n>=3||Date.now()-S.hall70f.t<60000))return;const r0=META&&META.runs&&META.runs[0];if(!r0||r0.nm!==S.name||r0.yrs!==years())return;S.hall70=1;const run=hallRun70();if(run&&run.yrs>=1)accApi('hall-put',{run}).then(x=>{try{toast(x.best?'명예의 전당에 이름을 올렸다':'명예의 전당 — 내 최고 기록은 그대로다');}catch(e){}}).catch(()=>{S.hall70=0;S.hall70f={t:Date.now(),n:((S.hall70f&&S.hall70f.n)||0)+1};});}catch(e){}}
 {const _rd70=render;render=function(){const r=_rd70.apply(this,arguments);hallSend70();return r;};}
-async function hallTop70(scope){const r=await fetch('/api/account',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({a:'hall-top',scope})});const j=await r.json();if(!j.ok)throw new Error(j.error||'불러오지 못했다');return j.list||[];}
+async function hallTop70(scope){const r=await fetch('/api/account',{method:'POST',headers:Object.assign({'content-type':'application/json'},accGet()?{authorization:'Bearer '+accGet().tok}:{}),body:JSON.stringify({a:'hall-top',scope})});const j=await r.json();if(!j.ok)throw new Error(j.error||'불러오지 못했다');return j.list||[];}
 async function hallWorld70(scope){scope=scope||'all';const nav=`<div class="acat">${[['all','역대'],['month','이번 달']].map(([k,n])=>`<button class="achip" data-hw="${k}" aria-pressed="${k===scope}" style="--c:var(--sodium)">${n}</button>`).join('')}<button class="achip" data-hl="runs" style="--c:var(--mute)">← 내 기록실</button></div>`;
   if(!accOn()){openModal('전체 순위',nav+'<p class="empty">전체 순위는 배포된 사이트에서만 볼 수 있다.</p>',[{label:'닫기',cls:'ghost'}]);bindHall70();return;}
   openModal('전체 순위',nav+'<p class="hint">불러오는 중…</p>',[{label:'닫기',cls:'ghost'}]);bindHall70();
   let L;try{L=await hallTop70(scope);}catch(e){openModal('전체 순위',nav+`<p class="warn keep">${esc(e.message)}</p>`,[{label:'닫기',cls:'ghost'}]);bindHall70();return;}
-  const me=accGet();const rows=L.map((r,i)=>`<div class="card hrun${me&&r.uid===me.id?' mine70':''}"><div class="t">${i+1}. ${esc(r.nm)} · ${esc(r.rn)} <small>${esc(r.o)}</small>${me&&r.uid===me.id?' <span class="tag ok">나</span>':''}</div><div class="meta"><span>점수 ${r.sc}</span><span>${r.yrs}년</span><span>단독 ${r.ex}</span><span>기자상 ${r.aw}</span><span>${esc(r.end)}</span>${r.nick?`<span>플레이어 ${esc(r.nick)}</span>`:''}</div>${r.best?`<p class="hint" style="margin:4px 0 0">대표작 「${esc(r.best)}」</p>`:''}</div>`).join('');
+  const me=accGet();const rows=L.map((r,i)=>`<div class="card hrun${r.mine?' mine70':''}"><div class="t">${i+1}. ${esc(r.nm)} · ${esc(r.rn)} <small>${esc(r.o)}</small>${r.mine?' <span class="tag ok">나</span>':''}</div><div class="meta"><span>점수 ${r.sc}</span><span>${r.yrs}년</span><span>단독 ${r.ex}</span><span>기자상 ${r.aw}</span><span>${esc(r.end)}</span>${r.nick?`<span>플레이어 ${esc(r.nick)}</span>`:''}</div>${r.best?`<p class="hint" style="margin:4px 0 0">대표작 「${esc(r.best)}」</p>`:''}</div>`).join('');
   openModal('전체 순위',nav+`<p class="hint">로그인한 플레이어가 끝낸 판이 올라온다. 한 사람은 가장 높은 판 하나만.${me?'':' 로그인하면 내 판도 올라간다.'}</p>`+(rows||'<p class="empty">아직 올라온 판이 없다. 첫 이름이 되어 보자.</p>'),[...(me?[]:[{label:'로그인하고 내 판 올리기',fn:()=>{accMenu();return false;}}]),{label:'닫기',cls:'ghost'}]);bindHall70();}
 function bindHall70(){document.querySelectorAll('#mb [data-hw]').forEach(b=>b.onclick=()=>hallWorld70(b.dataset.hw));document.querySelectorAll('#mb [data-hl]').forEach(b=>b.onclick=()=>hallOpen(b.dataset.hl));}
 // 기록실에 「전체 순위」 탭을 단다 (hallOpen은 뒤 파일에 있어 감싸지 않고 창이 열릴 때 덧붙인다)
@@ -89,23 +89,27 @@ function bindHall70(){document.querySelectorAll('#mb [data-hw]').forEach(b=>b.on
 // 다른 세계의 기자: 다른 플레이어가 끝낸 판의 주인공이 업계의 전설로 나온다
 const GH_K='byline-ghosts';
 function ghostsGet70(){try{const v=JSON.parse(localStorage.getItem(GH_K)||'null');return v&&Array.isArray(v.L)?v:null;}catch(e){return null;}}
-async function ghostsFetch70(){if(!accOn())return;const c=ghostsGet70();if(c&&Date.now()-c.t<6*3600e3)return;try{const r=await fetch('/api/account',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({a:'ghosts'})});const j=await r.json();if(j.ok)localStorage.setItem(GH_K,JSON.stringify({t:Date.now(),L:j.list||[]}));}catch(e){}}
+async function ghostsFetch70(){if(!accOn())return;const c=ghostsGet70();if(c&&Date.now()-c.t<6*3600e3)return;try{const r=await fetch('/api/account',{method:'POST',headers:Object.assign({'content-type':'application/json'},accGet()?{authorization:'Bearer '+accGet().tok}:{}),body:JSON.stringify({a:'ghosts'})});const j=await r.json();if(j.ok)localStorage.setItem(GH_K,JSON.stringify({t:Date.now(),L:j.list||[]}));}catch(e){}}
 setTimeout(()=>{ghostsFetch70();},4000);
-function ghostPick70(){const c=ghostsGet70();if(!c||!c.L.length)return null;const me=accGet();const L=c.L.filter(g=>g&&g.nm&&g.nm!==S.name&&!(me&&g.uid===me.id));return L.length?pick(L):null;}
+function ghostPick70(){const c=ghostsGet70();if(!c||!c.L.length)return null;const me=accGet();const L=c.L.filter(g=>g&&g.nm&&g.nm!==S.name);return L.length?pick(L):null;}
 {const _om70h=orgMonth;orgMonth=function(lines){const r=_om70h.apply(this,arguments);try{if(!c70()||S.dev)return r;
   if(!S.gh70&&!S.gh70no&&S.turn>=16&&chance(.12)){const g=ghostPick70();if(!g){if(S.turn>YW*3)S.gh70no=1;return r;}
     const L=OUTLETS.filter(x=>x.id!==S.outlet&&!x.closed&&!x.custom&&!x.npc);const o=L.find(x=>x.n===g.o)||pick(L.filter(x=>Math.abs(x.p-OUT().p)<=1))||pick(L);if(!o)return r;
-    S.gh70={nm:g.nm,o:o.id,rn:g.rn,best:g.best,end:g.end,sk:clamp(48+(g.sc||100)/12,52,74),w:0,l:0,t0:S.turn};Q.push(()=>ghostMeet70());}
+    S.gh70={nm:g.nm,o:o.id,rn:g.rn,best:g.best,end:g.end,sk:clamp(48+(g.sc||100)/12,52,74),w:0,l:0,t0:S.turn,q:S.turn};Q.push(()=>ghostMeet70());}
+  if(S.gh70&&!S.gh70.ok&&S.gh70.q!==S.turn){S.gh70.q=S.turn;Q.push(()=>ghostMeet70());}
   if(S.gh70&&S.gh70.ok&&S.m70g!==Math.floor(S.turn/4)){S.m70g=Math.floor(S.turn/4);ghostMonth70(lines);}}catch(e){}return r;};}
 function ghostOut70(){const G=S.gh70;const o=G&&OUTLETS.find(x=>x.id===G.o);return o?o.n:'경쟁사';}
-function ghostMeet70(){const G=S.gh70;openModal('업계의 전설',`<p class="lede">${esc(ghostOut70())}의 <b>${esc(G.nm)}</b>. 기자실에 들어서자 공기가 달라졌다.${G.best?` 그의 「${esc(G.best)}」${jp(esc(G.best),'은','는')} 교재처럼 돌려 읽힌다.`:''}</p><p class="hint">다른 플레이어가 끝낸 판의 주인공이 이 세계의 전설로 왔다.</p>`,[
+function ghostMeet70(){const G=S.gh70;if(!G||G.ok)return;openModal('업계의 전설',`<p class="lede">${esc(ghostOut70())}의 <b>${esc(G.nm)}</b>. 기자실에 들어서자 공기가 달라졌다.${G.best?` 그의 「${esc(G.best)}」${jp(esc(G.best),'은','는')} 교재처럼 돌려 읽힌다.`:''}</p><p class="hint">다른 플레이어가 끝낸 판의 주인공이 이 세계의 전설로 왔다.</p>`,[
    {label:'넘어서겠다고 다짐한다',sub:'몇 년간 같은 기사를 두고 다툰다 · 이기면 평판↑↑',fn:()=>{G.ok=1;G.mode='riv';log(`전설과의 승부: ${G.nm}`);}},
    {label:'찾아가 배운다',sub:'취재력·필력 성장 · 가끔 조언',fn:()=>{G.ok=1;G.mode='learn';try{gain('inv',.8);gain('wri',.8);}catch(e){}toast(`"단독은 발로 쓰는 거야." — ${G.nm}`);}},
    {label:'신경 쓰지 않는다',cls:'ghost',fn:()=>{G.ok=1;G.mode='none';}}]);}
 function ghostMonth70(lines){const G=S.gh70;if(G.mode==='none'||S.turn-G.t0>YW*6||G.won||G.gone)return;if(G.mode==='riv'&&G.l>=8){G.gone=1;lines.push({c:'',t:`${G.nm}${jp(G.nm,'이','가')} 은퇴했다. 마지막 인터뷰에서 "요즘 후배들 중엔 ${S.name}${jp(S.name,'이','가')} 제일 무섭다"고 했다 (${G.w}승 ${G.l}패)`});apply({fame:.5});return;}
   if(G.mode==='learn'){if(chance(.15)){try{gain(pick(['inv','wri','ver']),.3);}catch(e){}lines.push({c:'g',t:`${G.nm}의 한마디 — "${pick(['제목에 형용사를 빼.','반론 없는 단독은 단독이 아니야.','현장 사진 한 장이 기사 열 줄이야.','취재원은 밥으로 사는 게 아니라 정확함으로 사.'])}"`});}return;}
   // 승부: 내 이번 달 단독과 그의 단독이 맞붙는다
-  const mine=(S.clips||[]).filter(c=>c.turn>=S.turn-4&&!c.staff&&(!c.by||c.by===S.name)&&(c.excl||(c.imp||0)>=60));const him=G.sk+R(-12,12)+Math.min(6,(S.turn-G.t0)/YW);
+  const mine=(S.clips||[]).filter(c=>c.turn>=S.turn-4&&c.turn<S.turn&&!c.staff&&(!c.by||c.by===S.name)&&(c.excl||(c.imp||0)>=60));const him=G.sk+R(-12,12)+Math.min(6,(S.turn-G.t0)/YW);
   if(mine.length){const best=Math.max(...mine.map(c=>(c.imp||0)*.6+(c.q||0)*.4+(c.excl?8:0)))+(S.fame||0)/20;if(best>=him){G.w++;lines.push({c:'g',t:`${G.nm}보다 한발 앞섰다 — 업계가 내 단독을 먼저 인용한다 (${G.w}승 ${G.l}패)`});apply({fame:.6});if(G.w>=3&&!G.won){G.won=1;try{ach('legend70');}catch(e){}tick(`${OUT().n} ${S.name}, 「전설」 ${jo2(G.nm,'을','를')} 넘어서다`,1);Q.push(()=>openModal('전설을 넘어서',`<p class="lede">${esc(G.nm)}${jp(G.nm,'이','가')} 먼저 전화를 걸어왔다. "이번 건, 내가 졌네. 밥은 내가 사지."</p>${fxLine(apply({fame:3,eval:1.5}))}`,[{label:'좋다'}]));}}
     else{G.l++;lines.push({c:'',t:`${G.nm}의 기사가 더 컸다 — 같은 날 나온 내 단독이 묻혔다 (${G.w}승 ${G.l}패)`});apply({fame:-.2});}}
   else if(chance(.08)){G.l++;lines.push({c:'',t:`${ghostOut70()} ${G.nm}의 대형 단독 — 우리 데스크가 "우리는 뭐 했냐"고 묻는다 (${G.w}승 ${G.l}패)`});apply({eval:-.3});}}
+
+// 전문기자 트랙 창에 「협상(돈봉투)」 그림이 붙던 것 → 회의 그림
+try{ILL_MAP.unshift([/^(전문기자 제안|전문기자의 일|정기 인사 · 다음 자리)$/,'meeting']);}catch(e){}

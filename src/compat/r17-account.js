@@ -26,17 +26,19 @@ const ACC_SLOTN={auto:'자동 백업','1':'클라우드 1','2':'클라우드 2',
 let ACC_BUSY=0;
 async function accPut(slot,quiet){if(!S||(S.phase!=='game'&&S.phase!=='end')||S.dev)return false;const z=await accZip(JSON.stringify(S));await accApi('put',{slot,label:accLabel(),t:Date.now(),z});if(!quiet)toast(`${ACC_SLOTN[slot]}에 올렸다`);return true;}
 // ---- 기록실(업적·엔딩·판 기록) 합치기: 숫자는 큰 쪽, 목록은 합집합, 참/거짓은 하나라도 참이면 참 ----
-function accMerge(a,b){if(Array.isArray(a)&&Array.isArray(b)){const seen=new Set(),out=[];[...a,...b].forEach(x=>{const k=JSON.stringify(x);if(!seen.has(k)){seen.add(k);out.push(x);}});return out.length>400?out.slice(-400):out;}
-  if(a&&b&&typeof a==='object'&&typeof b==='object'){const o=Object.assign({},a);Object.keys(b).forEach(k=>{o[k]=k in a?accMerge(a[k],b[k]):b[k];});return o;}
+const ACC_LISTCAP={runs:40,heirs:5,legend:12,founded:20};
+function accKey(x){return x&&typeof x==='object'?(x.id?'id:'+x.id:x.nm&&(x.h||x.by)?'nm:'+x.nm+'|'+(x.h||x.by||''):JSON.stringify(x)):JSON.stringify(x);}
+function accMerge(a,b,key){if(Array.isArray(a)&&Array.isArray(b)){const seen=new Map();[...a,...b].forEach(x=>{const k=accKey(x);if(!seen.has(k))seen.set(k,x);});let out=[...seen.values()];if(key==='runs')out.sort((x,y)=>String(y.id||'').localeCompare(String(x.id||'')));const cap=ACC_LISTCAP[key]||400;return out.length>cap?out.slice(0,cap):out;}
+  if(a&&b&&typeof a==='object'&&typeof b==='object'){const o=Object.assign({},a);Object.keys(b).forEach(k=>{o[k]=k in a?accMerge(a[k],b[k],k):b[k];});return o;}
   if(typeof a==='number'&&typeof b==='number')return Math.max(a,b);if(typeof a==='boolean'||typeof b==='boolean')return !!(a||b);return b===undefined||b===null?a:(a===undefined||a===null?b:a);}
 let ACC_MT=null,ACC_MSYNC=0;
-async function accMetaSync(quiet){if(!accGet()||!accOn())return;try{const r=await accApi('meta-get');let M=META;if(r.z){try{M=accMerge(META,JSON.parse(await accUnzip(r.z)));}catch(e){}}
+async function accMetaSync(quiet){if(!accGet()||!accOn())return;try{const r=await accApi('meta-get');let M=META;if(r.z){try{M=accMerge(META,JSON.parse(await accUnzip(r.z)));}catch(e){if(!quiet)toast('서버 기록을 읽지 못했다 — 덮어쓰지 않는다');return;}}
   Object.keys(M).forEach(k=>{META[k]=M[k];});try{localStorage.setItem(META_KEY,JSON.stringify(META));}catch(e){}
   await accApi('meta-put',{z:await accZip(JSON.stringify(META))});ACC_MSYNC=Date.now();if(!quiet)toast('기록실을 합쳤다');}catch(e){if(!quiet)toast(e.message);}}
-{const _ms69=metaSave;metaSave=function(){const r=_ms69.apply(this,arguments);try{if(accGet()&&accOn()){clearTimeout(ACC_MT);ACC_MT=setTimeout(()=>{accZip(JSON.stringify(META)).then(z=>accApi('meta-put',{z})).catch(()=>{});},20000);}}catch(e){}return r;};}
+{const _ms69=metaSave;metaSave=function(){const r=_ms69.apply(this,arguments);try{if(accGet()&&accOn()){clearTimeout(ACC_MT);ACC_MT=setTimeout(()=>{accMetaSync(true);},20000);}}catch(e){}return r;};}
 // ---- 자동 백업: 로그인하면 석 달마다(실제로는 2분에 한 번까지) 「자동 백업」 칸에 올린다 ----
 let ACC_LAST={turn:-99,t:0};
-{const _sg69=saveGame;saveGame=function(){const r=_sg69.apply(this,arguments);try{if(accGet()&&accOn()&&S&&!S.dev&&!ACC_BUSY&&(S.phase==='end'||(S.phase==='game'&&S.turn-ACC_LAST.turn>=12))&&Date.now()-ACC_LAST.t>120000){ACC_LAST={turn:S.turn,t:Date.now()};ACC_BUSY=1;accPut('auto',true).catch(()=>{}).finally(()=>{ACC_BUSY=0;});}}catch(e){}return r;};}
+{const _sg69=saveGame;saveGame=function(){const r=_sg69.apply(this,arguments);try{if(accGet()&&accOn()&&S&&!S.dev&&!ACC_BUSY&&((S.turn<ACC_LAST.turn&&(ACC_LAST={turn:-99,t:0})),true)&&(S.phase==='end'||(S.phase==='game'&&S.turn-ACC_LAST.turn>=12))&&Date.now()-ACC_LAST.t>120000){ACC_LAST={turn:S.turn,t:Date.now()};ACC_BUSY=1;accPut('auto',true).catch(()=>{}).finally(()=>{ACC_BUSY=0;});}}catch(e){}return r;};}
 // ---- 계정 창 ----
 const ACC_IN='width:100%;margin:4px 0 10px;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px';
 function accVal(id){const e=document.getElementById(id);return e?e.value:'';}
@@ -76,7 +78,7 @@ async function accCloud(){const inGame=S&&(S.phase==='game'||S.phase==='end')&&!
   const up=slot=>async()=>{try{await accPut(slot);}catch(e){toast(e.message);}accCloud();};
   openModal('클라우드 저장',`<p>서버에 저장해 두면 다른 기기에서 로그인해 이어 할 수 있다. 「자동 백업」은 석 달마다 저절로 바뀐다.</p>${L.map(row).join('')}`,
    [...(inGame?['1','2','3'].map(s=>{const x=L.find(y=>y.slot===s);return {label:`지금 게임을 ${ACC_SLOTN[s]}에 올리기${x&&x.t?' (덮어쓰기)':''}`,fn:()=>{up(s)();return false;}};}):[]),
-    ...L.filter(s=>s.t).map(s=>({label:`${ACC_SLOTN[s.slot]} 불러오기`,sub:s.label,fn:()=>{accLoad(s.slot);return false;}})),
+    ...L.filter(s=>s.t).map(s=>({label:`${ACC_SLOTN[s.slot]} 불러오기`,sub:esc(s.label),fn:()=>{accLoad(s.slot);return false;}})),
     {label:'닫기',cls:'ghost'}]);}
 async function accLoad(slot){try{toast('내려받는 중…');const r=await accApi('get',{slot});const data=JSON.parse(await accUnzip(r.z));if(!data||!data.phase||!data.outlet)throw new Error('저장 파일이 올바르지 않다');closeModal();loadInto(data);ACC_LAST={turn:S.turn,t:Date.now()};}catch(e){toast(e.message);}}
 // ---- 메뉴·저장 창·첫 화면에 「계정」을 단다 ----
@@ -88,6 +90,6 @@ function accTitleBtn(){try{if(!S||S.phase!=='title'||!accOn())return;const ld=do
 // 페이지를 열 때: 로그인이 살아 있는지 확인하고 기록실을 합친다
 setTimeout(()=>{try{if(accGet()&&accOn())accApi('me').then(r=>{const u=accGet();if(u)accSet(Object.assign({},u,{nick:r.user.nick}));return accMetaSync(true);}).then(()=>{try{if(S&&S.phase==='title')render();}catch(e){}}).catch(()=>{try{if(S&&S.phase==='title')render();}catch(e){}});}catch(e){}},2500);
 // 창을 닫거나 다른 앱으로 갈 때: 진행 중인 판을 한 번 더 올린다
-document.addEventListener('visibilitychange',()=>{try{if(document.visibilityState==='hidden'&&accGet()&&accOn()&&S&&S.phase==='game'&&!S.dev&&S.turn!==ACC_LAST.turn&&!ACC_BUSY){ACC_LAST={turn:S.turn,t:Date.now()};accZip(JSON.stringify(S)).then(z=>fetch('/api/account',{method:'POST',keepalive:z.length<60000,headers:{'content-type':'application/json',authorization:'Bearer '+accGet().tok},body:JSON.stringify({a:'put',slot:'auto',label:accLabel(),t:Date.now(),z})})).catch(()=>{});}}catch(e){}});
+document.addEventListener('visibilitychange',()=>{try{if(document.visibilityState==='hidden'&&accGet()&&accOn()&&S&&S.phase==='game'&&!S.dev&&S.turn!==ACC_LAST.turn&&!ACC_BUSY){ACC_LAST={turn:S.turn,t:Date.now()};ACC_BUSY=1;setTimeout(()=>{ACC_BUSY=0;},15000);accZip(JSON.stringify(S)).then(z=>fetch('/api/account',{method:'POST',keepalive:z.length<60000,headers:{'content-type':'application/json',authorization:'Bearer '+accGet().tok},body:JSON.stringify({a:'put',slot:'auto',label:accLabel(),t:Date.now(),z})})).catch(()=>{});}}catch(e){}});
 // 첫 화면 모서리 버튼이 6개가 되어 좁은 화면에선 조금 줄인다
 (function(){try{const st=document.createElement('style');st.textContent='@media (max-width:430px){.ttcorner{gap:4px!important}.ttcorner.l{left:8px!important}.ttcorner.r{right:8px!important}.ttcorner .ttc{width:48px!important;min-width:0!important}.ttcorner .ttc span{font-size:10.5px;letter-spacing:-.3px}}';document.head.appendChild(st);}catch(e){}})();
