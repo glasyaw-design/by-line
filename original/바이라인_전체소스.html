@@ -2353,7 +2353,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='1.74';
+const VERSION='1.75';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},
@@ -5073,6 +5073,7 @@ function tutShort(i){const T=TUT_SHORT[i];const n=TUT_SHORT.length;openModal(`�
 function tutorial(i=0){const TUT=TUTF();const n=TUT.length;const [t,fig,pts]=TUT[i];
   openModal(`튜토리얼 ${i+1}/${n} · ${t}`,`<div class="tdots">${TUT.map((_,k)=>`<i class="${k===i?'on':k<i?'done':''}"></i>`).join('')}</div>${fig}<ul class="tpts">${pts.map(p=>`<li>${p}</li>`).join('')}</ul>`,[...(i<n-1?[{label:'다음',fn:()=>{tutorial(i+1);return false;}}]:[{label:'시작하자'}]),...(i>0?[{label:'이전',cls:'ghost',fn:()=>{tutorial(i-1);return false;}}]:[]),{label:'닫기',cls:'ghost'}]);}
 const PATCH=[ // 업데이트 내역 (간소화): [버전, 제목, [종류|한 줄], 날짜, [한눈에 보기]] — 새 버전은 맨 위
+ ['1.75','버그 수정',['수정|속보 현장에서 「디테일을 모은다」를 고르면 창이 닫히지 않고 단독 아이템이 계속 생기던 문제'],'2026.10.27',[]],
  ['1.74','읽히는 화면, 고민되는 데스킹',['개선|데스킹 — 초고의 모든 문장이 그 기사 이야기다. 엉뚱한 문장으로 정답이 티 나지 않는다','개선|데스킹 제목 보기도 모두 그 기사에 붙을 법한 제목으로','개선|모바일 — 위쪽에 평가·평판·신뢰·컨디션·행동력·통장이 늘 보이고, 고르면 바뀐 만큼 바로 표시','개선|알림창은 위쪽 띠로 짧게, 아무 데나 탭하면 닫힌다 · 이달의 미션은 접어 둘 수 있다'],'2026.10.27',['데스킹','모바일 상태 막대']],
  ['1.73','전수 조사',['수정|기기를 바꿔 가며 하면 기록실 판 기록이 지워질 수 있던 문제','수정|이번 달 순위에 다른 판이 보이던 문제 · 순위표 점수 조작 막기 · 아이디 노출 막기','수정|다른 플레이어 화면에 나가는 이름·대표작의 욕설·광고 거르기','수정|저장했다 불러오면 「지난 판의 나」·「업계의 전설」이 안 나오던 문제 · 새 판에서 자동 백업이 멈추던 문제','수정|전문기자 제안 창 그림 등 문장·그림 몇 곳'],'2026.10.27',[]],
  ['1.72','이어지는 세계',['대규모|명예의 전당 — 모든 플레이어의 판이 한 순위표에','대규모|다른 세계의 기자 — 다른 플레이어가 끝낸 판의 주인공이 업계의 전설로 나온다','대규모|지난 판의 나 — 은퇴한 내 기자가 이번 판에 찾아온다 · 후계자는 사수로','개선|전문 분야가 전문기자 트랙으로 이어진다 · 시대에 따라 분야의 몸값이 바뀐다','개선|출세한 취재원 — 큰 귀띔을 주거나, 내가 감시해야 할 사람이 된다'],'2026.10.26',['명예의 전당','다른 세계의 기자','지난 판의 나']],
@@ -6843,7 +6844,7 @@ const BRK_K=[['대형 화재','soc','소방 당국'],['다중 추돌 사고','so
 function reporterBreaking(){const [k,d,subj]=pick(BRK_K);const pl=pick(PLACES);const rv=S.rival;const rn=rv?`${rv.name}(${(OUTLETS.find(x=>x.id===rv.outlet)||{}).n||'타사'})`:'타사 기자';
   openModal('속보 — 현장으로',`<p class="lede">${esc(pl)} ${k}. 데스크 단톡방이 울린다. "가까운 사람 바로 가!"</p><p class="hint">${esc(rn)}도 움직였을 것이다. 빠르면 속보 1보를 먼저 띄우고, 정확하면 단독 디테일을 쥔다.</p>`,[
    {label:'현장 도착 즉시 1보를 띄운다',sub:'속도 승부 · 평판↑ · 확인 안 된 정보 위험',fn:()=>{spend(1,8);const win=chance(.45+S.st.spd/220-(rv?rv.skill/600:0));if(win){const fx=apply({fame:1.2,eval:.8});coBump(0,.01);if(chance(.2*DF().risk))S.pending.push({type:'err',title:`${pl} ${k} 속보`,due:S.turn+1});openModal('속보 1보 선점',`${scoopBanner('속보')}<p class="lede">우리 1보가 포털 속보 맨 위에 걸렸다. ${esc(rn)}보다 4분 빨랐다.</p>${fxLine(fx)}`);}else{const fx=apply({eval:-.3});if(rv)rv.wins++;openModal('한발 늦었다',`<p class="lede">${esc(rn)}의 1보가 먼저 떴다. 우리 기사는 "2보"가 됐다.</p>${fxLine(fx)}`);}return false;}},
-   {label:'현장을 돌며 디테일을 모은다',sub:'컨디션↓ · 확인된 사실이 붙은 단독 아이템',fn:()=>{spend(1,12);const it=makeItem(d,{excl:true,pre:chance(.5+S.st.inv/200)?2:1,mult:1.15,keyConf:chance(.4)});it.title=`${pl} ${k} — ${pick(['예견된 인재','늑장 대응','안전점검 허위','경보 무시','하청 구조'])}`;it.subj=subj;it.heat=Math.min(it.heat,3);S.items.push(it);gain('inv',.4);itemFound(it,'현장에서 남들이 못 본 것을 봤다');return false;}},
+   {label:'현장을 돌며 디테일을 모은다',sub:'컨디션↓ · 확인된 사실이 붙은 단독 아이템',fn:()=>{spend(1,12);const it=makeItem(d,{excl:true,pre:chance(.5+S.st.inv/200)?2:1,mult:1.15,keyConf:chance(.4)});it.title=`${pl} ${k} — ${pick(['예견된 인재','늑장 대응','안전점검 허위','경보 무시','하청 구조'])}`;it.subj=subj;it.heat=Math.min(it.heat,3);S.items.push(it);gain('inv',.4);itemFound(it,'현장에서 남들이 못 본 것을 봤다');}},
    {label:'데스크에 넘기고 하던 일을 한다',sub:'',fn:()=>{toast('다른 기자가 현장으로 갔다');}}]);}
 F_EVENTS.push({w:4,c:()=>!S.founder&&S.rank<=3&&S.phase==='game'&&['soc','case','nat','loc','city','sigun','court','eco','ind','pol','spo','base','foot'].includes(S.dept)||(S.founder&&OUT().p<=3),run:()=>reporterBreaking()});
 
