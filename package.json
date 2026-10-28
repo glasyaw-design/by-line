@@ -1,6 +1,6 @@
 {
   "name": "byline",
-  "version": "1.76.0",
+  "version": "1.77.0",
   "private": true,
   "description": "바이라인 — 기자 커리어 시뮬레이션 웹게임",
   "type": "module",
