@@ -16,6 +16,9 @@ export const GROUPS = [
   ['src/compat/r17-ux.js', '1.74 · 데스킹 문장을 기사 주제로 · 모바일 상태 막대·변화 표시·알림창', ['v71', 'v72']],
   ['src/compat/r176-easy-release.js', '1.76 · 쉬운 화면 · 라이벌의 인생 · 기자상과 몸값 · 저장 실패 알림 · 개인정보 동의 · 만든 사람들', ['v73', 'v74']],
   ['src/compat/r177-growth.js', '1.77 · 분기 개인 평가 보고서 · 능력치 성장 게이지 · 성장 기록', ['v77']],
+  ['src/compat/r178-perks.js', '1.78 · 특기 해금 · 능력치 쏠림 완화', ['v78']],
+  ['src/compat/r178-year.js', '1.78 · 연말 결산 「올해의 나」 카드', ['v79']],
+  ['src/compat/r178-season.js', '1.78 · 시즌 사건(여섯 달 탐사) · 맡기기 AI 개선', ['v80']],
 ];
 let idx = fs.readFileSync(path.join(D, 'index.html'), 'utf8');
 for (const [out, title, mods] of GROUPS) {
