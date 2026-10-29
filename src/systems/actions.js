@@ -119,7 +119,7 @@ function why(id){
   if(S.hp<6&&id!=='rest'&&a.ap>0)return '컨디션 바닥';
   return '';
 }
-const VERSION='1.78';
+const VERSION='1.79';
 // 단계별 해금: 커리어 주차(w) · 직급 재직 주차(rw) · 조건(c)
 const UNLOCK={
  handoff:{w:6,c:()=>S.items.length>0,why:'아이템이 있을 때 (수습 두 달째부터)'},

@@ -1,0 +1,29 @@
+# 푸시·PR마다: 정적 검사 → 빌드 → 계정 API 테스트 → 실제 시작 경로 테스트 → 회귀 테스트
+# 하나라도 실패하면 빨간 X가 뜬다. Vercel의 「Ignored Build Step」 등으로 실패한 커밋은 배포하지 않게 막을 수 있다.
+name: test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 정적 검사
+        run: node scripts/check.mjs
+      - name: 빌드
+        run: node scripts/build.mjs
+      - name: 계정 API 테스트
+        run: node tests/api.mjs
+      - name: Playwright 설치
+        run: |
+          npm i --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: 실제 시작 경로 테스트 (5모드 × 폰·PC · 계정 · 저장 실패)
+        run: node tests/start.mjs
+      - name: 회귀 테스트 (시나리오 · 저장 호환)
+        run: node tests/run.mjs

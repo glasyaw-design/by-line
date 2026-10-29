@@ -83,7 +83,7 @@ function fNewsroom(lines){const c=S.co,o=OUT();const rep=Math.max(0,c.staff-1);i
 // ===== 모바일: 한 화면에 하나씩 (할 일 · 현황 · 나 · 취재 · 사람 · 회사) =====
 const MNAV_IC={act:ic('clip'),dash:ic('chart'),me:ic('user'),work:ic('mic'),people:ic('users'),company:ic('bld')};
 // 6.1 하단 메뉴 순서: 오른손 엄지가 닿기 쉬운 가운데에 할 일을 두고, 순서는 기기마다 바꿀 수 있다
-const NAV_DEF=['company','me','act','work','dash','people'],NAV_NM={act:'할 일',dash:'현황',me:'나',work:'취재',people:'사람',company:'회사'};
+const NAV_DEF=['act','me','work','people','company','dash'],NAV_NM={act:'할 일',dash:'현황',me:'나',work:'취재',people:'사람',company:'회사'};
 function navOrder(){try{const a=JSON.parse(localStorage.getItem('byline-nav')||'null');if(Array.isArray(a)&&a.length===NAV_DEF.length&&NAV_DEF.every(k=>a.includes(k)))return a;}catch(e){}return NAV_DEF.slice();}
 function navSave(a){try{localStorage.setItem('byline-nav',JSON.stringify(a));}catch(e){}window.__navO=a;}
 function navOrderMenu(sel){const o=window.__navO||navOrder();

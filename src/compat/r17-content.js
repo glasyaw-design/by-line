@@ -144,9 +144,9 @@ function heirFate66(){const H=S.heir66;if(!H)return '';const top=S.founder?'대�
 // ---------- 3) 연말 기자상 시상식: 출품작을 내가 고른다 ----------
 function awardYear66(lines){if(S.story||month()!==12||S.aw66Y===Math.floor(S.turn/YW))return;const y0=S.turn-YW;const L=(S.clips||[]).filter(c=>c.turn>y0&&!c.staff&&!c.pos&&(c.by===S.name||String(c.by||'').includes(S.name))).sort((a,b)=>(b.imp*b.q)-(a.imp*a.q)).slice(0,3);if(!L.length)return;S.aw66Y=Math.floor(S.turn/YW);
   Q.push(()=>openModal('연말 기자상 · 출품',`<p class="lede">기자협회가 올해의 기자상 출품을 받는다. 한 편만 낼 수 있다.</p>`,L.map(c=>({label:`「${c.h.length>34?c.h.slice(0,34)+'…':c.h}」`,sub:`파급력 ${c.imp} · 완성도 ${c.q}${c.excl?' · 단독':''}${c.flDone||c.corr?' · 정정 이력(감점)':''}`,fn:()=>{awardJudge66(c);return false;}})).concat([{label:'올해는 내지 않는다',cls:'ghost'}])));}
-function awardJudge66(c){const sp=S.spec63?(S.spec63.lv||0)*3:0;const sc=c.imp*.5+c.q*.4+(c.excl?8:0)+(c.crit?4:0)+sp-(c.flDone||c.corr?20:0)+R(-10,10);
+function awardJudge66(c){const sp=S.spec63?(S.spec63.lv||0)*3:0;const sc=c.imp*.5+c.q*.4+(c.excl?8:0)+(c.crit?4:0)+sp-(c.flDone||c.corr?20:0)+R(-10,10)-(S.awT66!=null&&S.turn-S.awT66<YW*2?8:0);
   const why=[c.excl?'끝까지 혼자 파고든 집요함':'',c.imp>=80?'사회에 던진 파장':'',c.q>=75?'문장과 구성의 완성도':'',c.flDone||c.corr?'다만 정정 이력이 아쉬웠다':''].filter(Boolean).join(', ')||'성실한 취재';
-  let t,fx;if(sc>=88){t='대상';fx={fame:6,eval:3};S.awBig66=(S.awBig66||0)+1;S.awards=(S.awards||0)+1;S.money+=500;}else if(sc>=76){t='본상';fx={fame:4,eval:2};S.awards=(S.awards||0)+1;S.money+=200;}else if(sc>=62){t='입선';fx={fame:1.5};}else{t='낙선';fx={eval:-.3};}
+  let t,fx;if(sc>=96){t='대상';fx={fame:6,eval:3};S.awBig66=(S.awBig66||0)+1;S.awards=(S.awards||0)+1;S.awMain=(S.awMain||0)+1;S.awT66=S.turn;S.money+=500;}else if(sc>=86){t='본상';fx={fame:4,eval:2};S.awards=(S.awards||0)+1;S.awMain=(S.awMain||0)+1;S.awT66=S.turn;S.money+=200;}else if(sc>=72){t='입선';fx={fame:1.5};}else{t='낙선';fx={eval:-.3};}
   if(t!=='낙선'){c.awarded=1;tick(`올해의 기자상 ${t} — ${OUT().n} ${S.name} 「${c.h}」`,1);log(`기자상 ${t}: ${c.h}`);}
   openModal(`기자상 ${t}`,`<p class="lede">「${esc(c.h)}」 — <b>${t}</b>${t==='대상'?'. 시상식장 맨 앞줄에 앉았다.':t==='낙선'?'. 다른 매체의 탐사 보도가 상을 가져갔다.':''}</p><p class="hint">심사평: ${esc(why)}.</p>${fxLine(apply(fx))}${t==='대상'?'<p>상금 500만 원.</p>':t==='본상'?'<p>상금 200만 원.</p>':''}`);}
 

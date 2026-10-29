@@ -27,7 +27,7 @@ function qrBuild(a,b){const fs=!!(b.founder&&Object.keys(b.fs||{}).length);const
   const p={arts:b.arts-a.arts,sc:b.sc-a.sc,er:b.er-a.er,aw:b.aw-a.aw,eval:b.eval-a.eval,fame:b.fame-a.fame,trust:b.trust-a.trust,money:b.money-a.money,sk:b.sk-a.sk,rank:b.rank-a.rank};
   // 등급: 성장(능력치 합) · 평가 변화 · 기사·단독 · 오보 감점 — 직급이 높을수록 능력치는 덜 오르니 기준을 낮춘다
   const avg=Object.keys(N).reduce((t,k)=>t+((a[src]||{})[k]||0),0)/Object.keys(N).length;const gc=(typeof growCurve==='function'?growCurve(avg):.6)/.62;
-  const exp=Math.max(2,(fs?6.5:[15,15,14,11,9,7,6,5][clamp(b.rank|0,0,7)])*gc);
+  const exp=Math.max(2,(fs?6.5:[15,15,14,10,6,5,4,3][clamp(b.rank|0,0,7)])*gc);
   let s=58+clamp(sum/exp-1,-1.2,.8)*35+clamp(p.eval/4,-1.5,1.5)*8+Math.min(8,p.sc*3)+Math.min(4,p.arts*.3)-p.er*10+(p.rank>0?8:0)+(p.aw>0?8:0);
   if(b.founder)s+=clamp((b.cash!=null&&a.cash!=null?b.cash-a.cash:0)/3,-1,1)*6;
   s=clamp(Math.round(s),0,100);const g=s>=88?'S':s>=74?'A':s>=58?'B':s>=42?'C':'D';

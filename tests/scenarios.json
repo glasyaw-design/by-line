@@ -1,0 +1,10 @@
+[
+ {"name": "수습 · 대한일보 14개월", "cfg": {"rank": 0, "outlet": "daehan"}, "months": 14, "save": true, "quick": true},
+ {"name": "편집국장 · 대한일보 14개월", "cfg": {"rank": 6, "outlet": "daehan"}, "months": 14},
+ {"name": "사장 · 한가람신문 14개월", "cfg": {"rank": 7, "outlet": "hangaram"}, "months": 14},
+ {"name": "방송 부장 · KNB 12개월", "cfg": {"rank": 3, "outlet": "knb"}, "months": 12},
+ {"name": "창간 · 인터넷 14개월", "cfg": {"mode": "found"}, "months": 14, "save": true, "quick": true},
+ {"name": "창간 · 지역 일간지 10개월", "cfg": {"mode": "found", "ftype": "local"}, "months": 10},
+ {"name": "간소화 · 차장 12개월", "cfg": {"rank": 2, "outlet": "daehan", "mode": "simple"}, "months": 12},
+ {"name": "스토리 · 수습", "cfg": {"mode": "story", "story": "rookie"}, "months": 6}
+]

@@ -7,10 +7,10 @@
  */
 
 
-// ===== 1.78 특기 해금: 능력치가 50·65·80에 닿을 때마다 특기를 하나 고른다 · 취재력 쏠림 완화 =====
-// 능력치마다 특기 4개. 50에서 둘 중 하나, 65에서 새 특기와 고르지 않은 것 중 하나, 80에서 마지막 특기와 남은 것 중 하나.
+// ===== 1.78 특기 해금: 능력치가 60·80에 닿을 때마다 특기를 하나 고른다 · 취재력 쏠림 완화 =====
+// 능력치마다 특기 4개. 60에서 기본 특기 둘 중 하나, 80에서 깊은 특기 둘 중 하나 (1.79부터 두 단계).
 // 기록: S.pk78 = {own:{능력치:[특기 id...]}, t:{특기 id:얻은 turn}}. 창간(발행인)은 새 특기를 얻지 않는다(얻은 것은 그대로).
-const PK_T=[50,65,80];
+const PK_T=[60,80]; // 1.79: 단계를 둘로 (특기가 너무 흔했다)
 const PK={
  inv:[['inv_a','현장 감','취재로 건지는 아이템의 질 +6%',{item:.06}],['inv_b','끈질긴 발품','일할 때 컨디션 소모 -8%',{hp:.08}],['inv_c','촉','매달 제보가 들어올 확률 +6%',{tip:.06}],['inv_d','특종 사냥꾼','새 아이템이 단독일 확률 +5%',{excl:.05}]],
  ver:[['ver_a','두 번 확인','오보·실수로 신뢰가 깎일 때 -15%',{neg:{trust:.15}}],['ver_b','냉정한 눈','평가가 깎일 때 -10%',{neg:{eval:.1}}],['ver_c','교차 검증','검증력·데이터 성장 +15%',{g:{ver:.15,dat:.15}}],['ver_d','무결점','신뢰가 깎일 때 -25%',{neg:{trust:.25}}]],
@@ -40,10 +40,10 @@ function pkPending(){if(!S||S.phase!=='game'||S.founder||S.story)return null;con
   for(const k in PK){const v=+(S.st&&S.st[k]||0);const got=(P.own[k]||[]).length;const reach=PK_T.filter(t=>v>=t).length;if(reach>got){const tier=got;if(!best||PK_T[tier]<PK_T[best.tier]||(PK_T[tier]===PK_T[best.tier]&&v>best.v))best={k,tier,v};}}
   return best;}
 function pkOffer(k,tier){const own=(pkS().own[k]||[]);const L=PK[k].map(p=>p[0]).filter(id=>!own.includes(id));const ab=L.filter(id=>/_[ab]$/.test(id));
-  if(tier===0)return L.filter(id=>/_[ab]$/.test(id)).slice(0,2);if(tier===1)return [L.find(id=>/_c$/.test(id)),...ab].filter(Boolean).slice(0,2);return [L.find(id=>/_d$/.test(id)),...L.filter(id=>!/_d$/.test(id))].filter(Boolean).slice(0,2);}
-function pkNext(){if(!S||!S.st)return null;const P=pkS();let best=null;for(const k in PK){const got=(P.own[k]||[]).length;if(got>=3)continue;const t=PK_T[got],v=+(S.st[k]||0);if(v>=t)continue;const gap=t-v;if(!best||gap<best.gap)best={k,t,gap};}return best;}
+  if(tier===0)return L.filter(id=>/_[ab]$/.test(id)).slice(0,2);return [L.find(id=>/_d$/.test(id)),L.find(id=>/_c$/.test(id)),...ab].filter(Boolean).slice(0,2);}
+function pkNext(){if(!S||!S.st)return null;const P=pkS();let best=null;for(const k in PK){const got=(P.own[k]||[]).length;if(got>=PK_T.length)continue;const t=PK_T[got],v=+(S.st[k]||0);if(v>=t)continue;const gap=t-v;if(!best||gap<best.gap)best={k,t,gap};}return best;}
 function pkShow(){const pd=pkPending();if(!pd)return false;const ids=pkOffer(pd.k,pd.tier);if(!ids.length)return false;
-  openModal(`특기 해금 · ${STN[pd.k]} ${PK_T[pd.tier]}`,`<p class="lede">${jo2(esc(STN[pd.k]),'이','가')} ${PK_T[pd.tier]}에 닿았다. 몸에 밴 것 하나를 고른다.</p><p class="hint">고른 특기는 이번 판 내내 이어진다. 고르지 않은 쪽은 다음 단계(${PK_T[pd.tier+1]||'—'})에서 다시 고를 수 있다.</p>`,
+  openModal(`특기 해금 · ${STN[pd.k]} ${PK_T[pd.tier]}`,`<p class="lede">${jo2(esc(STN[pd.k]),'이','가')} ${PK_T[pd.tier]}에 닿았다. 몸에 밴 것 하나를 고른다.</p><p class="hint">고른 특기는 이번 판 내내 이어진다. ${pd.tier===0?`${PK_T[1]}에 닿으면 ${esc(STN[pd.k])}의 더 깊은 특기를 하나 더 고른다.`:'이 능력치의 마지막 특기다.'}</p>`,
    [...ids.map(id=>{const p=PK_BY[id];return {label:`◆ ${p.n}`,sub:p.d,fn:()=>{const P=pkS();(P.own[pd.k]=P.own[pd.k]||[]).push(id);P.t[id]=S.turn;PKE=null;log(`특기 — ${p.n} (${STN[pd.k]} ${PK_T[pd.tier]})`);toast(`특기를 얻었다 — ${p.n}`);try{render();}catch(e){}}};}),
     {label:'다음 달에 고르기',cls:'ghost'}]);return true;}
 // 달이 끝나면 고를 특기가 있는지 본다 (한 달에 하나)
@@ -67,7 +67,7 @@ function pkShow(){const pd=pkPending();if(!pd)return false;const ids=pkOffer(pd.
   if(E.tip&&S.items&&S.items.length<9&&chance(E.tip)){const it=makeItem(S.dept,{pre:1});S.items.push(it);const t=`특기(제보) — 「${it.title}」 제보가 들어왔다`;if(Array.isArray(lines))lines.push({c:'g',t});log(t);}}catch(e){}return r;};}
 // ---- 「나」 탭: 특기 목록 · 다음 특기까지 ----
 function pkBoxHTML(){const L=pkOwned();const nx=pkNext();const pd=pkPending();
-  return `<div class="pk-box"><div class="pk-hd"><b>특기 ${L.length}개</b>${pd?`<button type="button" class="pk-go">◆ 고를 특기가 있다 — ${esc(STN[pd.k])} ${PK_T[pd.tier]}</button>`:nx?`<span>다음 특기까지 — <b>${esc(STN[nx.k])} ${nx.t}</b> (${nx.gap<1?nx.gap.toFixed(1):nx.gap.toFixed(1)} 남음)</span>`:''}</div>${L.length?`<div class="pk-chips">${L.map(p=>`<span class="pk-chip" title="${esc(p.d)}"><b>◆ ${esc(p.n)}</b><small>${esc(STN[p.k])} · ${esc(p.d)}</small></span>`).join('')}</div>`:'<p class="hint" style="margin:4px 0 0">능력치가 50·65·80에 닿으면 특기를 하나씩 고른다.</p>'}</div>`;}
+  return `<div class="pk-box"><div class="pk-hd"><b>특기 ${L.length}개</b>${pd?`<button type="button" class="pk-go">◆ 고를 특기가 있다 — ${esc(STN[pd.k])} ${PK_T[pd.tier]}</button>`:nx?`<span>다음 특기까지 — <b>${esc(STN[nx.k])} ${nx.t}</b> (${nx.gap<1?nx.gap.toFixed(1):nx.gap.toFixed(1)} 남음)</span>`:''}</div>${L.length?`<div class="pk-chips">${L.map(p=>`<span class="pk-chip" title="${esc(p.d)}"><b>◆ ${esc(p.n)}</b><small>${esc(STN[p.k])} · ${esc(p.d)}</small></span>`).join('')}</div>`:'<p class="hint" style="margin:4px 0 0">능력치가 60·80에 닿으면 특기를 하나씩 고른다.</p>'}</div>`;}
 function pkTab(){try{if(!S||S.phase!=='game'||S.founder)return;const a=document.querySelector('.qr-link');if(!a)return;let bx=a.nextElementSibling&&a.nextElementSibling.classList.contains('pk-box')?a.nextElementSibling:null;const h=pkBoxHTML();
   if(!bx){a.insertAdjacentHTML('afterend',h);bx=a.nextElementSibling;}else if(bx.outerHTML!==h){bx.outerHTML=h;bx=a.nextElementSibling;}
   const g=bx&&bx.querySelector('.pk-go');if(g)g.onclick=()=>pkShow();
